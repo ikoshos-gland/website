@@ -61,9 +61,13 @@ const Hero: React.FC = () => {
 
       {/* Center Content: Headline */}
       <div className="flex-1 flex flex-col pt-12 sm:pt-16 md:pt-32 z-10 relative items-center justify-start pointer-events-none">
-        <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-8xl xl:text-9xl leading-[1.1] font-normal text-white tracking-wide font-instrument text-center drop-shadow-2xl px-2">
-          Welcome To The Heart Of <span className="block mt-2 sm:mt-4">Academia</span>
+        <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl xl:text-8xl leading-[1.1] font-normal text-white tracking-wide font-instrument text-center drop-shadow-2xl px-2">
+          <span className="block italic opacity-90">Mens in Machina,</span>
+          <span className="block mt-2 sm:mt-4 italic opacity-90">Machina in Mente</span>
         </h1>
+        <p className="mt-4 sm:mt-6 md:mt-8 text-xs sm:text-sm md:text-base lg:text-lg text-gray-400 tracking-[0.2em] sm:tracking-[0.3em] uppercase font-mono text-center px-4">
+          Mind in the Machine, Machine in the Mind
+        </p>
       </div>
 
       {/* Bottom Content */}
@@ -80,10 +84,17 @@ const Hero: React.FC = () => {
               student, who has
               unlimited imagination
             </p>
-            <a href="#" className="block underline underline-offset-4 decoration-gray-600 hover:decoration-white hover:text-white transition-all w-fit pt-2">
+            <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="block underline underline-offset-4 decoration-gray-600 hover:decoration-white hover:text-white transition-all w-fit pt-2">
               @augst.von.mackenss
             </a>
           </div>
+        </div>
+
+        {/* Right - Name */}
+        <div className="text-right self-end">
+          <span className="font-great-vibes text-2xl sm:text-3xl md:text-4xl text-white/80 tracking-wide">
+            Mert Koca
+          </span>
         </div>
       </div>
     </div>
