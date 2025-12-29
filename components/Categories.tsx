@@ -13,7 +13,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
 
   return (
     <div
-      className="group perspective-[1000px] aspect-[3/4] sm:aspect-square cursor-pointer"
+      className="group perspective-[1000px] aspect-square cursor-pointer"
       onClick={() => setIsFlipped(!isFlipped)}
     >
       <div
@@ -30,11 +30,11 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
           />
           <div className="bg-gradient-to-t from-[#0E0F11] via-black/40 to-transparent absolute inset-0"></div>
 
-          <div className="absolute bottom-0 left-0 w-full h-[40%] sm:h-[35%] p-3 sm:p-4 md:p-6 flex flex-col justify-start">
-            <span className="text-[8px] sm:text-[10px] font-sans uppercase tracking-widest text-[#D6FF4F] mb-1 sm:mb-2 block shrink-0">
+          <div className="absolute bottom-0 left-0 w-full h-[45%] sm:h-[35%] p-2 sm:p-4 md:p-6 flex flex-col justify-start">
+            <span className="text-[6px] sm:text-[10px] font-sans uppercase tracking-widest text-[#D6FF4F] mb-0.5 sm:mb-2 block shrink-0">
               {subtitle}
             </span>
-            <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-heading font-medium text-[#F5F5F5] leading-tight shrink-0 line-clamp-2">
+            <h3 className="text-[10px] sm:text-lg md:text-xl lg:text-2xl font-heading font-medium text-[#F5F5F5] leading-tight shrink-0 line-clamp-2">
               {title}
             </h3>
             <div className="hidden sm:flex items-center gap-2 mt-2 sm:mt-4 text-[#A1A1A6] text-[10px] sm:text-xs uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -45,21 +45,21 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
         </div>
 
         {/* Back Face */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl sm:rounded-3xl border border-[#23252B] bg-[#15171B] p-3 sm:p-4 md:p-6 flex flex-col justify-center overflow-y-auto no-scrollbar">
+        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl sm:rounded-3xl border border-[#23252B] bg-[#15171B] p-2 sm:p-4 md:p-6 flex flex-col justify-center overflow-y-auto no-scrollbar">
           <div className="h-full flex flex-col justify-center">
-            <h4 className="text-[#D6FF4F] font-heading text-sm sm:text-base md:text-lg mb-2 sm:mb-4 leading-tight border-b border-[#23252B] pb-2">
+            <h4 className="text-[#D6FF4F] font-heading text-[10px] sm:text-base md:text-lg mb-1 sm:mb-4 leading-tight border-b border-[#23252B] pb-1 sm:pb-2">
               Key Achievements
             </h4>
-            <ul className="space-y-2 sm:space-y-3 md:space-y-4">
+            <ul className="space-y-1 sm:space-y-3 md:space-y-4">
               {description.map((point, i) => (
-                <li key={i} className="text-[10px] sm:text-xs md:text-sm text-[#A1A1A6] leading-relaxed flex gap-2 sm:gap-3">
-                  <span className="shrink-0 text-[#D6FF4F] mt-1 sm:mt-1.5 w-1 h-1 rounded-full bg-[#D6FF4F]"></span>
-                  <span className="line-clamp-3 sm:line-clamp-none">{point}</span>
+                <li key={i} className="text-[8px] sm:text-xs md:text-sm text-[#A1A1A6] leading-relaxed flex gap-1 sm:gap-3">
+                  <span className="shrink-0 text-[#D6FF4F] mt-0.5 sm:mt-1.5 w-1 h-1 rounded-full bg-[#D6FF4F]"></span>
+                  <span className="line-clamp-2 sm:line-clamp-none">{point}</span>
                 </li>
               ))}
             </ul>
-            <div className="mt-4 sm:mt-8 pt-2 sm:pt-4 border-t border-[#23252B] flex justify-end">
-              <span className="text-[8px] sm:text-[10px] uppercase tracking-widest text-[#52525B]">Tap to return</span>
+            <div className="mt-2 sm:mt-8 pt-1 sm:pt-4 border-t border-[#23252B] flex justify-end">
+              <span className="text-[6px] sm:text-[10px] uppercase tracking-widest text-[#52525B]">Tap to return</span>
             </div>
           </div>
         </div>
@@ -71,7 +71,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
 const Categories: React.FC = () => {
   const categories: FlashCardProps[] = [
     {
-      subtitle: "Scholarship",
+      subtitle: "TUSEB PROJECT",
       title: "1.5 Year Tuseb Embedded Machine Learning Scholar",
       image: "https://i.ibb.co/JWpD5p89/Gemini-Generated-Image-4cjhe94cjhe94cjh.png",
       description: [
@@ -128,7 +128,7 @@ const Categories: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         {categories.map((cat, index) => (
           <FlashCard key={index} {...cat} />
         ))}

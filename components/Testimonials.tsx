@@ -35,7 +35,7 @@ const Testimonials: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col text-center pb-8 sm:pb-12 items-center justify-center">
           <span className="block text-[10px] text-[#D6FF4F] font-mono w-fit border-b border-[#23252B] mb-4 pb-1 tracking-widest">
-            06 — CLIENT VOICES
+            06 — QUOTES
           </span>
         </div>
 

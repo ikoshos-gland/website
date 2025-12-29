@@ -79,10 +79,7 @@ const Hero: React.FC = () => {
           </h2>
           <div className="font-mono text-xs sm:text-sm text-gray-400 space-y-3 sm:space-y-4 max-w-md leading-relaxed tracking-wide">
             <p>
-              Amateur photographer and
-              a Molecular Biotechnology
-              student, who has
-              unlimited imagination
+              Molecular Biotechnology student and future neuroscientist, balancing relentless discipline with a boundless imagination. Just as Expansion Microscopy overcomes the diffraction limit to reveal the brain's hidden nano-architecture, I strive to push the boundaries of the visible—merging scientific precision with a photographer's eye to illuminate the unseen wonders of the neural world.
             </p>
             <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="block underline underline-offset-4 decoration-gray-600 hover:decoration-white hover:text-white transition-all w-fit pt-2">
               @augst.von.mackenss
@@ -91,7 +88,7 @@ const Hero: React.FC = () => {
         </div>
 
         {/* Right - Name */}
-        <div className="text-right self-end">
+        <div className="text-right mb-10">
           <span className="font-great-vibes text-2xl sm:text-3xl md:text-4xl text-white/80 tracking-wide">
             Mert Koca
           </span>

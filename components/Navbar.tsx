@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Mail } from 'lucide-react';
+import { Menu, X, Mail, Instagram } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,13 +68,16 @@ const Navbar: React.FC = () => {
           {/* Desktop Right Nav */}
           <div className="hidden md:flex gap-4 lg:gap-8 items-center">
             <a href="#" className="text-xs lg:text-sm font-medium text-[#A1A1A6] hover:text-[#F5F5F5] transition-colors">CV</a>
-            <a href="#" className="bg-[#F5F5F5] hover:bg-[#D6FF4F] text-[#0E0F11] px-3 lg:px-5 py-1.5 lg:py-2 rounded-full text-[10px] lg:text-xs font-semibold uppercase tracking-wider transition-colors">
+            <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="text-[#A1A1A6] hover:text-[#D6FF4F] transition-colors">
+              <Instagram size={18} />
+            </a>
+            <a href="mailto:fatih.mertkoca2@gmail.com" className="bg-[#F5F5F5] hover:bg-[#D6FF4F] text-[#0E0F11] px-3 lg:px-5 py-1.5 lg:py-2 rounded-full text-[10px] lg:text-xs font-semibold uppercase tracking-wider transition-colors">
               Contact
             </a>
           </div>
 
           {/* Mobile User Icon */}
-          <a href="#" className="md:hidden p-1 text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">
+          <a href="mailto:fatih.mertkoca2@gmail.com" className="md:hidden p-1 text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">
             <Mail size={20} strokeWidth={1.5} className="sm:w-6 sm:h-6" />
           </a>
         </nav>
