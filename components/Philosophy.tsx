@@ -9,10 +9,12 @@ interface Publication {
   authors: string;
   metricLabel: string;
   metricValue: string;
+  link?: string;
 }
 
-const PublicationCard: React.FC<Publication> = ({ year, journal, journalColor, title, authors, metricLabel, metricValue }) => (
-  <div className="group relative flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#23252B] bg-[#0E0F11] hover:bg-[#15171B] transition-all duration-300">
+const PublicationCard: React.FC<Publication> = ({ year, journal, journalColor, title, authors, metricLabel, metricValue, link }) => {
+  const content = (
+    <div className="group relative flex flex-col md:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#23252B] bg-[#0E0F11] hover:bg-[#15171B] transition-all duration-300">
 
     {/* Year Box */}
     <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-xl sm:rounded-2xl border border-[#23252B] flex items-center justify-center bg-[#0E0F11] group-hover:border-[#3F4148] transition-colors">
@@ -70,8 +72,15 @@ const PublicationCard: React.FC<Publication> = ({ year, journal, journalColor, t
       </div>
     </div>
 
-  </div>
-);
+    </div>
+  );
+
+  return link ? (
+    <a href={link} target="_blank" rel="noopener noreferrer" className="block">
+      {content}
+    </a>
+  ) : content;
+};
 
 const Publications: React.FC = () => {
   const publications: Publication[] = [
@@ -82,7 +91,8 @@ const Publications: React.FC = () => {
       title: "Molecular Crowding by Computational Approaches",
       authors: "Orkid Coskuner-Weber, Mert Koca, Vladimir N Uversky",
       metricLabel: "DOI",
-      metricValue: "10.1007/978-3-032-03370-3_21"
+      metricValue: "10.1007/978-3-032-03370-3_21",
+      link: "https://pubmed.ncbi.nlm.nih.gov/41004013/"
     },
     {
       year: "2025",
@@ -91,7 +101,8 @@ const Publications: React.FC = () => {
       title: "Kuantum-Klasik Bilinç Modelleri ve İnterdisipliner Perspektifler",
       authors: "Mert Koca",
       metricLabel: "Link",
-      metricValue: "qturkey.org"
+      metricValue: "qturkey.org",
+      link: "https://quantium.qturkey.org/5-sayi/"
     },
     {
       year: "2025",
@@ -111,10 +122,10 @@ const Publications: React.FC = () => {
           04 — PUBLICATIONS
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-[#F5F5F5] font-heading font-medium tracking-tight mb-3 sm:mb-4">
-          Selected Publications
+          Publications
         </h2>
         <p className="text-[#A1A1A6] text-sm sm:text-base md:text-lg max-w-xl px-4">
-          Recent contributions to the field of neuroimmunology.
+          My Published Articles
         </p>
       </div>
 
