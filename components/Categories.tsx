@@ -81,7 +81,7 @@ const Categories: React.FC = () => {
       ]
     },
     {
-      subtitle: "Brain Mapping Enthusiast",
+      subtitle: "Internship Project",
       title: "1 Year Long-Internship in KUTTAM",
       image: "https://i.ibb.co/zTsqcFL2/Gemini-Generated-mage-kjwbhekjwbhekjwb.png",
       description: [
@@ -119,7 +119,7 @@ const Categories: React.FC = () => {
             01 — EXPERTISE
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#F5F5F5] font-heading font-medium tracking-tight leading-tight">
-            My Projects
+            My Internship and Projects
           </h2>
           <a href="#" className="mt-6 sm:mt-8 inline-flex items-center gap-2 sm:gap-3 bg-[#23252B] px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#F5F5F5] transition-colors hover:bg-[#D6FF4F] hover:text-[#0E0F11]">
             All Projects
