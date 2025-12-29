@@ -71,27 +71,22 @@ const Hero: React.FC = () => {
       </div>
 
       {/* Bottom Content */}
-      <div className="relative z-20 flex flex-col md:flex-row items-start md:items-end justify-between gap-6 sm:gap-8 mt-8 sm:mt-12 md:mt-0 mb-16 sm:mb-24 md:mb-32 w-full pointer-events-none">
-        {/* Left Info */}
+      <div className="relative z-20 flex flex-col items-center mt-8 sm:mt-12 md:mt-0 mb-16 sm:mb-24 md:mb-32 w-full pointer-events-none">
+        {/* Center Info with Name aligned right */}
         <div className="w-full max-w-2xl pointer-events-auto">
-          <h2 className="font-mono text-base sm:text-xl md:text-2xl lg:text-4xl mb-4 sm:mb-6 tracking-tight text-white font-medium">
-            Turkisch-Deutsche Universität
-          </h2>
-          <div className="font-mono text-xs sm:text-sm text-gray-400 space-y-3 sm:space-y-4 max-w-md leading-relaxed tracking-wide">
+          <div className="text-right mb-4 sm:mb-6">
+            <span className="font-great-vibes text-2xl sm:text-3xl md:text-4xl text-white/80 tracking-wide">
+              Mert Koca
+            </span>
+          </div>
+          <div className="font-mono text-xs sm:text-sm text-gray-400 space-y-3 sm:space-y-4 leading-relaxed tracking-wide text-center">
             <p>
               Molecular Biotechnology student and future neuroscientist, balancing relentless discipline with a boundless imagination. Just as Expansion Microscopy overcomes the diffraction limit to reveal the brain's hidden nano-architecture, I strive to push the boundaries of the visible—merging scientific precision with a photographer's eye to illuminate the unseen wonders of the neural world.
             </p>
-            <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="block underline underline-offset-4 decoration-gray-600 hover:decoration-white hover:text-white transition-all w-fit pt-2">
+            <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="inline-block underline underline-offset-4 decoration-gray-600 hover:decoration-white hover:text-white transition-all pt-2">
               @augst.von.mackenss
             </a>
           </div>
-        </div>
-
-        {/* Right - Name */}
-        <div className="text-right mb-10">
-          <span className="font-great-vibes text-2xl sm:text-3xl md:text-4xl text-white/80 tracking-wide">
-            Mert Koca
-          </span>
         </div>
       </div>
     </div>
