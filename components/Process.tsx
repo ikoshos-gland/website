@@ -22,8 +22,8 @@ const Process: React.FC = () => {
             </div>
             <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">Strategy</h3>
             <p className="text-[#A1A1A6] text-xs sm:text-sm leading-relaxed max-w-[240px]">
-              <span className="block">Multi-scale neuro discovery.</span>
-              <span className="block">Vascular & pericyte analysis.</span>
+              <span className="block">Multi-scale neuro-discovery.</span>
+              <span className="block">Digitalization of the brain and "uploading" neural structures to a computer.</span>
             </p>
           </div>
 
@@ -33,8 +33,8 @@ const Process: React.FC = () => {
             </div>
             <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">Design</h3>
             <p className="text-[#A1A1A6] text-xs sm:text-sm leading-relaxed max-w-[240px]">
-              <span className="block">Iterative AI-segmentation.</span>
-              <span className="block">Systematized neural craft.</span>
+              <span className="block">Utilizing expansion microscopy to surpass light diffraction limit.</span>
+              <span className="block">Merging with SOTA segmentation pipelines for 3D brain modeling and neurological disease research.</span>
             </p>
           </div>
 
@@ -44,8 +44,8 @@ const Process: React.FC = () => {
             </div>
             <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">Develop</h3>
             <p className="text-[#A1A1A6] text-xs sm:text-sm leading-relaxed max-w-[240px]">
-              <span className="block">Nano-precise implementation.</span>
-              <span className="block">Scalable, embedded code.</span>
+              <span className="block">Combining Agentic AI to create an end-to-end pipeline.</span>
+              <span className="block">Making this technology accessible and implementable across other labs.</span>
             </p>
           </div>
         </div>
