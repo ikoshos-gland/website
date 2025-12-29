@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+
+// Lazy load Spline for better performance
+const Spline = lazy(() => import('@splinetool/react-spline'));
 
 const Hero: React.FC = () => {
-  const [splineLoaded, setSplineLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [shouldLoadSpline, setShouldLoadSpline] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Delay Spline loading slightly for better initial performance
-    const timer = setTimeout(() => setSplineLoaded(true), 100);
+    // Delay Spline loading until after initial page load
+    const timer = setTimeout(() => setShouldLoadSpline(true), 500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -17,7 +20,7 @@ const Hero: React.FC = () => {
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
-      { threshold: 0.1 } // Trigger when 10% is visible
+      { threshold: 0.1 }
     );
 
     if (heroRef.current) {
@@ -32,14 +35,15 @@ const Hero: React.FC = () => {
 
       {/* Background Layer - Only render Spline when hero is visible */}
       <div className="absolute inset-0 z-0">
-        {splineLoaded && isVisible && (
-          /* @ts-ignore */
-          <spline-viewer
-            url="https://prod.spline.design/rZPCbrvNCWCkozOI/scene.splinecode"
-            className="w-full h-full"
-            style={{filter: 'brightness(1.3)'}}
-            loading="lazy"
-          ></spline-viewer>
+        {shouldLoadSpline && isVisible && (
+          <Suspense fallback={
+            <div className="w-full h-full bg-gradient-to-br from-[#0E0F11] via-[#1a1b1e] to-[#0E0F11] animate-pulse" />
+          }>
+            <Spline
+              scene="https://prod.spline.design/rZPCbrvNCWCkozOI/scene.splinecode"
+              style={{ width: '100%', height: '100%', filter: 'brightness(1.3)' }}
+            />
+          </Suspense>
         )}
 
         {/* Dark Gradients for Depth & Text Readability */}
