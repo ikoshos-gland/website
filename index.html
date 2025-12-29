@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mertoshi — Design & Digital Experiences</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600&family=Great+Vibes&family=Space+Mono:wght@400;700&family=Instrument+Serif:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <!-- Spline Viewer Web Component -->
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.28/build/spline-viewer.js"></script>
+        <style>
+      body { font-family: 'Inter', sans-serif; }
+      h1, h2, h3, h4, h5, h6, .font-heading { font-family: 'Space Grotesk', sans-serif; }
+      .font-great-vibes { font-family: 'Great Vibes', cursive; }
+      .font-instrument { font-family: 'Instrument Serif', serif; }
+      .font-mono { font-family: 'Space Mono', monospace; }
+      
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      html { scroll-behavior: smooth; }
+    </style>
+  </head>
+  <body class="bg-[#0E0F11] text-[#A1A1A6]">
+    <!-- Unicorn Studio Background -->
+    <div class="fixed top-0 left-0 w-full h-screen -z-10 pointer-events-none" style="opacity: 0.4;">
+      <div data-us-project="ILgOO23w4wEyPQOKyLO4" class="absolute w-full h-full left-0 top-0"></div>
+    </div>
+    <script>
+      !function(){if(!window.UnicornStudio){window.UnicornStudio={isInitialized:!1};var i=document.createElement("script");i.src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.29/dist/unicornStudio.umd.js",i.onload=function(){window.UnicornStudio.isInitialized||(UnicornStudio.init(),window.UnicornStudio.isInitialized=!0)},(document.head||document.body).appendChild(i)}}();
+    </script>
+
+    <div id="root" style="position: relative; z-index: 1;"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
