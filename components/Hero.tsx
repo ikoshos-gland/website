@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const Hero: React.FC = () => {
   const [splineLoaded, setSplineLoaded] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Delay Spline loading slightly for better initial performance
@@ -9,12 +11,28 @@ const Hero: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  return (
-    <div className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col p-4 sm:p-6 md:p-12 text-[#F5F5F5] font-sans">
+  useEffect(() => {
+    // Use Intersection Observer to detect when hero is out of view
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 } // Trigger when 10% is visible
+    );
 
-      {/* Background Layer */}
+    if (heroRef.current) {
+      observer.observe(heroRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={heroRef} className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col p-4 sm:p-6 md:p-12 text-[#F5F5F5] font-sans">
+
+      {/* Background Layer - Only render Spline when hero is visible */}
       <div className="absolute inset-0 z-0">
-        {splineLoaded && (
+        {splineLoaded && isVisible && (
           /* @ts-ignore */
           <spline-viewer
             url="https://prod.spline.design/rZPCbrvNCWCkozOI/scene.splinecode"
