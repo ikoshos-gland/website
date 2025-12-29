@@ -74,7 +74,7 @@ const Hero: React.FC = () => {
       <div className="relative z-20 flex flex-col items-center mt-8 sm:mt-12 md:mt-0 mb-16 sm:mb-24 md:mb-32 w-full pointer-events-none">
         {/* Center Info with Name aligned right */}
         <div className="w-full max-w-2xl pointer-events-auto">
-          <div className="text-right mb-4 sm:mb-6">
+          <div className="text-center mb-4 sm:mb-6">
             <span className="font-great-vibes text-2xl sm:text-3xl md:text-4xl text-white/80 tracking-wide">
               Mert Koca
             </span>
