@@ -1,4 +1,5 @@
 import React from 'react';
+import brainLoader from '../assets/brain-loader.png';
 
 const Loader: React.FC = () => {
   return (
@@ -74,30 +75,32 @@ const Loader: React.FC = () => {
         `}
       </style>
 
-      {/* Triangle Container */}
-      <div className="triangle-wrapper mb-12">
-        {/* Cyan/Blue Channel */}
-        <div className="triangle-b">
-          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_8px_rgba(0,255,255,0.8)]">
-             <polygon points="50,15 90,85 10,85" fill="none" stroke="cyan" strokeWidth="2" />
-          </svg>
-        </div>
-
-        {/* Red/Magenta Channel */}
-        <div className="triangle-r">
-          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_8px_rgba(255,0,0,0.8)]">
-             <polygon points="50,15 90,85 10,85" fill="none" stroke="red" strokeWidth="2" />
-          </svg>
-        </div>
-
-        {/* Main Channel */}
-        <div className="triangle-main">
-          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_15px_rgba(214,255,79,0.5)]">
-             <polygon points="50,15 90,85 10,85" fill="none" stroke="#D6FF4F" strokeWidth="3" />
-             {/* Inner detail */}
-             <polygon points="50,35 75,80 25,80" fill="none" stroke="#D6FF4F" strokeWidth="1" className="opacity-50" />
-          </svg>
-        </div>
+      {/* Brain Loader */}
+      <div
+        className="relative w-80 h-80 mb-8 mix-blend-screen"
+        style={{
+          maskImage: 'radial-gradient(closest-side, black 60%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(closest-side, black 60%, transparent 100%)'
+        }}
+      >
+        <img
+          src={brainLoader}
+          alt="Loading Brain"
+          className="w-full h-full object-contain animate-pulse drop-shadow-[0_0_15px_rgba(214,255,79,0.3)]"
+        />
+        {/* Glitch/Ghost effect layers */}
+        <img
+          src={brainLoader}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain opacity-50 mix-blend-screen animate-[glitch-skew_1s_infinite_linear_alternate-reverse] text-cyan-400"
+          style={{ filter: 'hue-rotate(90deg)' }}
+        />
+        <img
+          src={brainLoader}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain opacity-50 mix-blend-screen animate-[glitch-skew_2s_infinite_linear_alternate] text-red-500"
+          style={{ filter: 'hue-rotate(-90deg)' }}
+        />
       </div>
 
       {/* Text */}
@@ -105,6 +108,8 @@ const Loader: React.FC = () => {
         <h2 className="font-mono text-[#D6FF4F] text-sm tracking-[0.5em] uppercase animate-pulse">
           Loading...
         </h2>
+        {/* Shadow under text */}
+        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[800px] h-4 bg-[#D6FF4F] opacity-20 blur-xl rounded-[100%]"></div>
         <div className="absolute top-0 left-0 w-full h-full text-cyan-400 opacity-50 blur-[1px] animate-[vibrate_0.2s_infinite] pointer-events-none mix-blend-screen" aria-hidden="true">
           Loading...
         </div>
