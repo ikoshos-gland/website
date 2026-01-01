@@ -210,7 +210,7 @@ const Hero: React.FC = () => {
           </div>
           <div className="font-mono text-xs sm:text-sm text-gray-400 space-y-3 sm:space-y-4 leading-relaxed tracking-wide text-center">
             <p>
-              Molecular Biotechnology student and future neuroscientist, balancing relentless discipline with a boundless imagination. Just as Expansion Microscopy overcomes the diffraction limit to reveal the brain's hidden nano-architecture, I strive to push the boundaries of the visible—merging scientific precision with a photographer's eye to illuminate the unseen wonders of the neural world.
+              Molecular Biotechnology student and future neuroscientist, balancing relentless discipline with a boundless imagination. I strive to push the boundaries of the visible—merging scientific precision with a photographer's eye to illuminate the unseen wonders of the neural world.
             </p>
             <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="inline-block underline underline-offset-4 decoration-gray-600 hover:decoration-white hover:text-white transition-all pt-2">
               @augst.von.mackenss
