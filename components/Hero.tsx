@@ -2,6 +2,16 @@ import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 
 // Lazy load Spline for better performance
 const Spline = lazy(() => import('@splinetool/react-spline'));
+import ScrambleText from './ScrambleText';
+
+// Helper to interpolate colors
+const interpolateColor = (start: number[], end: number[], factor: number) => {
+  const result = start.map((startVal, i) => {
+    const endVal = end[i];
+    return Math.round(startVal + (endVal - startVal) * factor);
+  });
+  return `rgb(${result.join(',')})`;
+};
 
 const Hero: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -9,9 +19,17 @@ const Hero: React.FC = () => {
   const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Delay Spline loading until after initial page load
-    const timer = setTimeout(() => setShouldLoadSpline(true), 500);
-    return () => clearTimeout(timer);
+    // Start loading Spline immediately
+    setShouldLoadSpline(true);
+  }, []);
+
+  // Preconnect to Spline CDN for faster loading
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preconnect';
+    link.href = 'https://prod.spline.design';
+    document.head.appendChild(link);
+    return () => document.head.removeChild(link);
   }, []);
 
   useEffect(() => {
@@ -30,12 +48,57 @@ const Hero: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!heroRef.current) return;
+
+      // Get the headline element's position
+      const headline = heroRef.current.querySelector('h1');
+      if (!headline) return;
+
+      const rect = headline.getBoundingClientRect();
+      const textCenterX = rect.left + rect.width / 2;
+      const textCenterY = rect.top + rect.height / 2;
+
+      // Calculate distance from mouse to text center
+      const dx = e.clientX - textCenterX;
+      const dy = e.clientY - textCenterY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      // Max distance for effect (300px radius)
+      const maxDistance = 300;
+
+      // Factor: 1 when on text, 0 when far away
+      const factor = Math.max(0, 1 - distance / maxDistance);
+
+      // Silver/Metallic (default)
+      const silverStart = [245, 245, 245];
+      const silverEnd = [160, 160, 160];
+
+      // Gold/Premium (when close)
+      const goldStart = [255, 215, 0];
+      const goldEnd = [184, 134, 11];
+
+      // Interpolate based on proximity
+      const currentStart = interpolateColor(silverStart, goldStart, factor);
+      const currentEnd = interpolateColor(silverEnd, goldEnd, factor);
+      const currentShadow = interpolateColor([0, 0, 0], [139, 69, 19], factor * 0.5);
+
+      heroRef.current.style.setProperty('--text-gradient-start', currentStart);
+      heroRef.current.style.setProperty('--text-gradient-end', currentEnd);
+      heroRef.current.style.setProperty('--text-shadow-color', `rgba(${currentShadow}, 0.6)`);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
     <div ref={heroRef} className="relative w-full min-h-screen bg-black overflow-hidden flex flex-col p-4 sm:p-6 md:p-12 text-[#F5F5F5] font-sans">
 
-      {/* Background Layer - Only render Spline when hero is visible */}
-      <div className="absolute inset-0 z-0">
-        {shouldLoadSpline && isVisible && (
+      {/* Background Layer - Spline stays loaded once mounted */}
+      <div className="absolute inset-0 z-0" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
+        {shouldLoadSpline && (
           <Suspense fallback={
             <div className="w-full h-full bg-gradient-to-br from-[#0E0F11] via-[#1a1b1e] to-[#0E0F11] animate-pulse" />
           }>
@@ -59,11 +122,17 @@ const Hero: React.FC = () => {
         <span className="font-great-vibes text-2xl sm:text-3xl md:text-5xl text-white tracking-wide">Mertoshi</span>
       </div>
 
+
+
       {/* Center Content: Headline */}
       <div className="flex-1 flex flex-col pt-12 sm:pt-16 md:pt-32 z-10 relative items-center justify-start pointer-events-none">
-        <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl xl:text-8xl leading-[1.1] font-normal text-white tracking-wide font-instrument text-center drop-shadow-2xl px-2">
-          <span className="block italic opacity-90">Mens in Machina,</span>
-          <span className="block mt-2 sm:mt-4 italic opacity-90">Machina in Mente</span>
+        <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl xl:text-8xl leading-[1.1] font-normal tracking-wide font-instrument text-center px-2">
+          <span className="block italic opacity-90 text-premium-shadow pb-2">
+            Mens in <ScrambleText text="Machina" delay={300} duration={1000} className="inline-block" />,
+          </span>
+          <span className="block mt-2 sm:mt-4 italic opacity-90 text-premium-shadow pb-2">
+            <ScrambleText text="Machina" delay={800} duration={1000} className="inline-block" /> in Mente
+          </span>
         </h1>
         <p className="mt-4 sm:mt-6 md:mt-8 text-xs sm:text-sm md:text-base lg:text-lg text-gray-400 tracking-[0.2em] sm:tracking-[0.3em] uppercase font-mono text-center px-4">
           Mind in the Machine, Machine in the Mind

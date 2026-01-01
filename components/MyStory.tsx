@@ -8,7 +8,7 @@ const MyStory: React.FC = () => {
         {/* Text Content */}
         <div className="md:col-span-6 lg:col-span-5 order-2 md:order-1">
           <span className="text-[10px] font-mono text-[#D6FF4F] block mb-4 sm:mb-6 border-b border-[#23252B] w-fit pb-1 tracking-widest">
-            02 — BIOGRAPHY
+            02 BIOGRAPHY
           </span>
           <h2 className="font-instrument italic text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-[#F5F5F5] mb-6 sm:mb-10 leading-none">
             My Story
@@ -18,13 +18,13 @@ const MyStory: React.FC = () => {
               My name is Mert Koca, and I'm on a journey of relentless self-improvement, inspired by extraordinary thinkers and doers like Jordan Peterson, David Goggins, Robert Sapolsky, and Bruce Lipton. Each of these individuals has reshaped how we see the world and our potential within it.
             </p>
             <p>
-              Jordan Peterson teaches the power of responsibility and meaning; David Goggins embodies unyielding mental toughness and pushing through pain; Robert Sapolsky delves into the deep science of human behavior, while Bruce Lipton explores the mind's profound impact on biology.
+              Jordan Peterson taught the power of responsibility and meaning, David Goggins embodied unyielding mental toughness and pushing through pain, Robert Sapolsky delved into the deep science of human behavior while Bruce Lipton explored the mind's profound impact on biology.
             </p>
             <p>
               Like them, I believe in the limitless capacity of the human spirit to grow, adapt, and transcend challenges.
             </p>
             <p>
-              This website is a reflection of that philosophy — a space for transformation, learning, and becoming the best version of ourselves.
+              This website is a reflection of that philosophy, a space for transformation, learning, and becoming the best version of ourselves.
             </p>
           </div>
         </div>
