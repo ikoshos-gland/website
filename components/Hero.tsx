@@ -49,6 +49,37 @@ const Hero: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const updateColors = (factor: number) => {
+      if (!heroRef.current) return;
+
+      // Silver/Metallic
+      const silverStart = [245, 245, 245];
+      const silverEnd = [160, 160, 160];
+
+      // Gold/Premium
+      const goldStart = [255, 215, 0];
+      const goldEnd = [184, 134, 11];
+
+      // Main Text: Default (factor 0) = Gold, Hover (factor 1) = Silver
+      const mainStart = interpolateColor(goldStart, silverStart, factor);
+      const mainEnd = interpolateColor(goldEnd, silverEnd, factor);
+
+      // Machina Text: Default (factor 0) = Silver, Hover (factor 1) = Gold
+      const machinaStart = interpolateColor(silverStart, goldStart, factor);
+      const machinaEnd = interpolateColor(silverEnd, goldEnd, factor);
+
+      const currentShadow = interpolateColor([0, 0, 0], [139, 69, 19], factor * 0.5);
+
+      heroRef.current.style.setProperty('--main-gradient-start', mainStart);
+      heroRef.current.style.setProperty('--main-gradient-end', mainEnd);
+      heroRef.current.style.setProperty('--machina-gradient-start', machinaStart);
+      heroRef.current.style.setProperty('--machina-gradient-end', machinaEnd);
+      heroRef.current.style.setProperty('--text-shadow-color', `rgba(${currentShadow}, 0.6)`);
+    };
+
+    // Initialize immediately
+    updateColors(0);
+
     let lastUpdate = 0;
     const throttleMs = 33; // ~30fps
 
@@ -78,21 +109,29 @@ const Hero: React.FC = () => {
       // Factor: 1 when on text, 0 when far away
       const factor = Math.max(0, 1 - distance / maxDistance);
 
-      // Silver/Metallic (default)
+      // Silver/Metallic
       const silverStart = [245, 245, 245];
       const silverEnd = [160, 160, 160];
 
-      // Gold/Premium (when close)
+      // Gold/Premium
       const goldStart = [255, 215, 0];
       const goldEnd = [184, 134, 11];
 
       // Interpolate based on proximity
-      const currentStart = interpolateColor(silverStart, goldStart, factor);
-      const currentEnd = interpolateColor(silverEnd, goldEnd, factor);
+      // Main Text: Default (factor 0) = Gold, Hover (factor 1) = Silver
+      const mainStart = interpolateColor(goldStart, silverStart, factor);
+      const mainEnd = interpolateColor(goldEnd, silverEnd, factor);
+
+      // Machina Text: Default (factor 0) = Silver, Hover (factor 1) = Gold
+      const machinaStart = interpolateColor(silverStart, goldStart, factor);
+      const machinaEnd = interpolateColor(silverEnd, goldEnd, factor);
+
       const currentShadow = interpolateColor([0, 0, 0], [139, 69, 19], factor * 0.5);
 
-      heroRef.current.style.setProperty('--text-gradient-start', currentStart);
-      heroRef.current.style.setProperty('--text-gradient-end', currentEnd);
+      heroRef.current.style.setProperty('--main-gradient-start', mainStart);
+      heroRef.current.style.setProperty('--main-gradient-end', mainEnd);
+      heroRef.current.style.setProperty('--machina-gradient-start', machinaStart);
+      heroRef.current.style.setProperty('--machina-gradient-end', machinaEnd);
       heroRef.current.style.setProperty('--text-shadow-color', `rgba(${currentShadow}, 0.6)`);
     };
 
@@ -134,11 +173,25 @@ const Hero: React.FC = () => {
       {/* Center Content: Headline */}
       <div className="flex-1 flex flex-col pt-12 sm:pt-16 md:pt-32 z-10 relative items-center justify-start pointer-events-none">
         <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl xl:text-8xl leading-[1.1] font-normal tracking-wide font-instrument text-center px-2">
-          <span className="block italic opacity-90 text-premium-shadow pb-2">
-            Mens in <ScrambleText text="Machina" delay={300} duration={1000} className="inline-block" />,
+          {/* First Line */}
+          <span className="block italic opacity-90 pb-2">
+            <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--main-gradient-start)', '--text-gradient-end': 'var(--main-gradient-end)' } as React.CSSProperties}>
+              Mens in{' '}
+            </span>
+            <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--machina-gradient-start)', '--text-gradient-end': 'var(--machina-gradient-end)' } as React.CSSProperties}>
+              <ScrambleText text="Machina" delay={300} duration={1000} className="inline-block" />
+            </span>
+            <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--main-gradient-start)', '--text-gradient-end': 'var(--main-gradient-end)' } as React.CSSProperties}>,</span>
           </span>
-          <span className="block mt-2 sm:mt-4 italic opacity-90 text-premium-shadow pb-2">
-            <ScrambleText text="Machina" delay={800} duration={1000} className="inline-block" /> in Mente
+
+          {/* Second Line */}
+          <span className="block mt-2 sm:mt-4 italic opacity-90 pb-2">
+            <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--machina-gradient-start)', '--text-gradient-end': 'var(--machina-gradient-end)' } as React.CSSProperties}>
+              <ScrambleText text="Machina" delay={800} duration={1000} className="inline-block" />
+            </span>
+            <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--main-gradient-start)', '--text-gradient-end': 'var(--main-gradient-end)' } as React.CSSProperties}>
+              {' '}in Mente
+            </span>
           </span>
         </h1>
         <p className="mt-4 sm:mt-6 md:mt-8 text-xs sm:text-sm md:text-base lg:text-lg text-gray-400 tracking-[0.2em] sm:tracking-[0.3em] uppercase font-mono text-center px-4">
