@@ -1,5 +1,5 @@
 import React from 'react';
-import brainLoader from '../assets/brain-loader.png';
+const brainLoader = '/brain-loader.png';
 
 const Loader: React.FC = () => {
   return (
