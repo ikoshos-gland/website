@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    scroll-behavior: smooth;
+}
+
 @layer utilities {
     .text-premium-shadow {
         /* Base text properties for gradient capability */

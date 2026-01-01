@@ -49,7 +49,14 @@ const Hero: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let lastUpdate = 0;
+    const throttleMs = 33; // ~30fps
+
     const handleMouseMove = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastUpdate < throttleMs) return;
+      lastUpdate = now;
+
       if (!heroRef.current) return;
 
       // Get the headline element's position
@@ -89,7 +96,7 @@ const Hero: React.FC = () => {
       heroRef.current.style.setProperty('--text-shadow-color', `rgba(${currentShadow}, 0.6)`);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
