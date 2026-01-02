@@ -85,7 +85,6 @@ jobs:
   # Deploy Function App Code
   # ============================================================================
   deploy-function:
-    if: ${{ github.event.inputs.deploy_function == 'true' }}
     needs: [deploy-infrastructure]
     # Allow function deployment even if infra was skipped (using existing infra)
     if: ${{ always() && github.event.inputs.deploy_function == 'true' }}
