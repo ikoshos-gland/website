@@ -12,7 +12,9 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      // RAG API URL is safe to expose - it's just the endpoint, not the key
+      'import.meta.env.VITE_RAG_API_URL': JSON.stringify(env.VITE_RAG_API_URL || ''),
     },
     resolve: {
       alias: {

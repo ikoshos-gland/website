@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Mail, Instagram } from 'lucide-react';
+import { Menu, X, Mail, Instagram, MessageSquare } from 'lucide-react';
 
-const Navbar: React.FC = () => {
+const Navbar: React.FC<{ onChatClick: () => void }> = ({ onChatClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -20,13 +20,12 @@ const Navbar: React.FC = () => {
   return (
     <>
       {/* Mobile Menu Overlay */}
-      <div 
-        className={`fixed inset-0 bg-[#0E0F11]/95 backdrop-blur-xl z-[100] transition-opacity duration-300 flex flex-col items-center justify-center ${
-          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`fixed inset-0 bg-[#0E0F11]/95 backdrop-blur-xl z-[100] transition-opacity duration-300 flex flex-col items-center justify-center ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
       >
-        <button 
-          onClick={toggleMenu} 
+        <button
+          onClick={toggleMenu}
           className="absolute top-6 right-6 p-2 text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors"
         >
           <X size={32} strokeWidth={1.5} />
@@ -34,6 +33,12 @@ const Navbar: React.FC = () => {
         <nav className="flex flex-col gap-8 text-center text-3xl font-heading font-medium tracking-tight text-[#F5F5F5]">
           <a href="#" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>Projects</a>
           <a href="#" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>CV</a>
+          <button
+            onClick={() => { toggleMenu(); onChatClick(); }}
+            className="hover:text-[#D6FF4F] transition-colors"
+          >
+            Chat
+          </button>
         </nav>
         <div className="mt-12 flex gap-6">
           <a href="#" className="text-xs font-sans uppercase tracking-widest text-[#A1A1A6] hover:text-[#F5F5F5] border-b border-[#23252B] pb-1">
@@ -49,6 +54,15 @@ const Navbar: React.FC = () => {
           {/* Desktop Left Nav */}
           <div className="hidden md:flex gap-6 lg:gap-8 items-center">
             <a href="#" className="text-xs lg:text-sm font-medium text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">Projects</a>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                onChatClick();
+              }}
+              className="text-xs lg:text-sm font-medium text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors"
+            >
+              Chat
+            </button>
           </div>
 
           {/* Mobile Hamburger */}
@@ -77,9 +91,15 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile User Icon */}
-          <a href="mailto:fatih.mertkoca2@gmail.com" className="md:hidden p-1 text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">
-            <Mail size={20} strokeWidth={1.5} className="sm:w-6 sm:h-6" />
-          </a>
+          <div className="md:hidden flex items-center gap-3">
+            {/* Chat Icon for Mobile - added alongside Mail */}
+            <button onClick={(e) => { e.preventDefault(); onChatClick(); }} className="p-1 text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">
+              <MessageSquare size={20} strokeWidth={1.5} className="sm:w-6 sm:h-6" />
+            </button>
+            <a href="mailto:fatih.mertkoca2@gmail.com" className="p-1 text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">
+              <Mail size={20} strokeWidth={1.5} className="sm:w-6 sm:h-6" />
+            </a>
+          </div>
         </nav>
       </div>
     </>

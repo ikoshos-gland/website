@@ -12,9 +12,11 @@ const Process = lazy(() => import('./components/Process'));
 const Publications = lazy(() => import('./components/Philosophy'));
 const Testimonials = lazy(() => import('./components/Testimonials'));
 const Footer = lazy(() => import('./components/Footer'));
+import ChatWidget from './components/ChatWidget';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     // Smart loading: wait for critical resources - non-blocking approach
@@ -59,7 +61,7 @@ function App() {
           transition: 'opacity 0.3s ease-out'
         }}
       >
-        <Navbar />
+        <Navbar onChatClick={() => setIsChatOpen(true)} />
         <main className="w-full mt-20">
           <Hero />
           <Suspense fallback={<div className="min-h-[200px]" />}>
@@ -74,6 +76,7 @@ function App() {
           </Suspense>
         </main>
       </div>
+      <ChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </>
   );
 }

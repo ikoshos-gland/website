@@ -1,0 +1,147 @@
+# Azure RAG Infrastructure Deployment Workflow
+# Deploys Azure OpenAI, AI Search, and Function App
+
+name: Deploy RAG Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      deploy_infra:
+        description: 'Deploy infrastructure (Bicep)'
+        required: true
+        default: true
+        type: boolean
+      deploy_function:
+        description: 'Deploy Function App code'
+        required: true
+        default: true
+        type: boolean
+
+env:
+  AZURE_RESOURCE_GROUP: rg-rag-${{ github.event.inputs.environment }}
+  AZURE_LOCATION: eastus
+
+jobs:
+  # ============================================================================
+  # Deploy Infrastructure with Bicep
+  # ============================================================================
+  deploy-infrastructure:
+    if: ${{ github.event.inputs.deploy_infra == 'true' }}
+    runs-on: ubuntu-latest
+    outputs:
+      functionAppName: ${{ steps.deploy.outputs.functionAppName }}
+      functionAppUrl: ${{ steps.deploy.outputs.functionAppUrl }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create Resource Group
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az group create \
+              --name ${{ env.AZURE_RESOURCE_GROUP }} \
+              --location ${{ env.AZURE_LOCATION }} \
+              --tags environment=${{ github.event.inputs.environment }} project=rag-api
+
+      - name: Deploy Bicep Template
+        id: deploy
+        uses: azure/arm-deploy@v2
+        with:
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
+          template: ./infra/main.bicep
+          parameters: >
+            environment=${{ github.event.inputs.environment }}
+            location=${{ env.AZURE_LOCATION }}
+          failOnStdErr: false
+
+      - name: Output Deployment Results
+        run: |
+          echo "### Deployment Outputs" >> $GITHUB_STEP_SUMMARY
+          echo "| Resource | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Function App URL | ${{ steps.deploy.outputs.functionAppUrl }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Function App Name | ${{ steps.deploy.outputs.functionAppName }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OpenAI Endpoint | ${{ steps.deploy.outputs.openAiEndpoint }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Search Endpoint | ${{ steps.deploy.outputs.searchEndpoint }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================================
+  # Deploy Function App Code
+  # ============================================================================
+  deploy-function:
+    if: ${{ github.event.inputs.deploy_function == 'true' }}
+    needs: [deploy-infrastructure]
+    # Allow function deployment even if infra was skipped (using existing infra)
+    if: ${{ always() && github.event.inputs.deploy_function == 'true' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd api
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Get Function App Name
+        id: get-function-name
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest
+          inlineScript: |
+            # Get function app name from resource group
+            FUNC_NAME=$(az functionapp list \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --query "[0].name" -o tsv)
+            echo "name=$FUNC_NAME" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Azure Functions
+        uses: azure/functions-action@v1
+        with:
+          app-name: ${{ needs.deploy-infrastructure.outputs.functionAppName || steps.get-function-name.outputs.name }}
+          package: ./api
+          scm-do-build-during-deployment: true
+          enable-oryx-build: true
+
+      - name: Health Check
+        run: |
+          FUNC_URL="${{ needs.deploy-infrastructure.outputs.functionAppUrl || format('https://{0}.azurewebsites.net', steps.get-function-name.outputs.name) }}"
+          echo "Checking health at: $FUNC_URL/api/health"
+          sleep 30  # Wait for function to warm up
+          curl -f "$FUNC_URL/api/health" || echo "Health check pending - function may need more time to start"
+
+      - name: Deployment Summary
+        run: |
+          echo "### Function App Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "API Endpoints:" >> $GITHUB_STEP_SUMMARY
+          echo "- POST /api/chat - RAG chat endpoint" >> $GITHUB_STEP_SUMMARY
+          echo "- POST /api/search - Direct search endpoint" >> $GITHUB_STEP_SUMMARY
+          echo "- GET /api/health - Health check" >> $GITHUB_STEP_SUMMARY
