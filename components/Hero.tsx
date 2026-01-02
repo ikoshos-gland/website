@@ -162,7 +162,7 @@ const Hero: React.FC = () => {
       {/* Background Layer - Video on mobile, Spline on desktop */}
       <div className="absolute inset-0 z-0" style={{ visibility: isVisible ? 'visible' : 'hidden' }}>
         {isMobile ? (
-          /* Mobile: Video loop for performance */
+          /* Mobile: Video loop for performance - WebM primary, MP4 fallback */
           <video
             autoPlay
             loop
@@ -171,6 +171,7 @@ const Hero: React.FC = () => {
             className="w-full h-full object-cover"
             style={{ filter: 'brightness(1.3)' }}
           >
+            <source src="/spline-mobile.webm" type="video/webm" />
             <source src="/spline-mobile.mp4" type="video/mp4" />
           </video>
         ) : (
