@@ -17,16 +17,11 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Smart loading: wait for critical resources instead of fixed timer
+    // Smart loading: wait for critical resources - non-blocking approach
     const preloadCriticalResources = async () => {
       const criticalImages = [
         'https://i.ibb.co/rfqN2BC2/Whats-App-mage-2024-10-04-at-20-37-32-526fd566.jpg'
       ];
-
-      // Start preloading Spline scene in background
-      const splinePreload = fetch('https://prod.spline.design/rZPCbrvNCWCkozOI/scene.splinecode')
-        .then(() => true)
-        .catch(() => false);
 
       // Wait for fonts to be ready
       await document.fonts.ready;
@@ -41,14 +36,9 @@ function App() {
         });
       }));
 
-      // Wait for Spline to preload OR timeout after 3 seconds
-      await Promise.race([
-        splinePreload,
-        new Promise(r => setTimeout(r, 3000))
-      ]);
-
-      // Minimum 1.5s for nice loader animation
-      await new Promise(r => setTimeout(r, 1500));
+      // Minimum 500ms for nice loader animation (reduced from 1.5s)
+      // Spline now loads independently in Hero.tsx, no blocking
+      await new Promise(r => setTimeout(r, 500));
       setIsLoading(false);
     };
 

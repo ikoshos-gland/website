@@ -26,6 +26,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
             src={image}
             alt={title}
             loading="lazy"
+            decoding="async"
             className="opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 w-full h-full object-cover"
           />
           <div className="bg-gradient-to-t from-[#0E0F11] via-black/40 to-transparent absolute inset-0"></div>

@@ -14,7 +14,7 @@ interface PhotoWork {
 const PhotoCard: React.FC<PhotoWork> = ({ title, category, location, gear, image, isFeatured }) => (
   <div className="group cursor-pointer bg-[#0E0F11] p-3 sm:p-4 md:p-6 hover:bg-[#15171B] transition-colors">
     <div className="relative aspect-square bg-[#15171B] rounded-xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-5 border border-[#23252B]">
-      <img src={image} alt={title} loading="lazy" className="opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 w-full h-full object-cover" />
+      <img src={image} alt={title} loading="lazy" decoding="async" className="opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 w-full h-full object-cover" />
       {isFeatured && (
         <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-[#0E0F11]/80 border border-[#23252B] px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[8px] sm:text-[10px] font-medium text-[#F5F5F5] uppercase tracking-wider">
           Top Pick
