@@ -169,7 +169,7 @@ const Hero: React.FC = () => {
             muted
             playsInline
             className="w-full h-full object-cover"
-            style={{ filter: 'brightness(1.3)', objectPosition: '35% center' }}
+            style={{ filter: 'brightness(1.3)', objectPosition: '65% center' }}
           >
             <source src="/spline-mobile.webm" type="video/webm" />
             <source src="/spline-mobile.mp4" type="video/mp4" />
