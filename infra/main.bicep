@@ -23,7 +23,7 @@ param staticWebAppUrl string = 'https://proud-grass-02ea7a610.azurestaticapps.ne
 // EXISTING AZURE OPENAI (already deployed)
 // ═══════════════════════════════════════════════════════════════════════════
 @description('Existing Azure OpenAI endpoint')
-param existingOpenAiEndpoint string = 'https://defaultresourcegroup-itn-resource-1727.cognitiveservices.azure.com/'
+param existingOpenAiEndpoint string = 'https://vectorizervascularr.cognitiveservices.azure.com'
 
 @description('Existing Azure OpenAI API Key')
 @secure()
