@@ -71,6 +71,8 @@ jobs:
             location=${{ env.AZURE_LOCATION }}
             existingOpenAiKey=${{ secrets.AZURE_OPENAI_API_KEY }}
             apiSecretKey=${{ secrets.API_SECRET_KEY }}
+            tavilyApiKey=${{ secrets.TAVILY_API_KEY }}
+            existingAzureSearchKey=${{ secrets.AZURE_SEARCH_KEY }}
           failOnStdErr: false
 
       - name: Output Deployment Results

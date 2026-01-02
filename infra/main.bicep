@@ -29,6 +29,10 @@ param existingOpenAiEndpoint string = 'https://vectorizervascularr.cognitiveserv
 @secure()
 param existingOpenAiKey string
 
+@description('Existing Azure Search Key (optional)')
+@secure()
+param existingAzureSearchKey string = ''
+
 @description('Chat model deployment name')
 param chatDeployment string = 'gpt-4o'
 
@@ -39,6 +43,10 @@ param embeddingDeployment string = 'text-embedding-3-large'
 @description('API secret key for HMAC signing (optional)')
 @secure()
 param apiSecretKey string = ''
+ 
+@description('Tavily API Key for web search')
+@secure()
+param tavilyApiKey string = ''
 
 // Resource names
 var searchName = 'search-rag-${environment}-${take(uniqueSuffix, 8)}'
@@ -136,7 +144,7 @@ resource searchKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: keyVault
   name: 'azure-search-key'
   properties: {
-    value: searchService.listAdminKeys().primaryKey
+    value: !empty(existingAzureSearchKey) ? existingAzureSearchKey : searchService.listAdminKeys().primaryKey
   }
 }
 
@@ -286,6 +294,10 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         {
           name: 'API_SECRET_KEY'
           value: !empty(apiSecretKey) ? '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=api-secret-key)' : ''
+        }
+        {
+          name: 'TAVILY_API_KEY'
+          value: tavilyApiKey
         }
       ]
     }
