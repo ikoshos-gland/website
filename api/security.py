@@ -28,7 +28,7 @@ RATE_LIMIT_CHAT_MAX = int(os.environ.get("RATE_LIMIT_CHAT_MAX", 10))  # stricter
 # Allowed origins (set in environment or use defaults)
 ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS",
-    "https://proud-grass-02ea7a610.azurestaticapps.net,http://localhost:3000,http://localhost:5173,https://mertoshi.online"
+    "https://proud-grass-02ea7a610.azurestaticapps.net,http://localhost:3000,http://localhost:5173,https://mertoshi.online,https://www.mertoshi.online"
 ).split(",")
 
 # API Key for additional protection (optional, set in Azure)
