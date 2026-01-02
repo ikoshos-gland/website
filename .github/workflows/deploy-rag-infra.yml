@@ -69,6 +69,8 @@ jobs:
           parameters: >
             environment=${{ github.event.inputs.environment }}
             location=${{ env.AZURE_LOCATION }}
+            existingOpenAiKey=${{ secrets.AZURE_OPENAI_API_KEY }}
+            apiSecretKey=${{ secrets.API_SECRET_KEY }}
           failOnStdErr: false
 
       - name: Output Deployment Results
