@@ -189,6 +189,8 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
           staticWebAppUrl
           'http://localhost:3000'
           'http://localhost:5173'
+          'https://mertoshi.online'
+          'https://www.mertoshi.online'
         ]
         supportCredentials: false
       }
@@ -267,7 +269,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         // Security settings
         {
           name: 'ALLOWED_ORIGINS'
-          value: '${staticWebAppUrl},http://localhost:3000,http://localhost:5173'
+          value: '${staticWebAppUrl},http://localhost:3000,http://localhost:5173,https://mertoshi.online,https://www.mertoshi.online'
         }
         {
           name: 'RATE_LIMIT_WINDOW'
