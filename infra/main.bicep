@@ -324,6 +324,7 @@ output searchEndpoint string = 'https://${searchService.name}.search.windows.net
 output searchIndexName string = 'documents-index'
 output keyVaultName string = keyVault.name
 output appInsightsName string = appInsights.name
+output openAiEndpoint string = existingOpenAiEndpoint
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SECURITY NOTES
