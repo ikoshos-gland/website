@@ -8,6 +8,7 @@ import logging
 from typing import Annotated
 from semantic_kernel.functions import kernel_function
 from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +21,30 @@ class RAGPlugin:
         self._data_source_config = None
 
     def _get_client(self) -> AzureOpenAI:
-        """Lazy initialization of Azure OpenAI client."""
+        """Lazy initialization of Azure OpenAI client with Managed Identity support."""
         if self._client is None:
-            self._client = AzureOpenAI(
-                azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-                api_key=os.environ["AZURE_OPENAI_API_KEY"],
-                api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
-            )
+            api_key = os.environ.get("AZURE_OPENAI_API_KEY", "")
+            endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
+            api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-12-01-preview")
+
+            if api_key and not api_key.startswith("@Microsoft.KeyVault"):
+                # Local development with API key
+                self._client = AzureOpenAI(
+                    azure_endpoint=endpoint,
+                    api_key=api_key,
+                    api_version=api_version,
+                )
+            else:
+                # Production: Use Managed Identity
+                credential = DefaultAzureCredential()
+                token_provider = get_bearer_token_provider(
+                    credential, "https://cognitiveservices.azure.com/.default"
+                )
+                self._client = AzureOpenAI(
+                    azure_endpoint=endpoint,
+                    azure_ad_token_provider=token_provider,
+                    api_version=api_version,
+                )
         return self._client
 
     def _get_data_source_config(self) -> dict:

@@ -9,6 +9,7 @@ from semantic_kernel.agents import ChatCompletionAgent
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.connectors.ai.function_choice_behavior import FunctionChoiceBehavior
 from semantic_kernel.contents.chat_history import ChatHistory
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 from .plugins import RAGPlugin, WebSearchPlugin, AboutMePlugin, DateTimePlugin
 
@@ -37,11 +38,9 @@ You have access to the following tools:
 
 5. **DateTime-calculate_date**: Calculate relative dates (e.g., "what date is 30 days from now").
 
-## CRITICAL: Mandatory RAG Search
-**IMPORTANT**: You MUST call RAG-search_documents for EVERY user message before responding. This is mandatory, not optional. Always search the personal knowledge base first, then supplement with other tools if needed.
-
 ## Guidelines
-- ALWAYS call RAG-search_documents first, no exceptions
+- Use RAG-search_documents when the user asks about academic topics, research, or Mert's work
+- Use WebSearch for current events or general knowledge not in personal documents
 - Be transparent about which sources you're using
 - If RAG returns no results, say so and offer to search the web
 - Keep responses concise but informative
@@ -59,14 +58,36 @@ def create_kernel() -> Kernel:
     """Create and configure the Semantic Kernel with Azure OpenAI."""
     kernel = Kernel()
 
-    # Add Azure OpenAI Chat Completion service
-    service = AzureChatCompletion(
-        deployment_name=os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4o"),
-        endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-        api_key=os.environ["AZURE_OPENAI_API_KEY"],
-        api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
-        service_id="azure-openai",
-    )
+    # Get configuration
+    api_key = os.environ.get("AZURE_OPENAI_API_KEY", "")
+    endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
+    deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
+    api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2024-12-01-preview")
+
+    # Add Azure OpenAI Chat Completion service with Managed Identity support
+    if api_key and not api_key.startswith("@Microsoft.KeyVault"):
+        # Local development with API key
+        service = AzureChatCompletion(
+            deployment_name=deployment,
+            endpoint=endpoint,
+            api_key=api_key,
+            api_version=api_version,
+            service_id="azure-openai",
+        )
+    else:
+        # Production: Use Managed Identity
+        credential = DefaultAzureCredential()
+        token_provider = get_bearer_token_provider(
+            credential, "https://cognitiveservices.azure.com/.default"
+        )
+        service = AzureChatCompletion(
+            deployment_name=deployment,
+            endpoint=endpoint,
+            azure_ad_token_provider=token_provider,
+            api_version=api_version,
+            service_id="azure-openai",
+        )
+
     kernel.add_service(service)
 
     # Register all plugins

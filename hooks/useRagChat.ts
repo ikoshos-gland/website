@@ -105,7 +105,7 @@ export function useRagChat(): UseRagChatReturn {
   const [isCheckingHealth, setIsCheckingHealth] = useState(true);
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo | null>(null);
-  const [useAgent, setUseAgent] = useState(true); // Default to agent mode
+  const [useAgent, setUseAgent] = useState(false); // Use direct RAG endpoint (guaranteed document retrieval)
   const [agentStatus, setAgentStatus] = useState<AgentStatus>({
     isThinking: false,
     currentTool: null,
