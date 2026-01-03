@@ -49,13 +49,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Lowercase Repo Name
+        run: |
+          echo "LOWERCASE_REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.LOWERCASE_REPO }}/backend
           tags: |
-            type=sha,format=long
             type=raw,value=latest
 
       - name: Build and push Docker image
@@ -86,6 +89,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Lowercase Repo Name
+        run: |
+          echo "LOWERCASE_REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Create Resource Group
         uses: azure/cli@v2
         with:
@@ -110,7 +117,7 @@ jobs:
             apiSecretKey=${{ secrets.API_SECRET_KEY }}
             tavilyApiKey=${{ secrets.TAVILY_API_KEY }}
             existingAzureSearchKey=${{ secrets.AZURE_SEARCH_KEY }}
-            containerImageName=${{ needs.build-and-push.outputs.image }}
+            containerImageName=ghcr.io/${{ env.LOWERCASE_REPO }}/backend:latest
             dockerRegistryUrl='https://ghcr.io'
             dockerRegistryUsername=${{ github.actor }}
             dockerRegistryPassword=${{ secrets.CR_PAT }}
