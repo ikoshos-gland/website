@@ -178,8 +178,8 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
   location: location
   kind: 'linux'
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: 'B1'
+    tier: 'Basic'
   }
   properties: {
     reserved: true
@@ -202,6 +202,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     clientAffinityEnabled: false
     siteConfig: {
       pythonVersion: '3.11'
+      alwaysOn: true
       linuxFxVersion: 'DOCKER|${containerImageName}'
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
