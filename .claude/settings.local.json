@@ -6,7 +6,11 @@
       "Bash(az functionapp show:*)",
       "Bash(curl:*)",
       "Bash(func azure functionapp publish func-rag-prod-3mktjtlolzx3q)",
-      "Bash(az functionapp config appsettings list:*)"
+      "Bash(az functionapp config appsettings list:*)",
+      "Bash(az functionapp config set:*)",
+      "Bash(az functionapp restart:*)",
+      "Bash(python3:*)",
+      "Bash(git add:*)"
     ]
   }
 }
