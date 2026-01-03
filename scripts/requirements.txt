@@ -3,3 +3,5 @@ azure-search-documents
 azure-identity
 openai
 python-dotenv
+langchain-text-splitters
+tiktoken

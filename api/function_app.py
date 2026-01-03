@@ -8,6 +8,7 @@ import json
 import logging
 import azure.functions as func
 from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 from security import (
     secure_endpoint,
@@ -34,29 +35,54 @@ EMBEDDING_DEPLOYMENT = os.environ.get("AZURE_EMBEDDING_DEPLOYMENT", "text-embedd
 
 
 def get_openai_client() -> AzureOpenAI:
-    """Azure OpenAI client oluştur."""
+    """Azure OpenAI client oluştur (Managed Identity ile)."""
+    # Try Managed Identity first, fallback to API key for local dev
     api_key = os.environ.get("AZURE_OPENAI_API_KEY", "")
-    if not api_key:
-        raise ValueError("AZURE_OPENAI_API_KEY not configured")
 
-    return AzureOpenAI(
-        azure_endpoint=AZURE_OPENAI_ENDPOINT,
-        api_key=api_key,
-        api_version=AZURE_OPENAI_API_VERSION,
-    )
+    if api_key and not api_key.startswith("@Microsoft.KeyVault"):
+        # Local development with API key
+        logger.info("Using API key for Azure OpenAI authentication")
+        return AzureOpenAI(
+            azure_endpoint=AZURE_OPENAI_ENDPOINT,
+            api_key=api_key,
+            api_version=AZURE_OPENAI_API_VERSION,
+        )
+    else:
+        # Production: Use Managed Identity
+        logger.info("Using Managed Identity for Azure OpenAI authentication")
+        credential = DefaultAzureCredential()
+        token_provider = get_bearer_token_provider(
+            credential,
+            "https://cognitiveservices.azure.com/.default"
+        )
+        return AzureOpenAI(
+            azure_endpoint=AZURE_OPENAI_ENDPOINT,
+            azure_ad_token_provider=token_provider,
+            api_version=AZURE_OPENAI_API_VERSION,
+        )
 
 
 def get_data_source_config() -> dict:
-    """Azure AI Search 'On Your Data' yapılandırması."""
+    """Azure AI Search 'On Your Data' yapılandırması (Managed Identity ile)."""
+    # Check if we're using API key (local dev) or Managed Identity (production)
+    search_key = os.environ.get("AZURE_SEARCH_KEY", "")
+    use_managed_identity = not search_key or search_key.startswith("@Microsoft.KeyVault")
+
+    auth_config = {
+        "type": "system_assigned_managed_identity" if use_managed_identity else "api_key"
+    }
+    if not use_managed_identity:
+        auth_config["key"] = search_key
+        logger.info("Using API key for Azure AI Search authentication")
+    else:
+        logger.info("Using Managed Identity for Azure AI Search authentication")
+
     return {
         "type": "azure_search",
         "parameters": {
             "endpoint": os.environ["AZURE_SEARCH_ENDPOINT"],
             "index_name": os.environ.get("AZURE_SEARCH_INDEX", "documents-index"),
-            "authentication": {
-                "type": "api_key",
-                "key": os.environ["AZURE_SEARCH_KEY"],
-            },
+            "authentication": auth_config,
             "query_type": "vector_semantic_hybrid",
             "semantic_configuration": "default",
             "embedding_dependency": {
@@ -289,9 +315,18 @@ def init_index(req: func.HttpRequest) -> func.HttpResponse:
         )
         from azure.core.credentials import AzureKeyCredential
 
+        # Use Managed Identity for production, API key for local dev
+        search_key = os.environ.get("AZURE_SEARCH_KEY", "")
+        if search_key and not search_key.startswith("@Microsoft.KeyVault"):
+            logger.info("Using API key for Search index creation")
+            credential = AzureKeyCredential(search_key)
+        else:
+            logger.info("Using Managed Identity for Search index creation")
+            credential = DefaultAzureCredential()
+
         index_client = SearchIndexClient(
             endpoint=os.environ["AZURE_SEARCH_ENDPOINT"],
-            credential=AzureKeyCredential(os.environ["AZURE_SEARCH_KEY"]),
+            credential=credential,
         )
 
         index_name = os.environ.get("AZURE_SEARCH_INDEX", "documents-index")
