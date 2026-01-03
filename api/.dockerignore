@@ -1,8 +1,0 @@
-__pycache__
-*.pyc
-.python_packages
-.env
-local.settings.json
-.vscode
-.git
-.gitignore

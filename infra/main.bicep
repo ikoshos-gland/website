@@ -48,20 +48,6 @@ param apiSecretKey string = ''
 @secure()
 param tavilyApiKey string = ''
 
-@description('Container image name (e.g. ghcr.io/user/repo:tag)')
-param containerImageName string = ''
-
-@description('Docker Registry URL')
-param dockerRegistryUrl string = 'https://ghcr.io'
-
-@description('Docker Registry Username')
-@secure()
-param dockerRegistryUsername string = ''
-
-@description('Docker Registry Password')
-@secure()
-param dockerRegistryPassword string = ''
-
 // Resource names
 var searchName = 'search-rag-${environment}-${take(uniqueSuffix, 8)}'
 var functionAppName = 'func-rag-${environment}-${uniqueSuffix}'
@@ -203,7 +189,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     siteConfig: {
       pythonVersion: '3.11'
       alwaysOn: true
-      linuxFxVersion: 'DOCKER|${containerImageName}'
+      linuxFxVersion: 'Python|3.11'
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
       http20Enabled: true
@@ -256,20 +242,16 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
           value: appInsights.properties.ConnectionString
         }
         {
-          name: 'DOCKER_REGISTRY_SERVER_URL'
-          value: dockerRegistryUrl
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_USERNAME'
-          value: dockerRegistryUsername
-        }
-        {
-          name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
-          value: dockerRegistryPassword
-        }
-        {
           name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
-          value: 'false'
+          value: 'true'
+        }
+        {
+          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+          value: 'true'
+        }
+        {
+          name: 'ENABLE_ORYX_BUILD'
+          value: 'true'
         }
         // Azure OpenAI (from Key Vault)
         {
