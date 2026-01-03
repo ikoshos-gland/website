@@ -6,6 +6,38 @@ html {
     scroll-behavior: smooth;
 }
 
+/* Custom Animations for Premium Chat Widget */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
 @layer utilities {
     .text-premium-shadow {
         /* Base text properties for gradient capability */
@@ -22,5 +54,19 @@ html {
         /* Optimize for performance */
         will-change: background-image, filter;
         transition: background-image 0.1s linear, filter 0.1s linear;
+    }
+
+    .animate-slideUp {
+        animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-messageSlideIn {
+        animation: messageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .animate-shimmer {
+        animation: shimmer 2s linear infinite;
+        background: linear-gradient(to right, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+        background-size: 1000px 100%;
     }
 }
