@@ -48,6 +48,20 @@ param apiSecretKey string = ''
 @secure()
 param tavilyApiKey string = ''
 
+@description('Container image name (e.g. ghcr.io/user/repo:tag)')
+param containerImageName string = ''
+
+@description('Docker Registry URL')
+param dockerRegistryUrl string = 'https://ghcr.io'
+
+@description('Docker Registry Username')
+@secure()
+param dockerRegistryUsername string = ''
+
+@description('Docker Registry Password')
+@secure()
+param dockerRegistryPassword string = ''
+
 // Resource names
 var searchName = 'search-rag-${environment}-${take(uniqueSuffix, 8)}'
 var functionAppName = 'func-rag-${environment}-${uniqueSuffix}'
@@ -188,7 +202,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     clientAffinityEnabled: false
     siteConfig: {
       pythonVersion: '3.11'
-      linuxFxVersion: 'Python|3.11'
+      linuxFxVersion: 'DOCKER|${containerImageName}'
       minTlsVersion: '1.2'
       ftpsState: 'Disabled'
       http20Enabled: true
@@ -239,6 +253,22 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
         {
           name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
           value: appInsights.properties.ConnectionString
+        }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_URL'
+          value: dockerRegistryUrl
+        }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_USERNAME'
+          value: dockerRegistryUsername
+        }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
+          value: dockerRegistryPassword
+        }
+        {
+          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
+          value: 'false'
         }
         // Azure OpenAI (from Key Vault)
         {
