@@ -6,6 +6,7 @@ With rate limiting, request validation, and origin protection.
 import os
 import json
 import logging
+import time
 import azure.functions as func
 from openai import AzureOpenAI
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
@@ -106,10 +107,14 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     RAG Chat - Azure AI Search'teki dokümanlarda arayarak cevap verir.
     Rate limited to 10 requests per minute per IP.
     """
+    start_time = time.time()
     headers = get_cors_headers(req)
 
     # Validate request
+    validation_start = time.time()
     is_valid, error, body = validate_chat_request(req)
+    validation_time = time.time() - validation_start
+
     if not is_valid:
         return func.HttpResponse(
             json.dumps({"error": error}),
@@ -120,6 +125,8 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
     try:
         user_message = body["message"]
         conversation_history = body["conversation_history"]
+
+        logger.info(f"⏱️ Request validation: {validation_time:.3f}s")
 
         # Build messages
         messages = [
@@ -136,6 +143,9 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
         messages.append({"role": "user", "content": user_message})
 
         # Azure OpenAI call
+        logger.info(f"🔍 Starting RAG query for: '{user_message[:50]}...'")
+        openai_start = time.time()
+
         client = get_openai_client()
         response = client.chat.completions.create(
             model=CHAT_DEPLOYMENT,
@@ -147,7 +157,11 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
             },
         )
 
+        openai_time = time.time() - openai_start
+        logger.info(f"⏱️ Azure OpenAI + Search: {openai_time:.3f}s")
+
         # Extract response
+        response_processing_start = time.time()
         choice = response.choices[0]
         answer = choice.message.content
 
@@ -161,6 +175,13 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     "filepath": sanitize_input(citation.get("filepath", ""), 500),
                 })
 
+        response_processing_time = time.time() - response_processing_start
+        total_time = time.time() - start_time
+
+        logger.info(f"⏱️ Response processing: {response_processing_time:.3f}s")
+        logger.info(f"⏱️ Total request time: {total_time:.3f}s | Tokens: {response.usage.total_tokens}")
+        logger.info(f"📊 Breakdown - Validation: {validation_time:.3f}s | OpenAI+Search: {openai_time:.3f}s | Processing: {response_processing_time:.3f}s")
+
         return func.HttpResponse(
             json.dumps({
                 "answer": answer,
@@ -169,6 +190,11 @@ def chat(req: func.HttpRequest) -> func.HttpResponse:
                     "prompt_tokens": response.usage.prompt_tokens,
                     "completion_tokens": response.usage.completion_tokens,
                     "total_tokens": response.usage.total_tokens,
+                },
+                "timing": {
+                    "total_ms": round(total_time * 1000),
+                    "openai_search_ms": round(openai_time * 1000),
+                    "processing_ms": round(response_processing_time * 1000),
                 }
             }),
             status_code=200,

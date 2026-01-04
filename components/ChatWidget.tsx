@@ -59,10 +59,32 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
     checkHealth
   } = useRagChat();
 
+  const [showSecondMessage, setShowSecondMessage] = useState(false);
+  const [isTypingSecondMessage, setIsTypingSecondMessage] = useState(false);
+
   // Auto-scroll to bottom on new messages or status updates
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, agentStatus.statusMessage]);
+  }, [messages, agentStatus.statusMessage, showSecondMessage, isTypingSecondMessage]);
+
+  // Handle welcome message sequence
+  useEffect(() => {
+    if (isReady && messages.length === 0 && !showSecondMessage && !isTypingSecondMessage) {
+      const timer1 = setTimeout(() => {
+        setIsTypingSecondMessage(true);
+      }, 1000);
+
+      const timer2 = setTimeout(() => {
+        setIsTypingSecondMessage(false);
+        setShowSecondMessage(true);
+      }, 3500);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
+    }
+  }, [isReady, messages.length]);
 
   // Focus input when opened
   useEffect(() => {
@@ -213,13 +235,39 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         {!isCheckingHealth && isReady && (
           <>
             {messages.length === 0 && (
-              <div className="animate-messageSlideIn">
+              <div className="flex flex-col gap-4 animate-messageSlideIn">
                 <MessageBubble
                   message={{
                     role: 'assistant',
-                    content: "Merhaba! 👋 Ben Mert'in kişisel asistanı **Lundo**.\n\nProjeleri, araştırmaları veya sormak istediğin herhangi bir konuda yardımcı olmaya hazırım. Aklında ne var?"
+                    content: "Hi there! 👋 I’m **Lundo**, Mert’s personal assistant. I’ve been fed with everything Mert has ever read, written, or dreamed of (I even know about his childhood crushes!)."
                   }}
                 />
+
+                {isTypingSecondMessage && (
+                  <div className="flex gap-2 items-start animate-messageSlideIn">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-zinc-900 border border-white/10
+                      flex items-center justify-center mt-1 overflow-hidden p-1 animate-pulse">
+                      <img src="/lundo-logo.png" alt="Lundo" className="w-full h-full object-contain filter invert" />
+                    </div>
+                    <div className="bg-zinc-900 rounded-2xl rounded-bl-md
+                      px-5 py-4 border border-white/5 flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {showSecondMessage && (
+                  <MessageBubble
+                    message={{
+                      role: 'assistant',
+                      content: "Remember i am not just a simple chatbot rather an agentic entity capable of merging Mert’s personal archives with the vast knowledge of the web and has long-/short term memory. Feel free to explore his projects, his mind, and his world with me."
+                    }}
+                  />
+                )}
               </div>
             )}
 
