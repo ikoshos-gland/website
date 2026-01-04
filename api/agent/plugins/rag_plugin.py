@@ -90,7 +90,7 @@ class RAGPlugin:
                 messages=[
                     {
                         "role": "system",
-                        "content": "Extract and summarize relevant information from the provided documents. Be concise but thorough. Include specific details and reference the source documents.",
+                        "content": "Extract and summarize relevant information from the provided documents. Be concise but thorough. Include specific details. IMPORTANT: Always cite your sources using [doc1], [doc2], etc. inline notation when referencing information from documents.",
                     },
                     {"role": "user", "content": query},
                 ],
