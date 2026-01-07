@@ -97,13 +97,13 @@ class AboutMePlugin:
 
     @kernel_function(
         name="get_profile",
-        description="Get Mert's basic profile information including bio, expertise, current projects, and contact details. Use for introductions, questions about who Mert is, what he does, or how to contact him.",
+        description="Get Mert's basic profile information including bio, expertise, current projects, academic background, technical skills, and contact details. Use for introductions, questions about who Mert is, what he does, or how to contact him.",
     )
     def get_profile(
         self,
         section: Annotated[
             str,
-            "Which section to retrieve: 'bio', 'expertise', 'education', 'contact', 'current', 'links', or 'all' for complete profile",
+            "Which section to retrieve: 'bio', 'expertise', 'projects', 'academic', 'tech', 'interests', 'contact', 'links', or 'all' for complete profile",
         ] = "all",
     ) -> Annotated[str, "Profile information formatted as markdown"]:
         """Get profile information."""
@@ -112,15 +112,40 @@ class AboutMePlugin:
         section = section.lower().strip()
 
         if section == "bio":
-            return f"**{profile['name']}** - {profile['title']}\n\n{profile['bio']}"
+            age = profile.get('age', '')
+            age_str = f" ({age} years old)" if age else ""
+            return f"**{profile['name']}**{age_str} - {profile['title']}\n\n{profile['bio']}"
 
         elif section == "expertise":
             expertise_list = "\n".join(f"- {e}" for e in profile["expertise"])
             return f"**Expertise & Skills:**\n{expertise_list}"
 
-        elif section == "current":
-            current_list = "\n".join(f"- {c}" for c in profile["current_focus"])
-            return f"**Current Focus:**\n{current_list}"
+        elif section == "projects":
+            projects_list = "\n".join(f"- {p}" for p in profile.get("current_projects", []))
+            return f"**Current Projects:**\n{projects_list}"
+
+        elif section == "academic":
+            academic = profile.get("academic_background", {})
+            collaborators = ", ".join(academic.get("collaborators", []))
+            return f"""**Academic Background:**
+- Institution: {academic.get('institution', 'N/A')}
+- Major: {academic.get('major', 'N/A')}
+- Advisor: {academic.get('advisor', 'N/A')}
+- Collaborators: {collaborators}"""
+
+        elif section == "tech":
+            tech = profile.get("technical_stack", {})
+            langs = ", ".join(tech.get("languages", []))
+            frameworks = ", ".join(tech.get("frameworks", []))
+            os_list = ", ".join(tech.get("operating_systems", []))
+            return f"""**Technical Stack:**
+- Languages & Tools: {langs}
+- Frameworks: {frameworks}
+- Operating Systems: {os_list}"""
+
+        elif section == "interests":
+            interests_list = "\n".join(f"- {i}" for i in profile.get("interests", []))
+            return f"**Interests & Hobbies:**\n{interests_list}"
 
         elif section == "contact":
             return f"""**Contact Information:**
@@ -128,24 +153,32 @@ class AboutMePlugin:
 - Location: {profile['location']}
 - Portfolio: {profile['links'].get('portfolio', 'N/A')}"""
 
-        elif section == "education":
-            languages = ", ".join(profile.get("languages", []))
-            return f"""**Education & Background:**
-{profile['education']}
-
-**Languages:** {languages}"""
-
         elif section == "links":
             links_list = "\n".join(f"- {k.title()}: {v}" for k, v in profile["links"].items())
             return f"**Links & Profiles:**\n{links_list}"
 
         else:  # "all" or default
+            # Basic info
+            age = profile.get('age', '')
+            age_str = f" ({age})" if age else ""
+            
+            # Lists
             expertise_list = "\n".join(f"  - {e}" for e in profile["expertise"])
-            current_list = "\n".join(f"  - {c}" for c in profile["current_focus"])
+            projects_list = "\n".join(f"  - {p}" for p in profile.get("current_projects", []))
+            interests_list = "\n".join(f"  - {i}" for i in profile.get("interests", []))
             links_list = "\n".join(f"  - {k.title()}: {v}" for k, v in profile["links"].items())
             languages = ", ".join(profile.get("languages", []))
+            
+            # Academic background
+            academic = profile.get("academic_background", {})
+            collaborators = ", ".join(academic.get("collaborators", []))
+            
+            # Technical stack
+            tech = profile.get("technical_stack", {})
+            tech_langs = ", ".join(tech.get("languages", []))
+            frameworks = ", ".join(tech.get("frameworks", []))
 
-            return f"""# {profile['name']}
+            return f"""# {profile['name']}{age_str}
 **{profile['title']}** | {profile['location']}
 
 ## About
@@ -154,14 +187,24 @@ class AboutMePlugin:
 ## Expertise
 {expertise_list}
 
-## Currently Working On
-{current_list}
+## Current Projects
+{projects_list}
 
-## Education
-{profile['education']}
+## Academic Background
+- Institution: {academic.get('institution', 'N/A')}
+- Major: {academic.get('major', 'N/A')}
+- Advisor: {academic.get('advisor', 'N/A')}
+- Collaborators: {collaborators}
 
-## Languages
+## Technical Stack
+- Languages & Tools: {tech_langs}
+- Frameworks: {frameworks}
+
+## Spoken Languages
 {languages}
+
+## Interests
+{interests_list}
 
 ## Links
 {links_list}
