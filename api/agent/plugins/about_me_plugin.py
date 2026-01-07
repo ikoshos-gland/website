@@ -74,6 +74,24 @@ class AboutMePlugin:
             "portfolio": "https://mertoshi.online",
             "github": "https://github.com/ikoshos-gland",
             "linkedin": "https://linkedin.com/in/mertkoca"
+        },
+
+        "internship": {
+            "company": "Koç University Hospital / Vural Lab",
+            "role": "Research Intern",
+            "duration": "2024 - Present",
+            "focus": [
+                "3D Reconstruction of Pericyte-Vascular Interface in Mouse Brain",
+                "Expansion Microscopy (ExM) protocol optimization (DMAA, LICONN, proExM)",
+                "SOFIMA-based image stitching pipeline development",
+                "Deep learning models for vascular segmentation (U-Net, FFN)"
+            ],
+            "goals": [
+                "Complete TÜBİTAK 2209-A project deliverables",
+                "Publish research findings in neuroscience journal",
+                "Master ExM protocols for connectomics research",
+                "Build computational pipeline for 3D brain vasculature modeling"
+            ]
         }
     }
 
@@ -97,13 +115,13 @@ class AboutMePlugin:
 
     @kernel_function(
         name="get_profile",
-        description="Get Mert's basic profile information including bio, expertise, current projects, academic background, technical skills, and contact details. Use for introductions, questions about who Mert is, what he does, or how to contact him.",
+        description="Get Mert's basic profile information including bio, expertise, current projects, academic background, internship details, technical skills, and contact details. Use for introductions, questions about who Mert is, what he does, his internship, or how to contact him.",
     )
     def get_profile(
         self,
         section: Annotated[
             str,
-            "Which section to retrieve: 'bio', 'expertise', 'projects', 'academic', 'tech', 'interests', 'contact', 'links', or 'all' for complete profile",
+            "Which section to retrieve: 'bio', 'expertise', 'projects', 'academic', 'internship', 'tech', 'interests', 'contact', 'links', or 'all' for complete profile",
         ] = "all",
     ) -> Annotated[str, "Profile information formatted as markdown"]:
         """Get profile information."""
@@ -157,6 +175,21 @@ class AboutMePlugin:
             links_list = "\n".join(f"- {k.title()}: {v}" for k, v in profile["links"].items())
             return f"**Links & Profiles:**\n{links_list}"
 
+        elif section == "internship":
+            internship = profile.get("internship", {})
+            focus_list = "\n".join(f"- {f}" for f in internship.get("focus", []))
+            goals_list = "\n".join(f"- {g}" for g in internship.get("goals", []))
+            return f"""**Internship Details:**
+- Company: {internship.get('company', 'N/A')}
+- Role: {internship.get('role', 'N/A')}
+- Duration: {internship.get('duration', 'N/A')}
+
+**Current Focus:**
+{focus_list}
+
+**Goals:**
+{goals_list}"""
+
         else:  # "all" or default
             # Basic info
             age = profile.get('age', '')
@@ -178,6 +211,11 @@ class AboutMePlugin:
             tech_langs = ", ".join(tech.get("languages", []))
             frameworks = ", ".join(tech.get("frameworks", []))
 
+            # Internship
+            internship = profile.get("internship", {})
+            internship_focus = "\n".join(f"  - {f}" for f in internship.get("focus", []))
+            internship_goals = "\n".join(f"  - {g}" for g in internship.get("goals", []))
+
             return f"""# {profile['name']}{age_str}
 **{profile['title']}** | {profile['location']}
 
@@ -189,6 +227,15 @@ class AboutMePlugin:
 
 ## Current Projects
 {projects_list}
+
+## Internship at {internship.get('company', 'N/A')}
+**Role:** {internship.get('role', 'N/A')} | **Duration:** {internship.get('duration', 'N/A')}
+
+**Focus Areas:**
+{internship_focus}
+
+**Goals:**
+{internship_goals}
 
 ## Academic Background
 - Institution: {academic.get('institution', 'N/A')}
