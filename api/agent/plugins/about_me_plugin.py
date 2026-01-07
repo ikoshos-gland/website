@@ -19,32 +19,62 @@ class AboutMePlugin:
     # Can also be loaded from a JSON file or database
     DEFAULT_PROFILE = {
         "name": "Mert Koca",
-        "title": "Digital Creator & AI Engineer",
-        "location": "Turkey",
-        "email": "contact@mertkoca.dev",
-        "bio": """I'm a passionate digital creator and AI engineer focused on building innovative solutions
-at the intersection of technology and creativity. I specialize in developing AI-powered applications,
-interactive web experiences, and cloud-native solutions. My work spans from academic research in
-computer vision and machine learning to practical implementations of RAG systems and intelligent agents.""",
+        "age": 22,
+        "title": "Molecular Biotechnology Student & Researcher",
+        "location": "Istanbul, Turkey (Koç University Hospital)",
+        "email": "fatih.mertkoca2@gmail.com",
+        "bio": """I am a researcher and amateur photographer combining molecular biotechnology with computational neuroscience. 
+        I specifically focus on Expansion Microscopy (ExM) and AI-supported 3D modeling. 
+        I am also working on bionic systems and personalized educational technologies (EdTech).""",
+
         "expertise": [
-            "AI/ML Engineering (RAG, Agents, Computer Vision)",
-            "Full-Stack Development (React, TypeScript, Python)",
-            "Cloud Architecture (Azure, AWS)",
-            "3D Web Experiences (Spline, Three.js)",
-            "Research & Academic Writing",
+            "Expansion Microscopy (ExM) & Protocols (DMAA, LICONN, proExM)",
+            "Computational Neuroscience (3D Image Stitching - SOFIMA)",
+            "Deep Learning (U-Net, FFN, Local Shape Descriptors)",
+            "Embedded Systems & Electronics (ESP32-S3, PlatformIO)",
+            "Signal Processing (EMG Data, Feature Extraction)",
+            "Full-stack Web Development (React, Vite, FastAPI, Azure)",
+            "Computer Hardware & Motherboard Components"
         ],
-        "current_focus": [
-            "Building agentic AI systems with Semantic Kernel",
-            "Developing RAG-powered knowledge assistants",
-            "Creating immersive web experiences with 3D elements",
+
+        "current_projects": [
+            "3D Modeling of the Pericyte-Vascular Interface in the Mouse Brain (TÜBİTAK 2209-A)",
+            "EMG-Controlled Bionic Hand Development (Machine Learning & Servo Control)",
+            "easyegitim (Personalized AI Professor Platform)",
+            "mertoshi.online & Lundo (Agentic AI System with Memory)"
         ],
-        "education": "Computer Science / Engineering background with focus on AI/ML",
-        "languages": ["Turkish (Native)", "English (Fluent)"],
-        "links": {
-            "portfolio": "https://mertkoca.dev",
-            "github": "https://github.com/mertkoca",
-            "linkedin": "https://linkedin.com/in/mertkoca",
+
+        "academic_background": {
+            "institution": "Koç University",
+            "major": "Molecular Biotechnology",
+            "advisor": "Atay Vural (Vural Lab) and Betül Uluca",
+            "collaborators": ["Narges Shomalizadeh (Research Professor)"]
         },
+
+        "technical_stack": {
+            "languages": ["Python", "C++", "JavaScript", "TypeScript", "HTML", "CSS", "React", "Vite", "FastAPI", "Azure"],
+            "frameworks": ["PyTorch", "TensorFlow Lite", "PyQt6", "Docker"],
+            "operating_systems": ["Linux (WSL)", "Windows"]
+        },
+
+        "languages": [
+            "Turkish (Native)", 
+            "English (Advanced)", 
+            "German (Advanced)"
+        ],
+
+        "interests": [
+            "Amateur Photography",
+            "Latin Quotes & Philosophy",
+            "Neuroscience History (Santiago Ramón y Cajal)",
+            "PC Hardware Architecture"
+        ],
+
+        "links": {
+            "portfolio": "https://mertoshi.online",
+            "github": "https://github.com/ikoshos-gland",
+            "linkedin": "https://linkedin.com/in/mertkoca"
+        }
     }
 
     def __init__(self):
