@@ -23,38 +23,38 @@ class AboutMePlugin:
         "title": "Molecular Biotechnology Student & Researcher",
         "location": "Istanbul, Turkey (Koç University Hospital)",
         "email": "fatih.mertkoca2@gmail.com",
-        "bio": """I am a researcher and amateur photographer combining molecular biotechnology with computational neuroscience. 
-        I specifically focus on Expansion Microscopy (ExM) and AI-supported 3D modeling. 
-        I am also working on bionic systems and personalized educational technologies (EdTech).""",
+        "bio": """I am an undergraduate researcher and amateur photographer combining molecular biotechnology with computational neuroscience. 
+        I specifically focus on Expansion Microscopy (ExM) and AI-supported 3D modeling in my internship at Koç University Hospital. 
+        I am also working on bionic systems and personalized educational technologies.""",
 
         "expertise": [
-            "Expansion Microscopy (ExM) & Protocols (DMAA, LICONN, proExM)",
-            "Computational Neuroscience (3D Image Stitching - SOFIMA)",
-            "Deep Learning (U-Net, FFN, Local Shape Descriptors)",
+            "Expansion Microscopy (ExM) & Protocols (DMAA, LICONN, proExM,Magnify)",
+            "Computational Neuroscience (3D Image Stitching - SOFIMA, CLAHE, )",
+            "Deep Learning Based Brain Segmentation and Modeling (U-Net, FFN, Local Shape Descriptors)",
             "Embedded Systems & Electronics (ESP32-S3, PlatformIO)",
             "Signal Processing (EMG Data, Feature Extraction)",
-            "Full-stack Web Development (React, Vite, FastAPI, Azure)",
+            "Full-stack Web Development (I am kidding I vibe coded all this stuff LMAO)",
             "Computer Hardware & Motherboard Components"
         ],
 
         "current_projects": [
-            "3D Modeling of the Pericyte-Vascular Interface in the Mouse Brain (TÜBİTAK 2209-A)",
+            "3D Reconstruction of the Pericyte-Vascular Interface in the Mouse Brain (TÜBİTAK 2209-A)",
             "EMG-Controlled Bionic Hand Development (Machine Learning & Servo Control)",
             "easyegitim (Personalized AI Professor Platform)",
             "mertoshi.online & Lundo (Agentic AI System with Memory)"
         ],
 
         "academic_background": {
-            "institution": "Koç University",
+            "institution": "Turkish-German University",
             "major": "Molecular Biotechnology",
             "advisor": "Atay Vural (Vural Lab) and Betül Uluca",
-            "collaborators": ["Narges Shomalizadeh (Research Professor)"]
+            "collaborators": ["Narges Shomalizadeh (Research Professor), Özkur Kuran"]
         },
 
         "technical_stack": {
-            "languages": ["Python", "C++", "JavaScript", "TypeScript", "HTML", "CSS", "React", "Vite", "FastAPI", "Azure"],
-            "frameworks": ["PyTorch", "TensorFlow Lite", "PyQt6", "Docker"],
-            "operating_systems": ["Linux (WSL)", "Windows"]
+            "languages": ["Python", "C++", "Azure"],
+            "frameworks": ["PyTorch", "TensorFlow Lite", "Docker", "Azure CycleCloud"],
+            "operating_systems": ["Ubuntu", "Windows"]
         },
 
         "languages": [
@@ -65,9 +65,11 @@ class AboutMePlugin:
 
         "interests": [
             "Amateur Photography",
-            "Latin Quotes & Philosophy",
-            "Neuroscience History (Santiago Ramón y Cajal)",
-            "PC Hardware Architecture"
+            "Neuroscience",
+            "Bionic Systems",
+            "Personalized Education",
+            "Boxing",
+            "Learning New Stuff"
         ],
 
         "links": {
@@ -92,6 +94,25 @@ class AboutMePlugin:
                 "Master ExM protocols for connectomics research",
                 "Build computational pipeline for 3D brain vasculature modeling"
             ]
+        },
+
+        "current_state": {
+            "status": "Stuck - Supply Shortage",
+            "last_updated": "2026-01-01",
+            "description": "I am fucked. Currently the internship is stuck because of the lack of supplies.",
+            "bottlenecks": [
+                "NHS-Ester Dye (AF 488 NHS Ester)",
+                "Anhydrous DMSO"
+            ]
+        },
+
+        "childhood_crush": {
+            "name": "Elif Ece",
+            "location": "Manisa, Turkey",
+            "description": "A blue-eyed, yellow-haired girl I loved for 8 years during my childhood.",
+            "traits": ["Extremely smart", "Beautiful blue eyes", "Yellow/blonde hair"],
+            "duration": "8 years",
+            "status": "Lost contact after moving to Kayseri. No contact anymore."
         }
     }
 
@@ -115,13 +136,13 @@ class AboutMePlugin:
 
     @kernel_function(
         name="get_profile",
-        description="Get Mert's basic profile information including bio, expertise, current projects, academic background, internship details, technical skills, and contact details. Use for introductions, questions about who Mert is, what he does, his internship, or how to contact him.",
+        description="Get Mert's basic profile information including bio, expertise, current projects, academic background, internship details, current state/status, childhood crush, technical skills, and contact details. Use for introductions, questions about who Mert is, what he does, his internship, current status, personal life, or how to contact him.",
     )
     def get_profile(
         self,
         section: Annotated[
             str,
-            "Which section to retrieve: 'bio', 'expertise', 'projects', 'academic', 'internship', 'tech', 'interests', 'contact', 'links', or 'all' for complete profile",
+            "Which section to retrieve: 'bio', 'expertise', 'projects', 'academic', 'internship', 'current_state', 'childhood_crush', 'tech', 'interests', 'contact', 'links', or 'all' for complete profile",
         ] = "all",
     ) -> Annotated[str, "Profile information formatted as markdown"]:
         """Get profile information."""
@@ -190,6 +211,31 @@ class AboutMePlugin:
 **Goals:**
 {goals_list}"""
 
+        elif section == "current_state":
+            state = profile.get("current_state", {})
+            bottlenecks = "\n".join(f"- {b}" for b in state.get("bottlenecks", []))
+            return f"""**Current State:**
+- Status: {state.get('status', 'N/A')}
+- Last Updated: {state.get('last_updated', 'N/A')}
+
+{state.get('description', '')}
+
+**Bottlenecks:**
+{bottlenecks}"""
+
+        elif section == "childhood_crush":
+            crush = profile.get("childhood_crush", {})
+            traits = ", ".join(crush.get("traits", []))
+            return f"""**Childhood Crush:**
+- Name: {crush.get('name', 'N/A')}
+- Location: {crush.get('location', 'N/A')}
+- Duration: {crush.get('duration', 'N/A')}
+- Traits: {traits}
+
+{crush.get('description', '')}
+
+**Status:** {crush.get('status', 'N/A')}"""
+
         else:  # "all" or default
             # Basic info
             age = profile.get('age', '')
@@ -215,6 +261,14 @@ class AboutMePlugin:
             internship = profile.get("internship", {})
             internship_focus = "\n".join(f"  - {f}" for f in internship.get("focus", []))
             internship_goals = "\n".join(f"  - {g}" for g in internship.get("goals", []))
+
+            # Current state
+            state = profile.get("current_state", {})
+            bottlenecks = "\n".join(f"  - {b}" for b in state.get("bottlenecks", []))
+
+            # Childhood crush
+            crush = profile.get("childhood_crush", {})
+            crush_traits = ", ".join(crush.get("traits", []))
 
             return f"""# {profile['name']}{age_str}
 **{profile['title']}** | {profile['location']}
@@ -258,4 +312,18 @@ class AboutMePlugin:
 
 ## Contact
 Email: {profile['email']}
+
+## Current State
+- Status: {state.get('status', 'N/A')}
+- Last Updated: {state.get('last_updated', 'N/A')}
+- {state.get('description', '')}
+- Bottlenecks:
+{bottlenecks}
+
+## Childhood Crush 💔
+- Name: {crush.get('name', 'N/A')} ({crush.get('location', 'N/A')})
+- Duration: {crush.get('duration', 'N/A')}
+- Traits: {crush_traits}
+- {crush.get('description', '')}
+- Status: {crush.get('status', 'N/A')}
 """
