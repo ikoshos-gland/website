@@ -113,6 +113,21 @@ class AboutMePlugin:
             "traits": ["Extremely smart", "Beautiful blue eyes", "Yellow/blonde hair"],
             "duration": "8 years",
             "status": "Lost contact after moving to Kayseri. No contact anymore."
+        },
+
+        "chatbot": {
+            "name": "Lundo",
+            "type": "AI Assistant",
+            "creator": "Mert Koca",
+            "purpose": "To help visitors learn about Mert, his work, research, and personal life.",
+            "capabilities": [
+                "Search Mert's personal knowledge base (RAG)",
+                "Search the web for real-time information",
+                "Provide Mert's profile and contact information",
+                "Answer questions about Mert's research, projects, and interests"
+            ],
+            "personality": "Friendly, helpful, and slightly witty. I speak ABOUT Mert in third person - I am not Mert himself.",
+            "note": "I am Lundo, an AI assistant created by Mert. When you ask 'who are you?', you're asking about me (Lundo), not about Mert. If you want to know about Mert, ask 'who is Mert?' or 'tell me about Mert'."
         }
     }
 
@@ -136,13 +151,13 @@ class AboutMePlugin:
 
     @kernel_function(
         name="get_profile",
-        description="Get Mert's basic profile information including bio, expertise, current projects, academic background, internship details, current state/status, childhood crush, technical skills, and contact details. Use for introductions, questions about who Mert is, what he does, his internship, current status, personal life, or how to contact him.",
+        description="Get information about Mert OR the chatbot (Lundo). Use 'chatbot' section when user asks 'who are you?' to describe Lundo. Use other sections for questions about Mert's bio, expertise, projects, academic background, internship, current state, childhood crush, technical skills, and contact details.",
     )
     def get_profile(
         self,
         section: Annotated[
             str,
-            "Which section to retrieve: 'bio', 'expertise', 'projects', 'academic', 'internship', 'current_state', 'childhood_crush', 'tech', 'interests', 'contact', 'links', or 'all' for complete profile",
+            "Which section to retrieve: 'chatbot' (for 'who are you?' questions about Lundo), 'bio', 'expertise', 'projects', 'academic', 'internship', 'current_state', 'childhood_crush', 'tech', 'interests', 'contact', 'links', or 'all' for complete profile",
         ] = "all",
     ) -> Annotated[str, "Profile information formatted as markdown"]:
         """Get profile information."""
@@ -235,6 +250,22 @@ class AboutMePlugin:
 {crush.get('description', '')}
 
 **Status:** {crush.get('status', 'N/A')}"""
+
+        elif section == "chatbot":
+            bot = profile.get("chatbot", {})
+            capabilities = "\n".join(f"- {c}" for c in bot.get("capabilities", []))
+            return f"""**About Me (Lundo):**
+
+Hi! I'm **{bot.get('name', 'Lundo')}**, a {bot.get('type', 'AI Assistant')} created by {bot.get('creator', 'Mert Koca')}.
+
+**Purpose:** {bot.get('purpose', 'N/A')}
+
+**My Capabilities:**
+{capabilities}
+
+**Personality:** {bot.get('personality', 'N/A')}
+
+> {bot.get('note', '')}"""
 
         else:  # "all" or default
             # Basic info
