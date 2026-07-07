@@ -5,11 +5,13 @@ const CIPHER = '·:~-+=*°.,;∴';
 const PLACEHOLDER = '·';
 const WINDOW = 10;   // only a small leading edge shimmers
 const REROLL = 3;    // reroll that edge every N frames (gentle, not 60/s)
+const WARMUP_MS = 720;
 
 interface DeckRevealProps {
   text: string;
   /** When false, renders `text` immediately and fires onDone once. */
   animate: boolean;
+  warmupText?: string;
   onDone?: () => void;
 }
 
@@ -24,15 +26,18 @@ const placeholderFor = (text: string) => text.replace(/\S/g, PLACEHOLDER);
  * Same length every frame (stable wrapping + reserved height); written straight
  * to a ref'd span to avoid re-rendering React 60×/s.
  */
-const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, onDone }) => {
+const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, warmupText = 'thinking...', onDone }) => {
+  const wrapRef = useRef<HTMLSpanElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
   useEffect(() => {
+    const wrap = wrapRef.current;
     const el = spanRef.current;
 
     if (!animate) {
+      wrap?.classList.remove('is-thinking');
       if (el) el.textContent = text;
       onDoneRef.current?.();
       return;
@@ -63,6 +68,7 @@ const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, onDone }) => {
       return out;
     };
 
+    wrap?.classList.add('is-thinking');
     if (el) el.textContent = build();
 
     const tick = (t: number) => {
@@ -81,27 +87,34 @@ const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, onDone }) => {
       if (el) el.textContent = build();
       raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
+    const warmup = window.setTimeout(() => {
+      wrap?.classList.remove('is-thinking');
+      raf = requestAnimationFrame(tick);
+    }, WARMUP_MS);
 
     // Safety net: rAF is paused in background tabs — force-finish so the article
     // can never stay hidden waiting on a stalled reveal.
     const failsafe = window.setTimeout(() => {
       if (finished) return;
       finished = true;
+      wrap?.classList.remove('is-thinking');
       if (el) el.textContent = text;
       onDoneRef.current?.();
-    }, 5000);
+    }, WARMUP_MS + 5000);
 
     return () => {
+      clearTimeout(warmup);
       cancelAnimationFrame(raf);
       clearTimeout(failsafe);
+      wrap?.classList.remove('is-thinking');
       if (!finished && el) el.textContent = text;
     };
-  }, [animate, text]);
+  }, [animate, text, warmupText]);
 
   return (
-    <span aria-label={text}>
-      <span ref={spanRef} aria-hidden="true">{animate ? placeholderFor(text) : text}</span>
+    <span ref={wrapRef} className={'blg-deck-reveal' + (animate ? ' is-thinking' : '')} aria-label={text}>
+      <span ref={spanRef} className="blg-deck-text" aria-hidden="true">{animate ? placeholderFor(text) : text}</span>
+      {animate && <span className="blg-deck-thinking" aria-hidden="true">{warmupText}</span>}
     </span>
   );
 };

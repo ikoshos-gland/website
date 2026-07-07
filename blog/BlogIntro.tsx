@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 // A once-per-session cinematic when entering the blog: a small connectome grows
 // (nodes wire up, signals fire) and geometric "synaptic flowers" bloom at the
@@ -42,12 +42,16 @@ interface Node {
   rot: number;
   type: number;   // 0 pointed · 1 rounded · 2 double · 3 aster
   size: number;   // per-flower size multiplier (variety)
+  exitAngle: number;
+  exitDistance: number;
+  exitDelay: number;
+  exitSpin: number;
 }
-interface Edge { a: number; b: number; start: number; end: number; phase: number; }
+interface Edge { a: number; b: number; start: number; end: number; phase: number; breakAt: number; exitDelay: number; }
 
 const EDGE_GROW = 460;
 const BLOOM = 680;
-const PHASE3 = 1100;
+const PHASE3 = 1500;
 // Creature beats (backdrop posts): a Drosophila and a mouse grow among the
 // flowers, then their brains are FFN-segmented as the field dissolves.
 const FLY_APPEAR = 700, FLY_GROW = 800;
@@ -73,6 +77,13 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
   dissolveRef.current = dissolve;
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
+  const finishedRef = useRef(false);
+  const finish = useCallback(() => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    onDoneRef.current?.();
+    setGone(true);
+  }, []);
 
   useEffect(() => {
     if (!play) return;
@@ -80,7 +91,7 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    if (!ctx) { setGone(true); return; }
+    if (!ctx) { finish(); return; }
 
     const isMobile = window.innerWidth < 768;
     const baseA = isOverlay ? 1 : 0.72;   // backdrop sits quietly behind the text
@@ -112,7 +123,13 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
     const N = isMobile ? 16 : 30;
     const nodes: Node[] = [];
     let guard = 0;
-    const mk = (nx: number, ny: number): Node => ({ nx, ny, isFlower: false, reach: 0, bloomStart: 0, petals: 5, color: '#FFD700', rot: 0, type: 0, size: 1 });
+    const mk = (nx: number, ny: number): Node => ({
+      nx, ny, isFlower: false, reach: 0, bloomStart: 0, petals: 5, color: '#FFD700', rot: 0, type: 0, size: 1,
+      exitAngle: Math.random() * Math.PI * 2,
+      exitDistance: (isMobile ? 34 : 58) * (0.7 + Math.random() * 0.9),
+      exitDelay: Math.random() * 260,
+      exitSpin: (Math.random() < 0.5 ? -1 : 1) * (0.55 + Math.random() * 1.35),
+    });
     if (protect) {
       // ring placement around the header rectangle, weighted toward it
       const hcx = (protect.x0 + protect.x1) / 2, hcy = (protect.y0 + protect.y1) / 2;
@@ -163,7 +180,18 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
         const j = d[k][0];
         if (crossesHeader(px[i][0], px[i][1], px[j][0], px[j][1])) continue;
         const key = i < j ? `${i}-${j}` : `${j}-${i}`;
-        if (!seen.has(key)) { seen.add(key); edges.push({ a: Math.min(i, j), b: Math.max(i, j), start: 0, end: 0, phase: Math.random() * 1500 }); }
+        if (!seen.has(key)) {
+          seen.add(key);
+          edges.push({
+            a: Math.min(i, j),
+            b: Math.max(i, j),
+            start: 0,
+            end: 0,
+            phase: Math.random() * 1500,
+            breakAt: 0.38 + Math.random() * 0.24,
+            exitDelay: Math.random() * 240,
+          });
+        }
       }
     }
 
@@ -297,15 +325,20 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
     }
 
     // ── Draw helpers ─────────────────────────────────────────────────────
-    const drawFlower = (cx: number, cy: number, nd: Node, bloom: number, gA: number) => {
+    const drawFlower = (cx: number, cy: number, nd: Node, bloom: number, gA: number, disperse = 0) => {
       const base = (isMobile ? 15 : 24) * nd.size;
+      const d = easeInOut(clamp01(disperse));
+      const survive = Math.max(0, 1 - d);
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.rotate(nd.rot + (1 - bloom) * 0.7);
+      ctx.rotate(nd.rot + (1 - bloom) * 0.7 + nd.exitSpin * d * 0.45);
       const ring = (count: number, len: number, wid: number, round: boolean, phase: number, aMul: number) => {
         for (let k = 0; k < count; k++) {
           ctx.save();
           ctx.rotate((k / count) * Math.PI * 2 + phase);
+          const variance = 0.7 + (((k * 37) % 13) / 20);
+          ctx.translate(Math.sin(k * 12.989 + nd.rot) * base * 0.14 * d, -base * (0.45 + variance) * d);
+          ctx.rotate(nd.exitSpin * d * (0.22 + k * 0.015));
           ctx.beginPath();
           ctx.moveTo(0, 0);
           if (round) {
@@ -317,13 +350,13 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
           }
           ctx.strokeStyle = nd.color; ctx.lineWidth = 1.2;
           ctx.shadowColor = nd.color; ctx.shadowBlur = 8 * bloom;
-          ctx.globalAlpha = gA * (0.5 + 0.45 * bloom) * aMul;
+          ctx.globalAlpha = gA * (0.5 + 0.45 * bloom) * aMul * survive;
           ctx.stroke();
-          ctx.globalAlpha = gA * 0.13 * bloom * aMul; ctx.fillStyle = nd.color; ctx.fill();
+          ctx.globalAlpha = gA * 0.13 * bloom * aMul * survive; ctx.fillStyle = nd.color; ctx.fill();
           ctx.restore();
         }
       };
-      const L = base * bloom;
+      const L = base * bloom * (1 - 0.12 * d);
       if (nd.type === 0) {                 // pointed star
         ring(nd.petals, L, base * 0.3 * bloom, false, 0, 1);
       } else if (nd.type === 1) {          // rounded, full
@@ -335,7 +368,10 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
         ring(nd.petals, L * 1.05, base * 0.16 * bloom, false, 0, 0.9);
       }
       ctx.globalAlpha = gA; ctx.shadowColor = nd.color; ctx.shadowBlur = 10 * bloom;
-      ctx.beginPath(); ctx.arc(0, 0, 2.4 * bloom + 0.7, 0, 7); ctx.fillStyle = '#FFF6D5'; ctx.fill();
+      if (survive > 0.02) {
+        ctx.globalAlpha = gA * survive;
+        ctx.beginPath(); ctx.arc(0, 0, (2.4 * bloom + 0.7) * survive, 0, 7); ctx.fillStyle = '#FFF6D5'; ctx.fill();
+      }
       ctx.restore();
       ctx.shadowBlur = 0; ctx.globalAlpha = 1;
     };
@@ -458,7 +494,6 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
     };
 
     const exitStartRef = { current: null as number | null };
-    let doneFired = false;
     let raf = 0;
 
     const draw = (now: number) => {
@@ -473,14 +508,18 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
         es = exitStartRef.current;
       }
 
-      let fade = 1, sScale = 1, bgA = isOverlay ? 1 : 0;
+      let fade = 1, sScale = 1, bgA = isOverlay ? 1 : 0, exitP = 0;
       if (es != null && t >= es) {
-        const e = easeInOut(clamp01((t - es) / PHASE3));
-        fade = 1 - e; sScale = 1 - 0.16 * e;
-        if (isOverlay) { bgA = 1 - e; canvas.style.pointerEvents = 'none'; }
-        if (e >= 1) {
-          if (!doneFired) { doneFired = true; onDoneRef.current?.(); }
-          setGone(true);
+        const rawExit = clamp01((t - es) / PHASE3);
+        const e = easeInOut(rawExit);
+        if (isOverlay) {
+          fade = 1 - e; sScale = 1 - 0.16 * e; bgA = 1 - e;
+        } else {
+          exitP = rawExit;
+        }
+        canvas.style.pointerEvents = 'none';
+        if (rawExit >= 1) {
+          finish();
           return;
         }
       }
@@ -495,9 +534,12 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
       ctx.lineCap = 'round';
 
       const P = nodes.map((nd) => [nd.nx * W, nd.ny * H]);
+      const exitElapsed = exitP * PHASE3;
+      const vesselA = sA * (isOverlay ? 1 : Math.max(0, 1 - easeInOut(clamp01((exitP - 0.08) / 0.58))));
 
       // Vasculature (deepest layer): vessels grow root-first, corpuscles flow.
       for (const v of vessels) {
+        if (vesselA <= 0.01) continue;
         const gp = clamp01((t - (4 - v.depth) * 140) / 520);
         if (gp <= 0) continue;
         const vp = v.pts.map((p) => [p[0] * W, p[1] * H]);
@@ -507,12 +549,12 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
           if (s <= upto) ctx.lineTo(vp[s][0], vp[s][1]);
           else { const f = upto - (s - 1); if (f > 0) ctx.lineTo(vp[s - 1][0] + (vp[s][0] - vp[s - 1][0]) * f, vp[s - 1][1] + (vp[s][1] - vp[s - 1][1]) * f); break; }
         }
-        ctx.strokeStyle = `rgba(226,92,90,${0.32 * sA})`; ctx.lineWidth = 0.6 + v.depth * 0.55; ctx.shadowColor = '#E24B4A'; ctx.shadowBlur = 4; ctx.stroke(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = `rgba(226,92,90,${0.32 * vesselA})`; ctx.lineWidth = 0.6 + v.depth * 0.55; ctx.shadowColor = '#E24B4A'; ctx.shadowBlur = 4; ctx.stroke(); ctx.shadowBlur = 0;
         if (gp >= 1) {
           const cyc = ((t + v.phase) % 1900) / 1900, fp = cyc * segN, si = Math.floor(fp), ff = fp - si;
           if (si < segN) {
             const bx = vp[si][0] + (vp[si + 1][0] - vp[si][0]) * ff, by = vp[si][1] + (vp[si + 1][1] - vp[si][1]) * ff;
-            ctx.beginPath(); ctx.arc(bx, by, 1.7, 0, 7); ctx.fillStyle = `rgba(255,150,140,${0.9 * sA})`; ctx.shadowColor = '#FF8A80'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
+            ctx.beginPath(); ctx.arc(bx, by, 1.7, 0, 7); ctx.fillStyle = `rgba(255,150,140,${0.9 * vesselA})`; ctx.shadowColor = '#FF8A80'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
           }
         }
       }
@@ -522,18 +564,44 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
         if (gp <= 0) continue;
         const eg = easeOut(gp);
         const [ax, ay] = P[e.a], [bx, by] = P[e.b];
-        ctx.beginPath();
-        ctx.moveTo(ax, ay);
-        ctx.lineTo(ax + (bx - ax) * eg, ay + (by - ay) * eg);
-        ctx.strokeStyle = `rgba(176,178,190,${0.3 * sA})`;
+        const edgeExit = isOverlay ? 0 : easeInOut(clamp01((exitElapsed - e.exitDelay) / 760));
+        const edgeA = sA * (1 - edgeExit * 0.28);
+        const drawEdgePart = (from: number, to: number) => {
+          if (to <= from) return;
+          ctx.beginPath();
+          ctx.moveTo(ax + (bx - ax) * from, ay + (by - ay) * from);
+          ctx.lineTo(ax + (bx - ax) * to, ay + (by - ay) * to);
+          ctx.stroke();
+        };
+        ctx.strokeStyle = `rgba(176,178,190,${0.3 * edgeA})`;
         ctx.lineWidth = 1; ctx.shadowBlur = 0;
-        ctx.stroke();
-        if (gp >= 1) {
+        if (edgeExit > 0) {
+          const gap = 0.015 + edgeExit * 0.58;
+          const leftEnd = Math.min(eg, Math.max(0, e.breakAt - gap));
+          const rightStart = Math.min(eg, Math.min(1, e.breakAt + gap));
+          drawEdgePart(0, leftEnd);
+          drawEdgePart(rightStart, eg);
+          if (edgeExit < 0.86) {
+            const crackA = (1 - edgeExit) * sA;
+            [-1, 1].forEach((side) => {
+              const p = e.breakAt + side * gap;
+              if (p <= 0 || p >= eg) return;
+              const sx = ax + (bx - ax) * p, sy = ay + (by - ay) * p;
+              ctx.beginPath();
+              ctx.arc(sx, sy, 1.2 + edgeExit * 2.4, 0, 7);
+              ctx.fillStyle = `rgba(214,255,79,${0.36 * crackA})`;
+              ctx.shadowColor = '#D6FF4F'; ctx.shadowBlur = 7; ctx.fill(); ctx.shadowBlur = 0;
+            });
+          }
+        } else {
+          drawEdgePart(0, eg);
+        }
+        if (gp >= 1 && edgeExit < 0.16) {
           const cyc = ((t - e.end + e.phase) % 1500) / 650;
           if (cyc > 0 && cyc < 1) {
             ctx.beginPath();
             ctx.arc(ax + (bx - ax) * cyc, ay + (by - ay) * cyc, 2, 0, 7);
-            ctx.fillStyle = `rgba(214,255,79,${(1 - cyc) * 0.9 * sA})`;
+            ctx.fillStyle = `rgba(214,255,79,${(1 - cyc) * 0.9 * sA * (1 - edgeExit / 0.16)})`;
             ctx.shadowColor = '#D6FF4F'; ctx.shadowBlur = 8; ctx.fill(); ctx.shadowBlur = 0;
           }
         }
@@ -542,12 +610,20 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
       for (let i = 0; i < n; i++) {
         if (t < nodes[i].reach) continue;
         const [x, y] = P[i];
-        ctx.beginPath(); ctx.arc(x, y, 1.6, 0, 7);
-        ctx.fillStyle = `rgba(245,245,245,${0.5 * sA})`;
-        ctx.shadowColor = 'rgba(255,215,0,.6)'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
+        const nodeExit = isOverlay ? 0 : easeInOut(clamp01((exitElapsed - nodes[i].exitDelay) / 860));
+        const drift = easeOut(nodeExit);
+        const dx = Math.cos(nodes[i].exitAngle) * nodes[i].exitDistance * drift;
+        const dy = Math.sin(nodes[i].exitAngle) * nodes[i].exitDistance * drift;
+        const nx = x + dx, ny = y + dy;
+        const nodeA = sA * Math.max(0, 1 - nodeExit);
+        if (nodeA > 0.02) {
+          ctx.beginPath(); ctx.arc(nx, ny, 1.6 * (1 - nodeExit * 0.7), 0, 7);
+          ctx.fillStyle = `rgba(245,245,245,${0.5 * nodeA})`;
+          ctx.shadowColor = 'rgba(255,215,0,.6)'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
+        }
         if (nodes[i].isFlower) {
           const bp = clamp01((t - nodes[i].bloomStart) / BLOOM);
-          if (bp > 0) drawFlower(x, y, nodes[i], easeOut(bp), sA);
+          if (bp > 0) drawFlower(nx, ny, nodes[i], easeOut(bp), sA, nodeExit);
         }
       }
 
@@ -556,11 +632,12 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
       // dissolve signal (exitStartRef) and cascades across the specimens.
       if (creatures.length) {
         const es = exitStartRef.current;
+        const groundA = sA * (isOverlay ? 1 : Math.max(0, 1 - easeInOut(clamp01((exitP - 0.38) / 0.48))));
         const firstMouse = creatures.find((c) => c.kind === 'mouse');
         if (firstMouse) {
           const gyPx = firstMouse.ny * H, wipe = clamp01((t - (MOUSE_APPEAR - 240)) / 560);
           if (wipe > 0) {
-            ctx.strokeStyle = '#B0B2BE'; ctx.shadowBlur = 0; ctx.lineWidth = 1; ctx.globalAlpha = 0.1 * sA * wipe;
+            ctx.strokeStyle = '#B0B2BE'; ctx.shadowBlur = 0; ctx.lineWidth = 1; ctx.globalAlpha = 0.1 * groundA * wipe;
             ctx.beginPath(); ctx.moveTo(W * 0.05, gyPx); ctx.lineTo(W * 0.05 + W * 0.9 * wipe, gyPx); ctx.stroke(); ctx.globalAlpha = 1;
           }
         }
@@ -568,8 +645,12 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
           const g = easeOut(clamp01((t - cr.appear) / cr.grow));
           if (g <= 0) continue;
           const x = es == null ? 0 : clamp01((t - es - cr.examIdx * 120) / EXAM_DUR);
-          if (cr.kind === 'fly') drawFly(cr.nx * W, cr.ny * H, g, x, t, sA, cr);
-          else drawMouse(cr.nx * W, cr.ny * H, g, x, t, sA, cr);
+          const crExit = es == null ? 0 : easeInOut(clamp01((t - es - cr.examIdx * 120 - EXAM_DUR * 0.62) / 520));
+          const crA = sA * Math.max(0, 1 - crExit);
+          if (crA <= 0.02) continue;
+          const crGrow = g * (1 - crExit * 0.16);
+          if (cr.kind === 'fly') drawFly(cr.nx * W, cr.ny * H, crGrow, x, t, crA, cr);
+          else drawMouse(cr.nx * W, cr.ny * H, crGrow, x, t, crA, cr);
         }
       }
 
@@ -588,7 +669,7 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
     // full timeline; backdrop force-lifts once dissolve is requested (see the
     // dissolve effect below) — either way the page is never trapped.
     const overlayFailsafe = isOverlay
-      ? window.setTimeout(() => setGone(true), T_REVEAL + PHASE3 + 2000)
+      ? window.setTimeout(() => finish(), T_REVEAL + PHASE3 + 2000)
       : 0;
 
     const onResize = () => size();
@@ -613,9 +694,9 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
   // rAF is throttled/paused.
   useEffect(() => {
     if (isOverlay || !dissolve) return;
-    const id = window.setTimeout(() => setGone(true), PHASE3 + 1500);
+    const id = window.setTimeout(() => finish(), PHASE3 + 1500);
     return () => clearTimeout(id);
-  }, [isOverlay, dissolve]);
+  }, [isOverlay, dissolve, finish]);
 
   if (!play || gone) return null;
   return <canvas ref={canvasRef} className={'blg-intro' + (isOverlay ? '' : ' backdrop')} aria-hidden="true" />;

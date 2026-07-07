@@ -10,6 +10,8 @@
 .blog-root *{box-sizing:border-box}
 .blog-root ::selection{background:rgba(255,215,0,.18)}
 .blg-gold{background:linear-gradient(135deg,var(--gold-a),var(--gold-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+html.blg-hide-native-scrollbar,body.blg-hide-native-scrollbar{scrollbar-width:none;-ms-overflow-style:none}
+html.blg-hide-native-scrollbar::-webkit-scrollbar,body.blg-hide-native-scrollbar::-webkit-scrollbar{width:0;height:0;display:none}
 
 .blg-nib-track{position:fixed;top:0;left:0;width:2px;height:100vh;background:var(--hair);z-index:50}
 .blg-nib-fill{position:absolute;top:0;left:0;width:100%;height:100%;transform:scaleY(0);transform-origin:top;background:linear-gradient(180deg,var(--gold-a),var(--gold-b))}
@@ -480,6 +482,14 @@
 }
 
 /* ── Streaming deck reveal (first open only) ──────────────────────────── */
+.blg-deck-reveal{position:relative;display:block}
+.blg-deck-text{display:block;transition:opacity .22s ease}
+.blg-deck-reveal.is-thinking .blg-deck-text{opacity:0}
+.blg-deck-thinking{position:absolute;left:0;top:.08em;font-family:var(--mono);font-size:13px;letter-spacing:.08em;
+  color:var(--gold-a);opacity:0;transform:translateY(3px);transition:opacity .22s ease,transform .22s ease;
+  pointer-events:none;white-space:nowrap;animation:blg-thinking-breath 1.2s ease-in-out infinite}
+.blg-deck-reveal.is-thinking .blg-deck-thinking{opacity:.82;transform:none}
+@keyframes blg-thinking-breath{50%{opacity:.48}}
 .blg-deck-caret{display:inline-block;width:.48ch;height:1.05em;margin-left:2px;vertical-align:-0.12em;
   background:linear-gradient(180deg,var(--gold-a),var(--gold-b));border-radius:1px;
   animation:blg-caret-blink 1s steps(1,end) infinite}
@@ -488,6 +498,8 @@
 .blg-reveal{animation:blg-reveal-in .6s ease-out .3s both}
 @keyframes blg-reveal-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){
+  .blg-deck-text,.blg-deck-thinking{transition:none}
+  .blg-deck-thinking{animation:none}
   .blg-deck-caret{animation:none}
   .blg-reveal{animation:none}
   .blg-hero{transition:none !important}

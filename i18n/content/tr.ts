@@ -228,6 +228,7 @@ export const tr: ContentShape = {
     noPosts: 'Henüz lab yazısı yok.',
     readingTime: 'dk okuma',
     tableOfContents: 'İçindekiler',
+    deckThinking: 'düşünüyor...',
     nextPost: 'Sonraki',
     prevPost: 'Önceki',
     contentType: {

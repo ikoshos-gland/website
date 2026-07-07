@@ -228,6 +228,7 @@ export const de: ContentShape = {
     noPosts: 'Noch keine Labor-Beiträge.',
     readingTime: 'Min. Lesezeit',
     tableOfContents: 'Inhalt',
+    deckThinking: 'denkt...',
     nextPost: 'Weiter',
     prevPost: 'Zurück',
     contentType: {

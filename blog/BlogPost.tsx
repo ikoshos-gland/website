@@ -118,6 +118,16 @@ export default function BlogPost() {
   const [scrubProgress, setScrubProgress] = useState(0);
   const ct = (t: string) => (c.blog.contentType as Record<string, string>)[t] ?? t;
 
+  useEffect(() => {
+    const cls = 'blg-hide-native-scrollbar';
+    document.documentElement.classList.add(cls);
+    document.body.classList.add(cls);
+    return () => {
+      document.documentElement.classList.remove(cls);
+      document.body.classList.remove(cls);
+    };
+  }, []);
+
   // Streaming-deck gating: decide once per slug whether to play the reveal, and
   // keep the rest of the article hidden until it finishes. Decision is memoised
   // per slug so React StrictMode's double-invoke can't skip or double-run it.
@@ -139,14 +149,24 @@ export default function BlogPost() {
   // Skip the reveal (show plainly) once it has completed for this slug — so a
   // language switch on an open post never replays it.
   const animateDeck = deckDecision && doneSlug !== metaSlug;
+  const [introExitRequested, setIntroExitRequested] = useState(false);
   const [revealed, setRevealed] = useState(!deckDecision);
   useEffect(() => {
+    setIntroExitRequested(false);
     setRevealed(!deckDecision);
   }, [deckDecision, metaSlug]);
   const handleDeckDone = () => {
     setDoneSlug(metaSlug ?? null);
-    setRevealed(true);
     if (metaSlug) markDeckSeen(metaSlug);
+    if (introBackdrop) {
+      setIntroExitRequested(true);
+      if (!animateDeck) setRevealed(true);
+    } else {
+      setRevealed(true);
+    }
+  };
+  const handleIntroDone = () => {
+    setRevealed(true);
   };
 
   // Hero cinematic: while the intro plays, the title + deck sit CENTRED and
@@ -334,7 +354,14 @@ export default function BlogPost() {
 
   return (
     <div className="blog-root">
-      {introBackdrop && heroReady && <BlogIntro key={metaSlug} mode="backdrop" dissolve={revealed} />}
+      {introBackdrop && heroReady && (
+        <BlogIntro
+          key={metaSlug}
+          mode="backdrop"
+          dissolve={introExitRequested}
+          onDone={handleIntroDone}
+        />
+      )}
       <div className="blg-nib-track"><div className="blg-nib-fill" ref={nibRef} /></div>
       {revealed && (
         <SectionScrubber
@@ -353,7 +380,13 @@ export default function BlogPost() {
             <h1 className="blg-title">{meta.title}</h1>
             {meta.excerpt && (
               <p className="blg-deck">
-                <DeckReveal key={metaSlug} text={meta.excerpt} animate={animateDeck} onDone={handleDeckDone} />
+                <DeckReveal
+                  key={metaSlug}
+                  text={meta.excerpt}
+                  animate={animateDeck}
+                  warmupText={c.blog.deckThinking}
+                  onDone={handleDeckDone}
+                />
               </p>
             )}
           </div>
