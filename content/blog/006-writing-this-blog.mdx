@@ -1,0 +1,183 @@
+---
+title: Writing This Blog: An MDX Field Guide
+date: 2026-07-07
+contentType: lesson
+tags: [MDX, writing, meta]
+excerpt: How this blog actually works, from someone who had never written a line of MDX. Frontmatter, components, images, live animations, and the three golden rules, each one demonstrated right here on the page.
+cover: /img/case-1.webp
+draft: false
+---
+<DropCap>T</DropCap>his post is the one I wish I had when I started. It explains how to write for this blog when you have never touched MDX in your life, and it does the honest thing a guide should do. Every feature I describe, I also show working, right here on this page.
+
+## What MDX is, in one breath
+
+Markdown is the simple way to write formatted text. You type `**bold**`, `## heading`, `- list` and it renders. MDX is Markdown plus live components. So while you write ordinary prose, you can drop in interactive things like animations, and they just run. The ease of Markdown, the power of a web app, in one file.
+
+## The whole system in one rule
+
+There is exactly one thing to remember. **Put a `.mdx` file in `content/blog/` and it becomes a post.** You never register it anywhere. The site scans the folder itself.
+
+File names follow one pattern, `NNN-slug.lang.mdx`. The `NNN` is just a number to keep files tidy. The `slug` is what shows in the URL. The `lang` is a language suffix, and no suffix means English.
+
+```text
+content/blog/006-writing-this-blog.mdx      → English, URL /blog/writing-this-blog
+content/blog/006-writing-this-blog.tr.mdx   → Turkish, same URL
+```
+
+All languages of a post share one URL. The site's language switcher decides which one you see, and a missing language falls back to English.
+
+## Frontmatter, the little header
+
+Every post opens with a header between two lines of three dashes. This is the only metadata the system needs.
+
+```yaml
+---
+title: Writing This Blog
+date: 2026-07-07
+contentType: lesson       # lesson (green) · lab (gold) · compute (silver)
+tags: [MDX, writing]      # the first tag shows in the kicker above the title
+excerpt: A short, punchy summary. Shown in the list and the entrance animation.
+cover: /img/case-1.webp    # a cover image path, stored for later use
+draft: false              # true hides it from the live site
+---
+```
+
+The `date` drives ordering. The `excerpt` appears both in the post list and in the cinematic entrance behind the title. Keep it sharp.
+
+## Markdown basics
+
+All of this is plain text, and it takes five minutes to learn.
+
+```md
+## A section heading
+### A sub-heading
+
+A paragraph with **bold**, *italic*, and `inline code`.
+
+- a bullet
+- another
+
+1. numbered
+2. list
+
+[a link](https://mertoshi.online)
+```
+
+There is one small trick worth knowing. If a quote starts with a **bold label**, that label renders gold and set apart. It is the "lesson" pattern this blog leans on.
+
+```md
+> **Lesson:** the loss prints to stderr, so tail the .err file, not the .out.
+```
+
+Which comes out like this:
+
+> **Lesson:** the loss prints to stderr, so tail the .err file, not the .out.
+
+Tables and rules work too, the usual Markdown way.
+
+## Code and math
+
+Fence code with three backticks and a language name.
+
+```python
+import jax
+print(jax.device_count())
+```
+
+Math is LaTeX, rendered with KaTeX. Use `$...$` inline and `$$...$$` for a block.
+
+```md
+Global batch scales with the GPU count, $b_\text{global} = b_\text{device} \times N$.
+```
+
+Which renders as, global batch scales with the GPU count, $b_\text{global} = b_\text{device} \times N$.
+
+## Components, the good part
+
+These are ready-made building blocks. You never import them. You just write the tag, and it works in every post. Here is each one, with its code and the live result side by side.
+
+**Pull** puts an emphasised line, centred and large, between sections.
+
+```mdx
+<Pull>You are not a user running a program. You are a customer placing an order.</Pull>
+```
+
+<Pull>You are not a user running a program. You are a customer placing an order.</Pull>
+
+**Aside** drops a small note beside the text.
+
+```mdx
+<Aside title="Tip">The debug partition caps at four hours but starts fast.</Aside>
+```
+
+<Aside title="Tip">The debug partition caps at four hours but starts fast.</Aside>
+
+**Console** shows terminal output, three dots and a title. The `body` can span lines.
+
+```mdx
+<Console title="squeue -u avural" body="JOBID    ST  TIME
+1234567  PD  0:00
+1234568   R  0:42" />
+```
+
+<Console title="squeue -u avural" body="JOBID    ST  TIME
+1234567  PD  0:00
+1234568   R  0:42" />
+
+**Term** underlines a word and shows its definition on hover, pulled from a small glossary.
+
+```mdx
+We model the brain as a <Term k="connectome">connectome</Term>.
+```
+
+We model the brain as a <Term k="connectome">connectome</Term>. (Hover the dotted word.)
+
+## Images
+
+The rule is short. **Images live in `public/img/` and you call them with `/img/...`.** Use `.webp` for small, fast files.
+
+For a framed, captioned image, use `Figure`.
+
+```mdx
+<Figure src="/img/case-1.webp" alt="A cluster" caption="One image from public/img." />
+```
+
+<Figure src="/img/case-1.webp" alt="A cluster" caption="One image from public/img." />
+
+You never write `public` in the path. Everything in `public/` is served from the site root, so `public/img/x.webp` is reached at `/img/x.webp`. Images load lazily on their own, so the page stays fast.
+
+## Animations
+
+Animations are components too. You drop the tag, and the rest is handled. Each one is interactive, speaks three languages on its own, and calms down when the reader prefers reduced motion.
+
+Here are two of them running live. You did nothing but write `<SlurmFlow />` and `<WallClock />`.
+
+<SlurmFlow />
+
+<WallClock />
+
+There are more ready to use, `<PartitionQueue />`, `<InodeContainer />`, and a set of thesis-themed ones like `<ScaleEscalation />` and `<FFNFlood />`. The pattern is always the same, a self-closing tag.
+
+Behind the scenes, each animation is a small React component in `blog/`, registered once in `blog/mdxComponents.tsx`, and styled in `blog/blog.css`. Most are built from plain DOM and CSS rather than SVG, which keeps them robust.
+
+## Adding your own animation
+
+Three steps. Write `blog/MyThing.tsx` (copy `blog/WallClock.tsx` as a template, keep every visible string in a three-language `STR` object). Register it in `blog/mdxComponents.tsx`. Then write `<MyThing />` in any post. That is the whole loop.
+
+## Languages, drafts, publishing
+
+For three languages, write three files, `010-slug.mdx`, `010-slug.tr.mdx`, `010-slug.de.mdx`. English is canonical and must exist. Keep the same animation tags in the same places so every language shows the same flow, the captions translate themselves.
+
+A post with `draft: true` is visible while developing and hidden on the live site. To hide one entirely, move its file out of `content/blog/`. And publishing has no button. Push to `main`, and a few minutes later it is live on the site. Push is publish.
+
+## Three golden rules
+
+If you remember nothing else, remember these.
+
+> **Rule 1:** a new post is just a `.mdx` file in `content/blog/`. Nothing else to edit.
+
+> **Rule 2:** you never import components. Write the tag, like `<SlurmFlow />` or `<Pull>...</Pull>`, and it is there.
+
+> **Rule 3:** images go in `public/img/` and are called with `/img/...`. Use `.webp`.
+
+That is the whole craft. The best reference is any real post in `content/blog/`, where you can read the source and see exactly how each feature was used.

@@ -1,0 +1,183 @@
+---
+title: Bu Blogu Yazmak: Sıfırdan MDX Rehberi
+date: 2026-07-07
+contentType: lesson
+tags: [MDX, yazım, meta]
+excerpt: Ömründe bir satır MDX yazmamış birine göre, bu blogun nasıl çalıştığı. Frontmatter, bileşenler, resimler, canlı animasyonlar ve üç altın kural, her biri tam da bu sayfada gösteriliyor.
+cover: /img/case-1.webp
+draft: false
+---
+<DropCap>B</DropCap>u yazı, başlarken keşke elimde olsaydı dediğim şey. Ömründe hiç MDX'e dokunmamışken bu blog için nasıl yazacağını anlatıyor, ve bir rehberin yapması gereken dürüst şeyi yapıyor. Anlattığım her özelliği, tam da bu sayfada çalışır halde gösteriyorum.
+
+## MDX nedir, tek nefeste
+
+Markdown, biçimli metni kolayca yazma yöntemi. `**kalın**`, `## başlık`, `- madde` yazarsın, o da öyle görünür. MDX ise Markdown artı canlı bileşenler. Yani sıradan bir paragraf yazarken araya animasyon gibi interaktif şeyler koyabilir, onlar da çalışır. Markdown'ın kolaylığı, bir web uygulamasının gücü, tek dosyada.
+
+## Bütün sistem, tek kural
+
+Aklında tutman gereken tek bir şey var. **`content/blog/` klasörüne bir `.mdx` dosyası koy, o bir yazı olur.** Hiçbir yere kaydetmezsin. Site klasörü kendi tarar.
+
+Dosya adları tek bir kalıptadır, `NNN-slug.dil.mdx`. `NNN` sadece dosyaları düzenli tutan bir numara. `slug` URL'de görünen ad. `dil` bir dil eki, eki yoksa İngilizce demektir.
+
+```text
+content/blog/006-writing-this-blog.mdx      → İngilizce, URL /blog/writing-this-blog
+content/blog/006-writing-this-blog.tr.mdx   → Türkçe, aynı URL
+```
+
+Bir yazının tüm dilleri aynı URL'i paylaşır. Sitenin dil değiştiricisi hangisini göreceğini belirler, ve eksik bir dil İngilizce'ye düşer.
+
+## Frontmatter, küçük üst bilgi
+
+Her yazı, üç tireli iki satır arasındaki bir üst bilgiyle açılır. Sistemin ihtiyaç duyduğu tek veri budur.
+
+```yaml
+---
+title: Bu Blogu Yazmak
+date: 2026-07-07
+contentType: lesson       # lesson (yeşil) · lab (altın) · compute (gümüş)
+tags: [MDX, yazım]        # ilk etiket, başlığın üstündeki kicker'da görünür
+excerpt: Kısa, çarpıcı özet. Listede ve giriş animasyonunda görünür.
+cover: /img/case-1.webp    # kapak görseli yolu, ileride kullanılmak üzere saklanır
+draft: false              # true, yazıyı canlı siteden gizler
+---
+```
+
+`date` sıralamayı belirler. `excerpt` hem yazı listesinde hem de başlığın arkasındaki sinematik girişte belirir. Keskin tut.
+
+## Markdown temelleri
+
+Bunların hepsi düz metin, öğrenmesi beş dakika.
+
+```md
+## Bölüm başlığı
+### Alt başlık
+
+**kalın**, *italik* ve `satır-içi kod` içeren bir paragraf.
+
+- bir madde
+- bir başka
+
+1. numaralı
+2. liste
+
+[bir bağlantı](https://mertoshi.online)
+```
+
+Bilmeye değer küçük bir püf noktası var. Bir alıntı **kalın bir etiketle** başlarsa, o etiket altın renkli ve ayrı durur. Bu blogun yaslandığı "ders" deseni budur.
+
+```md
+> **Ders:** kayıp (loss) stderr'e yazılır, o yüzden .err dosyasını izle, .out'u değil.
+```
+
+Şöyle görünür:
+
+> **Ders:** kayıp (loss) stderr'e yazılır, o yüzden .err dosyasını izle, .out'u değil.
+
+Tablolar ve çizgiler de her zamanki Markdown yöntemiyle çalışır.
+
+## Kod ve matematik
+
+Kodu üç ters-tırnak ve bir dil adıyla çerçevele.
+
+```python
+import jax
+print(jax.device_count())
+```
+
+Matematik LaTeX'tir, KaTeX ile çizilir. Satır içinde `$...$`, blok için `$$...$$`.
+
+```md
+Global batch, GPU sayısıyla ölçeklenir, $b_\text{global} = b_\text{device} \times N$.
+```
+
+Şöyle görünür, global batch GPU sayısıyla ölçeklenir, $b_\text{global} = b_\text{device} \times N$.
+
+## Bileşenler, asıl güzel kısım
+
+Bunlar hazır yapı taşları. Hiçbirini import etmezsin. Sadece etiketini yazarsın, her yazıda çalışır. İşte her biri, kodu ve canlı hali yan yana.
+
+**Pull**, bölüm araları için ortalı ve büyük bir vurgu cümlesi koyar.
+
+```mdx
+<Pull>Program çalıştıran bir kullanıcı değilsin. Sipariş veren bir müşterisin.</Pull>
+```
+
+<Pull>Program çalıştıran bir kullanıcı değilsin. Sipariş veren bir müşterisin.</Pull>
+
+**Aside**, metnin yanına küçük bir not düşürür.
+
+```mdx
+<Aside title="İpucu">debug bölümü dört saatle sınırlı ama hemen başlar.</Aside>
+```
+
+<Aside title="İpucu">debug bölümü dört saatle sınırlı ama hemen başlar.</Aside>
+
+**Console**, terminal çıktısı gösterir, üç nokta ve bir başlık. `body` çok satırlı olabilir.
+
+```mdx
+<Console title="squeue -u avural" body="JOBID    ST  TIME
+1234567  PD  0:00
+1234568   R  0:42" />
+```
+
+<Console title="squeue -u avural" body="JOBID    ST  TIME
+1234567  PD  0:00
+1234568   R  0:42" />
+
+**Term**, bir kelimenin altına çizgi çeker ve üstüne gelince küçük bir sözlükten tanımını gösterir.
+
+```mdx
+Beyni bir <Term k="connectome">konnektom</Term> olarak modelliyoruz.
+```
+
+Beyni bir <Term k="connectome">konnektom</Term> olarak modelliyoruz. (Noktalı kelimenin üstüne gel.)
+
+## Resimler
+
+Kural kısa. **Resimler `public/img/`'de durur ve `/img/...` ile çağrılır.** Küçük ve hızlı dosyalar için `.webp` kullan.
+
+Çerçeveli ve altyazılı bir görsel için `Figure` kullan.
+
+```mdx
+<Figure src="/img/case-1.webp" alt="Bir küme" caption="public/img içinden bir görsel." />
+```
+
+<Figure src="/img/case-1.webp" alt="Bir küme" caption="public/img içinden bir görsel." />
+
+Yola asla `public` yazmazsın. `public/` içindeki her şey sitenin kökünden servis edilir, yani `public/img/x.webp` dosyasına `/img/x.webp` ile ulaşılır. Resimler kendiliğinden tembel yüklenir, böylece sayfa hızlı kalır.
+
+## Animasyonlar
+
+Animasyonlar da birer bileşen. Etiketi koyarsın, gerisi halledilir. Her biri interaktiftir, kendi başına üç dil konuşur, ve okuyucu hareket azaltmayı tercih ederse sakinleşir.
+
+İşte ikisi canlı çalışıyor. Sen sadece `<SlurmFlow />` ve `<WallClock />` yazdın.
+
+<SlurmFlow />
+
+<WallClock />
+
+Kullanıma hazır daha fazlası var, `<PartitionQueue />`, `<InodeContainer />`, ve `<ScaleEscalation />` ile `<FFNFlood />` gibi tez temalı bir dizi. Kalıp hep aynı, kendi kendine kapanan bir etiket.
+
+Perde arkasında her animasyon `blog/` içinde küçük bir React bileşeni, `blog/mdxComponents.tsx` içinde bir kez kaydedilir, ve `blog/blog.css` içinde stillendirilir. Çoğu SVG değil, sade DOM ve CSS ile yapılır, bu da onları sağlam tutar.
+
+## Kendi animasyonunu eklemek
+
+Üç adım. `blog/MyThing.tsx` yaz (`blog/WallClock.tsx`'i şablon olarak kopyala, görünen her metni üç dilli bir `STR` nesnesinde tut). `blog/mdxComponents.tsx` içinde kaydet. Sonra herhangi bir yazıda `<MyThing />` yaz. Bütün döngü bu.
+
+## Diller, taslaklar, yayınlama
+
+Üç dil için üç dosya, `010-slug.mdx`, `010-slug.tr.mdx`, `010-slug.de.mdx`. İngilizce kanoniktir ve mutlaka olmalı. Aynı animasyon etiketlerini aynı yerlere koy ki her dil aynı akışı göstersin, altyazılar kendini çevirir.
+
+`draft: true` olan bir yazı geliştirirken görünür, canlı sitede gizlidir. Bir yazıyı tamamen gizlemek için dosyasını `content/blog/` dışına taşı. Ve yayınlamanın düğmesi yok. `main`'e push'la, birkaç dakika sonra sitede canlı olur. Push, yayındır.
+
+## Üç altın kural
+
+Başka hiçbir şey aklında kalmasın, ama bunlar kalsın.
+
+> **Kural 1:** yeni bir yazı, sadece `content/blog/` içinde bir `.mdx` dosyasıdır. Başka düzenlenecek yer yok.
+
+> **Kural 2:** bileşenleri asla import etmezsin. Etiketi yaz, `<SlurmFlow />` ya da `<Pull>...</Pull>` gibi, oradadır.
+
+> **Kural 3:** resimler `public/img/`'e gider ve `/img/...` ile çağrılır. `.webp` kullan.
+
+Bütün zanaat bu. En iyi referans, `content/blog/` içindeki gerçek yazılardan herhangi biri, kaynağını okuyup her özelliğin tam olarak nasıl kullanıldığını görebilirsin.
