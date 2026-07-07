@@ -230,7 +230,6 @@ export const en = {
     noPosts: 'No lab posts yet.',
     readingTime: 'min read',
     tableOfContents: 'Contents',
-    deckThinking: 'thinking...',
     nextPost: 'Next',
     prevPost: 'Previous',
     contentType: {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight, BookOpen, FlaskConical } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import './blog.css';
 import { getPosts } from './posts';
 import { useLang, useContent } from '../i18n/LanguageContext';
@@ -36,30 +36,28 @@ export default function BlogIndex() {
       <div className="blog-root">
         {topbar}
         <div className="blg-index blg-library">
-          <div className="blg-index-head">
-            <div className="eyebrow">{c.blog.entryEyebrow}</div>
-            <h1>{c.blog.chooseTitle}</h1>
-            <p className="blg-index-intro">{c.blog.chooseIntro}</p>
+          <div className="blg-library-head">
+            <div className="blg-index-head">
+              <div className="eyebrow">{c.blog.entryEyebrow}</div>
+              <h1>{c.blog.chooseTitle}</h1>
+              <p className="blg-index-intro">{c.blog.chooseIntro}</p>
+            </div>
           </div>
 
           <div className="blg-choice-grid" aria-label={c.blog.chooseTitle}>
             <Link className="blg-choice-card lab" to="/blog?section=lab">
-              <span className="blg-choice-icon" aria-hidden="true">
-                <FlaskConical size={24} strokeWidth={1.7} />
-              </span>
               <span className="blg-choice-kicker">{labPosts.length} {c.blog.postsLabel}</span>
               <span className="blg-choice-title">{c.blog.labChoiceTitle}</span>
               <span className="blg-choice-body">{c.blog.labChoiceBody}</span>
+              <span className="blg-choice-trace" aria-hidden="true"><i /><i /><i /></span>
               <span className="blg-choice-cta">{c.blog.openSection}<ArrowRight size={15} strokeWidth={1.8} /></span>
             </Link>
 
             <Link className="blg-choice-card thesis" to="/thesis">
-              <span className="blg-choice-icon" aria-hidden="true">
-                <BookOpen size={24} strokeWidth={1.7} />
-              </span>
               <span className="blg-choice-kicker">3 {c.blog.chaptersLabel}</span>
               <span className="blg-choice-title">{c.blog.thesisChoiceTitle}</span>
               <span className="blg-choice-body">{c.blog.thesisChoiceBody}</span>
+              <span className="blg-choice-trace" aria-hidden="true"><i /><i /><i /></span>
               <span className="blg-choice-cta">{c.blog.openSection}<ArrowRight size={15} strokeWidth={1.8} /></span>
             </Link>
           </div>

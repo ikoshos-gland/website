@@ -205,6 +205,7 @@ export default function BlogPost() {
     transition: heroArmed ? 'transform 0.9s cubic-bezier(0.2,0.75,0.2,1)' : 'none',
     willChange: 'transform',
   };
+  const cinematicEntry = deckDecision && !revealed;
 
   useEffect(() => {
     let active = true;
@@ -353,7 +354,7 @@ export default function BlogPost() {
   const next = posts[idx - 1];
 
   return (
-    <div className="blog-root">
+    <div className={'blog-root' + (cinematicEntry ? ' blg-post-cinematic' : '')}>
       {introBackdrop && heroReady && (
         <BlogIntro
           key={metaSlug}
@@ -384,7 +385,6 @@ export default function BlogPost() {
                   key={metaSlug}
                   text={meta.excerpt}
                   animate={animateDeck}
-                  warmupText={c.blog.deckThinking}
                   onDone={handleDeckDone}
                 />
               </p>

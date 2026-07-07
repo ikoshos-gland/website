@@ -11,7 +11,6 @@ interface DeckRevealProps {
   text: string;
   /** When false, renders `text` immediately and fires onDone once. */
   animate: boolean;
-  warmupText?: string;
   onDone?: () => void;
 }
 
@@ -26,7 +25,7 @@ const placeholderFor = (text: string) => text.replace(/\S/g, PLACEHOLDER);
  * Same length every frame (stable wrapping + reserved height); written straight
  * to a ref'd span to avoid re-rendering React 60×/s.
  */
-const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, warmupText = 'thinking...', onDone }) => {
+const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, onDone }) => {
   const wrapRef = useRef<HTMLSpanElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
   const onDoneRef = useRef(onDone);
@@ -37,7 +36,7 @@ const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, warmupText = 'th
     const el = spanRef.current;
 
     if (!animate) {
-      wrap?.classList.remove('is-thinking');
+      wrap?.classList.remove('is-warmup');
       if (el) el.textContent = text;
       onDoneRef.current?.();
       return;
@@ -68,7 +67,7 @@ const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, warmupText = 'th
       return out;
     };
 
-    wrap?.classList.add('is-thinking');
+    wrap?.classList.add('is-warmup');
     if (el) el.textContent = build();
 
     const tick = (t: number) => {
@@ -88,7 +87,7 @@ const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, warmupText = 'th
       raf = requestAnimationFrame(tick);
     };
     const warmup = window.setTimeout(() => {
-      wrap?.classList.remove('is-thinking');
+      wrap?.classList.remove('is-warmup');
       raf = requestAnimationFrame(tick);
     }, WARMUP_MS);
 
@@ -97,7 +96,7 @@ const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, warmupText = 'th
     const failsafe = window.setTimeout(() => {
       if (finished) return;
       finished = true;
-      wrap?.classList.remove('is-thinking');
+      wrap?.classList.remove('is-warmup');
       if (el) el.textContent = text;
       onDoneRef.current?.();
     }, WARMUP_MS + 5000);
@@ -106,15 +105,14 @@ const DeckReveal: React.FC<DeckRevealProps> = ({ text, animate, warmupText = 'th
       clearTimeout(warmup);
       cancelAnimationFrame(raf);
       clearTimeout(failsafe);
-      wrap?.classList.remove('is-thinking');
+      wrap?.classList.remove('is-warmup');
       if (!finished && el) el.textContent = text;
     };
-  }, [animate, text, warmupText]);
+  }, [animate, text]);
 
   return (
-    <span ref={wrapRef} className={'blg-deck-reveal' + (animate ? ' is-thinking' : '')} aria-label={text}>
+    <span ref={wrapRef} className={'blg-deck-reveal' + (animate ? ' is-warmup' : '')} aria-label={text}>
       <span ref={spanRef} className="blg-deck-text" aria-hidden="true">{animate ? placeholderFor(text) : text}</span>
-      {animate && <span className="blg-deck-thinking" aria-hidden="true">{warmupText}</span>}
     </span>
   );
 };
