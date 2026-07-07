@@ -79,13 +79,29 @@ export default function BlogIndex() {
         <ul className="blg-list">
           {labPosts.map((p) => (
             <li key={p.slug}>
-              <Link className="blg-row" to={`/blog/${p.slug}`}>
-                <div className="meta">
-                  <span>{p.date.replace(/-/g, ' · ')}</span>
-                  <span className={'blg-chip ' + p.contentType}>{ct(p.contentType)}</span>
+              <Link className={'blg-row' + (p.cover ? ' has-cover' : '')} to={`/blog/${p.slug}`}>
+                <div className="blg-row-text">
+                  <div className="meta">
+                    <span>{p.date.replace(/-/g, ' · ')}</span>
+                    <span className={'blg-chip ' + p.contentType}>{ct(p.contentType)}</span>
+                  </div>
+                  <h2>{p.title}</h2>
+                  <p>{p.excerpt}</p>
                 </div>
-                <h2>{p.title}</h2>
-                <p>{p.excerpt}</p>
+                {p.cover && (
+                  <span className="blg-row-cover" aria-hidden="true">
+                    <img
+                      src={p.cover}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        const box = e.currentTarget.closest('.blg-row-cover') as HTMLElement | null;
+                        if (box) box.style.display = 'none';
+                      }}
+                    />
+                  </span>
+                )}
               </Link>
             </li>
           ))}

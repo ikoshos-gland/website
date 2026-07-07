@@ -118,12 +118,22 @@ html.blg-hide-native-scrollbar::-webkit-scrollbar,body.blg-hide-native-scrollbar
 .blg-index-head .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
 .blg-index-head h1{font-family:var(--serif);font-style:italic;font-weight:400;font-size:48px;color:var(--ink-bright);margin:14px 0 0}
 .blg-list{list-style:none;margin:0;padding:0}
-.blg-row{display:block;text-decoration:none;color:inherit;padding:26px 0;border-bottom:1px solid var(--hair);transition:.25s}
+.blg-row{display:flex;gap:28px;align-items:center;text-decoration:none;color:inherit;padding:26px 0;border-bottom:1px solid var(--hair);transition:.25s}
 .blg-row:hover{padding-left:8px}
+.blg-row-text{flex:1;min-width:0}
 .blg-row .meta{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .blg-row h2{font-family:var(--head);font-weight:500;font-size:22px;color:var(--ink-bright);margin:10px 0 6px;transition:.25s}
 .blg-row:hover h2{color:var(--gold-a)}
 .blg-row p{font-size:15px;color:var(--muted);margin:0;max-width:640px;line-height:1.6}
+/* optional cover thumbnail beside a post (from the `cover` frontmatter) */
+.blg-row-cover{flex-shrink:0;width:150px;height:100px;border-radius:11px;overflow:hidden;border:1px solid var(--hair);background:var(--surface2)}
+.blg-row-cover img{width:100%;height:100%;object-fit:cover;display:block;opacity:.86;transition:opacity .28s,transform .35s}
+.blg-row:hover .blg-row-cover img{opacity:1;transform:scale(1.05)}
+@media(max-width:640px){
+  .blg-row{gap:16px}
+  .blg-row-cover{width:92px;height:70px;border-radius:9px}
+}
+@media(prefers-reduced-motion:reduce){.blg-row-cover img{transition:none}}
 .blg-index-intro{font-size:18px;color:var(--muted);font-weight:300;margin:16px 0 0;max-width:660px;line-height:1.7}
 .blg-section-switch{display:inline-flex;margin-top:20px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--lime);text-decoration:none;border-bottom:1px solid rgba(214,255,79,.35);padding-bottom:2px}
 .blg-section-switch:hover{color:var(--ink-bright);border-color:var(--ink-bright)}
