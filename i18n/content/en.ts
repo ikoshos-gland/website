@@ -43,7 +43,6 @@ export const en = {
           'KUTTAM: Koç University Research Center for Translational Medicine.',
           'Studies Expansion Microscopy Techniques to surpass light diffraction limit.',
           'Tries to integrate state of the art machine learning technique for vessel and neural segmentation to map the brain on computer at nanometer scale resolution.',
-          'Also learns newer insights in both wet-lab and computationally from other research groups in Koç Hospital.',
         ],
       },
       {

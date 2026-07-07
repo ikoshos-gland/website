@@ -41,7 +41,6 @@ export const de: ContentShape = {
           'KUTTAM: Forschungszentrum für Translationale Medizin der Koç University.',
           'Erforschung von Expansionsmikroskopie-Techniken, um die Beugungsgrenze des Lichts zu überwinden.',
           'Versuch, modernste Verfahren des maschinellen Lernens zur Gefäß- und Neuronensegmentierung zu integrieren, um das Gehirn am Computer mit Nanometer-Auflösung zu kartieren.',
-          'Außerdem werden sowohl im Nasslabor als auch rechnergestützt neue Erkenntnisse von anderen Forschungsgruppen am Koç-Krankenhaus erworben.',
         ],
       },
       {

@@ -41,7 +41,6 @@ export const tr: ContentShape = {
           'KUTTAM: Koç University Research Center for Translational Medicine (Koç Üniversitesi Translasyonel Tıp Araştırma Merkezi).',
           'Işık kırınımı sınırını aşmak için Genişletme Mikroskopisi (Expansion Microscopy) tekniklerini araştırıyor.',
           'Beyni bilgisayarda nanometre ölçekli çözünürlükte haritalamak amacıyla damar ve sinir segmentasyonu için son teknoloji makine öğrenmesi tekniklerini entegre etmeye çalışıyor.',
-          'Ayrıca Koç Hastanesi\'ndeki diğer araştırma gruplarından hem ıslak laboratuvar hem de hesaplamalı alanda yeni içgörüler ediniyor.',
         ],
       },
       {
