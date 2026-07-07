@@ -99,7 +99,9 @@ class AgentService:
             service_id="azure-openai",
             function_choice_behavior=FunctionChoiceBehavior.Auto(
                 auto_invoke=True,
-                maximum_auto_invoke_attempts=5,
+                # Cap tool-call chains: bounds per-request cost and limits how far
+                # a prompt-injection payload can drive repeated tool invocations.
+                maximum_auto_invoke_attempts=3,
             ),
         )
 
@@ -204,7 +206,9 @@ class AgentService:
             response = self.invoke(message, conversation_history)
 
             if response.error:
-                yield {"type": "error", "error": response.error}
+                # Detail is already logged in invoke(); never surface raw
+                # exception text (env var names, endpoints) to the client.
+                yield {"type": "error", "error": "An error occurred processing your request"}
                 return
 
             # Yield status updates for each tool that was called
@@ -225,7 +229,7 @@ class AgentService:
 
         except Exception as e:
             logger.error(f"Agent invoke_with_status error: {e}")
-            yield {"type": "error", "error": str(e)}
+            yield {"type": "error", "error": "An error occurred processing your request"}
 
 
 # Global singleton instance

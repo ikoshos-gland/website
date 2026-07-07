@@ -28,7 +28,7 @@ RATE_LIMIT_CHAT_MAX = int(os.environ.get("RATE_LIMIT_CHAT_MAX", 10))  # stricter
 # Allowed origins (set in environment or use defaults)
 ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS",
-    "https://proud-grass-02ea7a610.azurestaticapps.net,http://localhost:3000,http://localhost:5173,https://mertoshi.online,https://www.mertoshi.online"
+    "https://proud-grass-02ea7a610.4.azurestaticapps.net,http://localhost:3000,http://localhost:5173,https://mertoshi.online,https://www.mertoshi.online"
 ).split(",")
 
 # API Key for additional protection (optional, set in Azure)
@@ -117,11 +117,30 @@ rate_limiter = RateLimiter()
 # ═══════════════════════════════════════════════════════════════════════════
 
 def get_client_ip(req: func.HttpRequest) -> str:
-    """Extract client IP from request headers."""
-    # Azure Functions behind load balancer
+    """
+    Extract client IP from request headers.
+
+    NOTE: X-Forwarded-For is client-controllable and can be spoofed to evade
+    per-IP rate limiting. We therefore prefer platform-injected headers that a
+    client cannot forge (Azure Front Door's X-Azure-SocketIP, then the raw
+    X-Forwarded-For as a last resort). When fronting this app with Front Door
+    or APIM, rely on the edge for the authoritative client IP.
+    """
+    # Azure Front Door injects the real socket IP (not client-settable end-to-end)
+    socket_ip = req.headers.get("X-Azure-SocketIP", "")
+    if socket_ip:
+        return socket_ip.strip()
+
+    # Azure Functions behind load balancer. X-Forwarded-For can contain a chain
+    # "client, proxy1, proxy2"; the *rightmost* entries are appended by trusted
+    # infrastructure. The leftmost is client-supplied, so we fall back to it only
+    # when nothing more trustworthy exists.
     forwarded = req.headers.get("X-Forwarded-For", "")
     if forwarded:
-        return forwarded.split(",")[0].strip()
+        parts = [p.strip() for p in forwarded.split(",") if p.strip()]
+        if parts:
+            # Azure appends the true edge IP last; use it over the spoofable head.
+            return parts[-1]
 
     # Direct connection
     return req.headers.get("X-Real-IP", req.headers.get("REMOTE_ADDR", "unknown"))
@@ -230,6 +249,29 @@ def secure_endpoint(max_requests: int = RATE_LIMIT_MAX_REQUESTS, require_signatu
             # Handle CORS preflight
             if req.method == "OPTIONS":
                 return func.HttpResponse(status_code=204, headers=headers)
+
+            # Enforce origin allow-list on state-changing requests.
+            # CORS headers alone are advisory (browsers honor them; scripts/bots
+            # ignore them). Rejecting a disallowed Origin here actually stops the
+            # request from being processed.
+            #
+            # In production this app sits behind an Azure Static Web Apps linked
+            # backend: App Service Authentication only lets SWA-proxied requests
+            # reach us, injecting a client-principal header. Those are trusted
+            # regardless of the Origin the proxy happens to forward, so we skip
+            # the allow-list for them and never risk 403-ing legitimate traffic.
+            # An empty Origin (same-origin or non-browser) also passes; the real
+            # gate for anything not SWA-authenticated is the upstream auth layer.
+            if req.method in ("POST", "PUT", "DELETE", "PATCH"):
+                is_swa_authenticated = bool(req.headers.get("X-MS-CLIENT-PRINCIPAL", ""))
+                origin = req.headers.get("Origin", "")
+                if not is_swa_authenticated and origin and origin not in ALLOWED_ORIGINS:
+                    logger.warning(f"Blocked disallowed origin: {origin}")
+                    return func.HttpResponse(
+                        json.dumps({"error": "Forbidden"}),
+                        status_code=403,
+                        headers=headers,
+                    )
 
             # Check if IP is blocked
             if rate_limiter.is_blocked(client_ip):

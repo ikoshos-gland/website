@@ -303,10 +303,11 @@ def health(req: func.HttpRequest) -> func.HttpResponse:
             headers=headers,
         )
 
+    # Return only the minimal signal the frontend needs (healthy/unhealthy).
+    # No version string or component detail — reduces fingerprinting.
     return func.HttpResponse(
         json.dumps({
             "status": "healthy",
-            "version": "2.0.0",
         }),
         status_code=200,
         headers=headers,
@@ -532,7 +533,7 @@ def agent_chat_stream(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logger.error(f"Agent stream error: {e}")
         return func.HttpResponse(
-            json.dumps({"events": [{"type": "error", "error": str(e)}]}),
+            json.dumps({"events": [{"type": "error", "error": "An error occurred processing your request"}]}),
             status_code=500,
             headers=headers,
         )

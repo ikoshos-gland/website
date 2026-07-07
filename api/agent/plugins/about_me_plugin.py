@@ -20,10 +20,10 @@ class AboutMePlugin:
     DEFAULT_PROFILE = {
         "name": "Mert Koca",
         "age": 22,
-        "title": "Molecular Biotechnology Student & Researcher",
-        "location": "Istanbul, Turkey (Koç University Hospital)",
+        "title": "Molecular Biotechnology Graduate & Researcher",
+        "location": "Istanbul, Turkey",
         "email": "fatih.mertkoca2@gmail.com",
-        "bio": """I am an undergraduate researcher and amateur photographer combining molecular biotechnology with computational neuroscience. 
+        "bio": """I am a graduate researcher and amateur photographer, who tries combining molecular biotechnology with computational neuroscience. 
         I specifically focus on Expansion Microscopy (ExM) and AI-supported 3D modeling in my internship at Koç University Hospital. 
         I am also working on bionic systems and personalized educational technologies.""",
 
@@ -38,9 +38,7 @@ class AboutMePlugin:
         ],
 
         "current_projects": [
-            "3D Reconstruction of the Pericyte-Vascular Interface in the Mouse Brain (TÜBİTAK 2209-A)",
             "EMG-Controlled Bionic Hand Development (Machine Learning & Servo Control)",
-            "easyegitim (Personalized AI Professor Platform)",
             "mertoshi.online & Lundo (Agentic AI System with Memory)"
         ],
 
@@ -52,7 +50,7 @@ class AboutMePlugin:
         },
 
         "technical_stack": {
-            "languages": ["Python", "C++", "Azure"],
+            "languages": ["Python", "Azure"],
             "frameworks": ["PyTorch", "TensorFlow Lite", "Docker", "Azure CycleCloud"],
             "operating_systems": ["Ubuntu", "Windows"]
         },
@@ -81,7 +79,7 @@ class AboutMePlugin:
         "internship": {
             "company": "Koç University Hospital / Vural Lab",
             "role": "Research Intern",
-            "duration": "2024 - Present",
+            "duration": "2025 - Present",
             "focus": [
                 "3D Reconstruction of Pericyte-Vascular Interface in Mouse Brain",
                 "Expansion Microscopy (ExM) protocol optimization (DMAA, LICONN, proExM)",
@@ -89,7 +87,6 @@ class AboutMePlugin:
                 "Deep learning models for vascular segmentation (U-Net, FFN)"
             ],
             "goals": [
-                "Complete TÜBİTAK 2209-A project deliverables",
                 "Publish research findings in neuroscience journal",
                 "Master ExM protocols for connectomics research",
                 "Build computational pipeline for 3D brain vasculature modeling"
@@ -97,9 +94,9 @@ class AboutMePlugin:
         },
 
         "current_state": {
-            "status": "Stuck - Supply Shortage",
+            "status": "Optimizing the ExM gelation step",
             "last_updated": "2026-01-01",
-            "description": "I am fucked. Currently the internship is stuck because of the lack of supplies.",
+            "description": "Currently working through a challenge in the expansion microscopy workflow where the hydrogel is not forming as expected. Iterating on the protocol to resolve it.",
             "bottlenecks": [
                 "NHS-Ester Dye (AF 488 NHS Ester)",
                 "Anhydrous DMSO"
@@ -124,6 +121,7 @@ class AboutMePlugin:
                 "Search Mert's personal knowledge base (RAG)",
                 "Search the web for real-time information",
                 "Provide Mert's profile and contact information",
+                "Pull information from Mert's website blog posts and thesis materials",
                 "Answer questions about Mert's research, projects, and interests"
             ],
             "personality": "Friendly, helpful, and slightly witty. I speak ABOUT Mert in third person - I am not Mert himself.",
@@ -202,10 +200,14 @@ class AboutMePlugin:
             return f"**Interests & Hobbies:**\n{interests_list}"
 
         elif section == "contact":
+            # Do not print the raw email address (avoids automated harvesting by
+            # scrapers). Direct visitors to professional channels instead.
+            links = profile.get("links", {})
             return f"""**Contact Information:**
-- Email: {profile['email']}
 - Location: {profile['location']}
-- Portfolio: {profile['links'].get('portfolio', 'N/A')}"""
+- LinkedIn: {links.get('linkedin', 'N/A')}
+- Portfolio: {links.get('portfolio', 'N/A')}
+- For direct messages, please reach out via LinkedIn."""
 
         elif section == "links":
             links_list = "\n".join(f"- {k.title()}: {v}" for k, v in profile["links"].items())
@@ -342,7 +344,7 @@ Hi! I'm **{bot.get('name', 'Lundo')}**, a {bot.get('type', 'AI Assistant')} crea
 {links_list}
 
 ## Contact
-Email: {profile['email']}
+Location: {profile['location']} — reach out via LinkedIn (see Links above).
 
 ## Current State
 - Status: {state.get('status', 'N/A')}
