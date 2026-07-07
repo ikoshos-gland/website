@@ -13,8 +13,14 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      // RAG API URL is safe to expose - it's just the endpoint, not the key
-      'import.meta.env.VITE_RAG_API_URL': JSON.stringify(env.VITE_RAG_API_URL || 'https://func-rag-prod-3mktjtlolzx3q.azurewebsites.net'),
+      // In production, call the backend through the Static Web App's own
+      // same-origin `/api` route (SWA linked backend). An empty base makes
+      // fetch() hit `/api/...` on the SWA domain, which SWA proxies to the
+      // linked Function App — so the Function App can be locked to SWA-only
+      // traffic. Local dev still targets the local func host.
+      'import.meta.env.VITE_RAG_API_URL': JSON.stringify(
+        env.VITE_RAG_API_URL || (mode === 'production' ? '' : 'http://localhost:7071')
+      ),
     },
     resolve: {
       alias: {

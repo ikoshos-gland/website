@@ -5,8 +5,11 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 
-// Configure the API endpoint
-const RAG_API_URL = import.meta.env.VITE_RAG_API_URL || 'http://localhost:7071';
+// Configure the API endpoint.
+// Use `??` (not `||`) so an explicitly-empty value (production, set by
+// vite.config) is preserved as "" → same-origin `/api` calls proxied through
+// the Static Web App. Only an undefined value falls back to the local func host.
+const RAG_API_URL = import.meta.env.VITE_RAG_API_URL ?? 'http://localhost:7071';
 
 export interface Message {
   role: 'user' | 'assistant';
