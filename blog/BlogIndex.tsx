@@ -33,7 +33,7 @@ export default function BlogIndex() {
 
   if (section !== 'lab') {
     return (
-      <div className="blog-root">
+      <div className="blog-root blg-shelf">
         {topbar}
         <div className="blg-index blg-library">
           <div className="blg-library-head">

@@ -158,6 +158,49 @@ html.blg-hide-native-scrollbar::-webkit-scrollbar,body.blg-hide-native-scrollbar
   .blg-choice-body{font-size:15.5px}
 }
 
+/* ── Shelf-choice page: cinematic atmosphere ──────────────────────────── */
+.blg-shelf{position:relative;isolation:isolate}
+.blg-shelf>*{position:relative;z-index:1}
+/* two slow-drifting clouds of light — teal on the lab side, gold on the thesis
+   side — so the page reads like a lit scene, not a flat menu */
+.blg-shelf::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(44% 52% at 26% 34%,rgba(127,212,204,.13),transparent 66%),
+    radial-gradient(46% 56% at 76% 64%,rgba(255,215,0,.11),transparent 68%),
+    radial-gradient(70% 60% at 50% 116%,rgba(214,255,79,.05),transparent 72%);
+  animation:blg-shelf-drift 24s ease-in-out infinite alternate}
+/* a soft vignette to focus the centre, cinematic */
+.blg-shelf::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(125% 92% at 50% 40%,transparent 50%,rgba(6,7,9,.55) 100%)}
+@keyframes blg-shelf-drift{
+  0%{transform:translate3d(-1.5%,-1%,0) scale(1.03)}
+  100%{transform:translate3d(2%,1.5%,0) scale(1.09)}
+}
+/* heading + cards rise into place on load */
+.blg-shelf .blg-library-head{animation:blg-shelf-rise .8s cubic-bezier(.2,.7,.2,1) both}
+.blg-shelf .blg-choice-card{animation:blg-shelf-rise .82s cubic-bezier(.2,.7,.2,1) both}
+.blg-shelf .blg-choice-card.lab{animation-delay:.12s}
+.blg-shelf .blg-choice-card.thesis{animation-delay:.22s}
+@keyframes blg-shelf-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+/* a faint luminous seam between the two shelves — the split, drawn quietly */
+.blg-shelf .blg-choice-grid{position:relative}
+.blg-shelf .blg-choice-grid::before{content:'';position:absolute;top:6%;bottom:6%;left:50%;width:1px;transform:translateX(-50%);
+  z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(245,245,245,.13) 22%,rgba(245,245,245,.16) 50%,rgba(245,245,245,.13) 78%,transparent);
+  box-shadow:0 0 16px rgba(245,245,245,.05)}
+.blg-shelf .blg-choice-grid::after{content:'';position:absolute;top:50%;left:50%;width:5px;height:5px;transform:translate(-50%,-50%) rotate(45deg);
+  z-index:0;pointer-events:none;background:rgba(245,245,245,.5);box-shadow:0 0 12px rgba(245,245,245,.35)}
+@media(max-width:760px){
+  .blg-shelf .blg-choice-grid::before,.blg-shelf .blg-choice-grid::after{display:none}
+  .blg-shelf::before{background:
+    radial-gradient(60% 40% at 30% 18%,rgba(127,212,204,.12),transparent 68%),
+    radial-gradient(60% 40% at 72% 60%,rgba(255,215,0,.10),transparent 70%)}
+}
+@media(prefers-reduced-motion:reduce){
+  .blg-shelf::before{animation:none}
+  .blg-shelf .blg-library-head,.blg-shelf .blg-choice-card{animation:none}
+}
+
 /* SLURM job-flow animation */
 .blg-slurmflow{margin:42px 0}
 .blg-sf{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:24px 20px 16px}
@@ -500,24 +543,37 @@ html.blg-hide-native-scrollbar::-webkit-scrollbar,body.blg-hide-native-scrollbar
   animation:blg-caret-blink 1s steps(1,end) infinite}
 @keyframes blg-caret-blink{50%{opacity:0}}
 .blg-hero{position:relative;isolation:isolate;will-change:transform}
-.blg-post-cinematic .blg-hero::before{content:'';position:absolute;inset:-80px -92px -96px;z-index:-3;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 68%,rgba(14,15,17,0) 0 34%,rgba(14,15,17,.18) 62%,rgba(14,15,17,.5) 100%);
-  opacity:0;animation:blg-cinematic-vignette .8s ease-out forwards}
-.blg-post-cinematic .blg-deck::before{content:'';position:absolute;inset:-26px -36px -30px;z-index:-2;pointer-events:none;border-radius:28px;
-  background:radial-gradient(ellipse at 28% 42%,rgba(255,215,0,.18),transparent 58%),
-    radial-gradient(ellipse at 76% 62%,rgba(127,212,204,.12),transparent 62%);
-  filter:blur(12px);opacity:.78;animation:blg-cinematic-aura 2.6s ease-in-out both}
-.blg-post-cinematic .blg-deck::after{content:'';position:absolute;inset:-18px -26px -22px;z-index:-1;pointer-events:none;border-radius:24px;
-  background:linear-gradient(180deg,rgba(245,245,245,.035),rgba(245,245,245,.006));
-  border:1px solid rgba(245,245,245,.07);box-shadow:0 18px 58px rgba(0,0,0,.22);opacity:.46;
-  animation:blg-cinematic-frame 1s ease-out both}
+/* Cinematic entrance: an edgeless cloud of light behind the title + deck.
+   No box, no border, no frame — heavily blurred radial gradients feathered
+   with a radial mask so the glow dissolves into nothing at every edge, like
+   fog lit from within. Two layers drift slowly for an organic, filmic feel. */
+.blg-post-cinematic .blg-hero::before{content:'';position:absolute;inset:-150px -170px -170px;z-index:-3;pointer-events:none;
+  background:radial-gradient(58% 54% at 50% 46%,rgba(14,15,17,0) 0%,rgba(14,15,17,.26) 70%,rgba(14,15,17,.58) 100%);
+  opacity:0;animation:blg-cinematic-vignette 1.1s ease-out forwards}
+.blg-post-cinematic .blg-deck::before{content:'';position:absolute;inset:-130px -160px -140px;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(42% 60% at 32% 40%,rgba(255,215,0,.24),transparent 70%),
+    radial-gradient(46% 66% at 72% 60%,rgba(127,212,204,.16),transparent 72%),
+    radial-gradient(72% 82% at 52% 50%,rgba(255,233,168,.10),transparent 80%);
+  filter:blur(46px);
+  -webkit-mask:radial-gradient(58% 62% at 50% 50%,#000 22%,transparent 84%);
+  mask:radial-gradient(58% 62% at 50% 50%,#000 22%,transparent 84%);
+  opacity:0;animation:blg-cinematic-fog 3s ease-in-out both}
+.blg-post-cinematic .blg-deck::after{content:'';position:absolute;inset:-160px -130px -150px;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(40% 52% at 60% 34%,rgba(214,255,79,.10),transparent 74%),
+    radial-gradient(52% 62% at 38% 66%,rgba(245,245,245,.055),transparent 78%);
+  filter:blur(54px);
+  -webkit-mask:radial-gradient(62% 60% at 50% 50%,#000 16%,transparent 88%);
+  mask:radial-gradient(62% 60% at 50% 50%,#000 16%,transparent 88%);
+  opacity:0;animation:blg-cinematic-wisp 3.6s ease-in-out both}
 @keyframes blg-cinematic-vignette{to{opacity:1}}
-@keyframes blg-cinematic-aura{0%{opacity:0;transform:scale(.96)}32%{opacity:.8;transform:scale(1)}100%{opacity:.52;transform:scale(1.03)}}
-@keyframes blg-cinematic-frame{from{opacity:0;transform:translateY(5px)}to{opacity:.46;transform:none}}
+@keyframes blg-cinematic-fog{0%{opacity:0;transform:scale(.9) translateY(6px)}42%{opacity:.92}100%{opacity:.64;transform:scale(1.06)}}
+@keyframes blg-cinematic-wisp{0%{opacity:0;transform:scale(1.05) translate(9px,5px)}48%{opacity:.72}100%{opacity:.5;transform:scale(1.13) translate(-11px,-7px)}}
 @media(max-width:760px){
-  .blg-post-cinematic .blg-hero::before{inset:-56px -20px -72px}
-  .blg-post-cinematic .blg-deck::before{inset:-22px -16px -26px;filter:blur(10px)}
-  .blg-post-cinematic .blg-deck::after{inset:-14px -12px -18px}
+  .blg-post-cinematic .blg-hero::before{inset:-96px -60px -104px}
+  .blg-post-cinematic .blg-deck::before{inset:-84px -74px -92px;filter:blur(34px)}
+  .blg-post-cinematic .blg-deck::after{inset:-96px -64px -104px;filter:blur(42px)}
 }
 .blg-reveal{animation:blg-reveal-in .6s ease-out .3s both}
 @keyframes blg-reveal-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
