@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
 import { Quote, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Testimonial } from '../types';
+import { useContent } from '../i18n/LanguageContext';
 
 const Testimonials: React.FC = () => {
+  const c = useContent();
   const [activeIndex, setActiveIndex] = useState(0);
 
   const testimonials: Testimonial[] = [
     {
       id: 1,
-      quote: "The truest guide for everything in the world—for civilization, for life, and for success—is science and knowledge. Seeking a guide other than science and knowledge is ignorance, carelessness, and deviation.",
-      author: "Atatürk",
-      role: "Founder of the Republic of Turkey, Commander-in-chief of the Turkish War of Independence, Visionary Statesman & Reformer",
-      image: "https://i.ibb.co/B5JVvv8Q/Screenshot-from-2025-12-29-03-17-31.png"
+      quote: c.testimonials.items[0].quote,
+      author: c.testimonials.items[0].author,
+      role: c.testimonials.items[0].role,
+      image: "/img/testimonial-1.webp"
     },
     {
       id: 2,
-      quote: "Every man can, if he so desires, become the sculptor of his own brain.",
-      author: "Santiago Ramón y Cajal",
-      role: "Spanish pathologist, histologist, neuroscientist, and Nobel Prize winner in Physiology or Medicine",
-      image: "https://i.ibb.co/H5bNwpz/Screenshot-from-2025-12-29-03-17-50.png"
+      quote: c.testimonials.items[1].quote,
+      author: c.testimonials.items[1].author,
+      role: c.testimonials.items[1].role,
+      image: "/img/testimonial-2.webp"
     }
   ];
 
@@ -35,7 +37,7 @@ const Testimonials: React.FC = () => {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col text-center pb-8 sm:pb-12 items-center justify-center">
           <span className="block text-[10px] text-[#D6FF4F] font-mono w-fit border-b border-[#23252B] mb-4 pb-1 tracking-widest">
-            06 — QUOTES
+            {c.testimonials.sectionLabel}
           </span>
         </div>
 

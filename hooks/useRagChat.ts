@@ -11,6 +11,26 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 // the Static Web App. Only an undefined value falls back to the local func host.
 const RAG_API_URL = import.meta.env.VITE_RAG_API_URL ?? 'http://localhost:7071';
 
+// Persist the conversation across page reloads (survives refresh / tab close).
+const CHAT_STORAGE_KEY = 'mertoshi-chat-history';
+const MAX_STORED_MESSAGES = 50;
+
+const loadStoredMessages = (): Message[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = window.localStorage.getItem(CHAT_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (m): m is Message =>
+        m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'
+    );
+  } catch {
+    return [];
+  }
+};
+
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -100,7 +120,7 @@ const parseRateLimitHeaders = (headers: Headers): RateLimitInfo | null => {
 };
 
 export function useRagChat(): UseRagChatReturn {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(loadStoredMessages);
   const [citations, setCitations] = useState<Citation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -118,6 +138,23 @@ export function useRagChat(): UseRagChatReturn {
 
   // Track retry timeout
   const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Persist the conversation whenever it changes (cap to the most recent messages).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      if (messages.length === 0) {
+        window.localStorage.removeItem(CHAT_STORAGE_KEY);
+      } else {
+        window.localStorage.setItem(
+          CHAT_STORAGE_KEY,
+          JSON.stringify(messages.slice(-MAX_STORED_MESSAGES))
+        );
+      }
+    } catch {
+      /* storage full or unavailable — ignore */
+    }
+  }, [messages]);
 
   // Clear rate limit after retry period
   useEffect(() => {

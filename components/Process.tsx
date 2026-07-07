@@ -1,15 +1,17 @@
 import React from 'react';
 import { Telescope, PenTool, Code2 } from 'lucide-react';
+import { useContent } from '../i18n/LanguageContext';
 
 const Process: React.FC = () => {
+  const { process } = useContent();
   return (
     <div className="border-t border-[#23252B] bg-[#0E0F11] py-12 sm:py-16 md:py-24 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto text-center">
         <span className="block text-[10px] text-[#D6FF4F] font-mono w-fit border-b border-[#23252B] mx-auto mb-6 sm:mb-8 pb-1 tracking-widest">
-          05 — METHODOLOGY
+          {process.sectionLabel}
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium font-heading text-[#F5F5F5] tracking-tight mb-10 sm:mb-16">
-          Precision in Discovery
+          {process.heading}
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-6 md:gap-12 relative">
@@ -20,10 +22,10 @@ const Process: React.FC = () => {
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#15171B] border border-[#23252B] flex items-center justify-center text-[#A1A1A6] group-hover:text-[#D6FF4F] group-hover:border-[#D6FF4F] transition-all">
               <Telescope size={20} className="sm:w-6 sm:h-6" />
             </div>
-            <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">Strategy</h3>
+            <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">{process.steps[0].title}</h3>
             <p className="text-[#A1A1A6] text-xs sm:text-sm leading-relaxed max-w-[240px]">
-              <span className="block">Multi-scale neuro-discovery.</span>
-              <span className="block">Digitalization of the brain and "uploading" neural structures to a computer.</span>
+              <span className="block">{process.steps[0].line1}</span>
+              <span className="block">{process.steps[0].line2}</span>
             </p>
           </div>
 
@@ -31,10 +33,10 @@ const Process: React.FC = () => {
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#15171B] border border-[#23252B] flex items-center justify-center text-[#A1A1A6] group-hover:text-[#D6FF4F] group-hover:border-[#D6FF4F] transition-all">
               <PenTool size={20} className="sm:w-6 sm:h-6" />
             </div>
-            <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">Design</h3>
+            <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">{process.steps[1].title}</h3>
             <p className="text-[#A1A1A6] text-xs sm:text-sm leading-relaxed max-w-[240px]">
-              <span className="block">Utilizing expansion microscopy to surpass light diffraction limit.</span>
-              <span className="block">Merging with SOTA segmentation pipelines for 3D brain modeling and neurological disease research.</span>
+              <span className="block">{process.steps[1].line1}</span>
+              <span className="block">{process.steps[1].line2}</span>
             </p>
           </div>
 
@@ -42,10 +44,10 @@ const Process: React.FC = () => {
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#15171B] border border-[#23252B] flex items-center justify-center text-[#A1A1A6] group-hover:text-[#D6FF4F] group-hover:border-[#D6FF4F] transition-all">
               <Code2 size={20} className="sm:w-6 sm:h-6" />
             </div>
-            <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">Develop</h3>
+            <h3 className="text-lg sm:text-xl font-heading font-medium text-[#F5F5F5]">{process.steps[2].title}</h3>
             <p className="text-[#A1A1A6] text-xs sm:text-sm leading-relaxed max-w-[240px]">
-              <span className="block">Combining Agentic AI to create an end-to-end pipeline.</span>
-              <span className="block">Making this technology accessible and implementable across other labs.</span>
+              <span className="block">{process.steps[2].line1}</span>
+              <span className="block">{process.steps[2].line2}</span>
             </p>
           </div>
         </div>

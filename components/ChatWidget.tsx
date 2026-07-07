@@ -4,8 +4,9 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, X, MessageSquare, Loader2, FileText, AlertCircle, RefreshCw, Search, Globe, User, Clock, Sparkles, Bot } from 'lucide-react';
+import { Send, X, MessageSquare, Loader2, FileText, AlertCircle, RefreshCw, Search, Globe, User, Clock, Sparkles, Bot, Copy, Check } from 'lucide-react';
 import { useRagChat, Message, Citation } from '../hooks/useRagChat';
+import { useContent } from '../i18n/LanguageContext';
 
 interface ChatWidgetProps {
   /** Check if the chat is open (controlled) */
@@ -18,19 +19,26 @@ interface ChatWidgetProps {
   position?: 'bottom-right' | 'bottom-left';
 }
 
-// Map tool names to icons and display names
-const TOOL_DISPLAY: Record<string, { icon: React.ReactNode; name: string }> = {
-  'RAG-search_documents': { icon: <Search className="w-3 h-3" />, name: 'Documents' },
-  'WebSearch-search_web': { icon: <Globe className="w-3 h-3" />, name: 'Web' },
-  'AboutMe-get_profile': { icon: <User className="w-3 h-3" />, name: 'Profile' },
-  'DateTime-get_current_time': { icon: <Clock className="w-3 h-3" />, name: 'Time' },
-  'DateTime-calculate_date': { icon: <Clock className="w-3 h-3" />, name: 'Date' },
-  'DateTime-days_until': { icon: <Clock className="w-3 h-3" />, name: 'Days' },
+// Map tool names to icons and to a key in c.chat.tools (name is localized at render time)
+type ToolKey = 'documents' | 'web' | 'profile' | 'time' | 'date' | 'days' | 'fallback';
+
+const TOOL_DISPLAY: Record<string, { icon: React.ReactNode; key: ToolKey }> = {
+  'RAG-search_documents': { icon: <Search className="w-3 h-3" />, key: 'documents' },
+  'WebSearch-search_web': { icon: <Globe className="w-3 h-3" />, key: 'web' },
+  'AboutMe-get_profile': { icon: <User className="w-3 h-3" />, key: 'profile' },
+  'DateTime-get_current_time': { icon: <Clock className="w-3 h-3" />, key: 'time' },
+  'DateTime-calculate_date': { icon: <Clock className="w-3 h-3" />, key: 'date' },
+  'DateTime-days_until': { icon: <Clock className="w-3 h-3" />, key: 'days' },
 };
 
-const getToolDisplay = (toolName: string) => {
-  return TOOL_DISPLAY[toolName] || { icon: <Search className="w-3 h-3" />, name: toolName.split('-').pop() || 'Tool' };
+const getToolDisplay = (toolName: string): { icon: React.ReactNode; key: ToolKey } => {
+  return TOOL_DISPLAY[toolName] || { icon: <Search className="w-3 h-3" />, key: 'fallback' };
 };
+
+const prefersReducedMotion = (): boolean =>
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export const ChatWidget: React.FC<ChatWidgetProps> = ({
   isOpen: controlledIsOpen,
@@ -38,6 +46,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
   defaultOpen = false,
   position = 'bottom-right',
 }) => {
+  const c = useContent();
   const [internalIsOpen, setInternalIsOpen] = useState(defaultOpen);
   const isControlled = controlledIsOpen !== undefined;
   const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
@@ -61,6 +70,17 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 
   const [showSecondMessage, setShowSecondMessage] = useState(false);
   const [isTypingSecondMessage, setIsTypingSecondMessage] = useState(false);
+
+  // Reveal only the newest assistant reply with a typewriter effect (streaming feel).
+  const prevLenRef = useRef(messages.length);
+  const [animateIdx, setAnimateIdx] = useState<number | null>(null);
+  useEffect(() => {
+    if (messages.length > prevLenRef.current) {
+      const last = messages[messages.length - 1];
+      if (last?.role === 'assistant') setAnimateIdx(messages.length - 1);
+    }
+    prevLenRef.current = messages.length;
+  }, [messages]);
 
   // Auto-scroll to bottom on new messages or status updates
   useEffect(() => {
@@ -127,7 +147,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
           hover:scale-105 transition-all duration-300
           border border-black/5
           group relative overflow-hidden`}
-        aria-label="Open chat"
+        aria-label={c.chat.openAria}
       >
         <MessageSquare className="w-6 h-6 relative z-10 transition-transform duration-300 group-hover:rotate-12" />
         {!isReady && (
@@ -144,7 +164,6 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         bg-black
         border border-white/10 rounded-3xl shadow-2xl
         flex flex-col overflow-hidden
-        backdrop-blur-xl
         animate-slideUp`}
       style={{
         boxShadow: '0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.1)',
@@ -176,7 +195,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
                 <span className="inline-block w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </span>
             ) : (
-              <span className="text-xs text-zinc-500">Çevrimiçi</span>
+              <span className="text-xs text-zinc-500">{c.chat.statusOnline}</span>
             )}
           </div>
         </div>
@@ -186,15 +205,15 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
             onClick={clearChat}
             className="text-zinc-500 hover:text-white p-2 transition-colors text-xs
               hover:bg-white/5 rounded-lg"
-            title="Sohbeti temizle"
+            title={c.chat.clearTitle}
           >
-            Temizle
+            {c.chat.clearButton}
           </button>
           <button
             onClick={handleClose}
             className="text-zinc-500 hover:text-white p-1.5 transition-colors
               hover:bg-white/5 rounded-lg group"
-            aria-label="Close chat"
+            aria-label={c.chat.closeAria}
           >
             <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-200" />
           </button>
@@ -207,7 +226,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
         {isCheckingHealth && (
           <div className="flex flex-col items-center justify-center py-12 text-zinc-500">
             <Loader2 className="w-8 h-8 animate-spin mb-3 text-white" />
-            <p className="text-xs tracking-wider uppercase">Bağlanıyor...</p>
+            <p className="text-xs tracking-wider uppercase">{c.chat.connecting}</p>
           </div>
         )}
 
@@ -217,16 +236,16 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
             <div className="w-16 h-16 rounded-full bg-zinc-900 border border-white/5 flex items-center justify-center mb-4">
               <AlertCircle className="w-8 h-8 text-zinc-500" />
             </div>
-            <h3 className="text-white font-medium mb-2">Yapılandırma Gerekli</h3>
+            <h3 className="text-white font-medium mb-2">{c.chat.configRequiredHeading}</h3>
             <p className="text-zinc-500 text-sm mb-4 px-4">
-              Sohbet servisi henüz hazır değil. Lütfen daha sonra tekrar deneyin.
+              {c.chat.configRequiredBody}
             </p>
             <button
               onClick={checkHealth}
               className="flex items-center gap-2 text-sm text-black bg-white px-4 py-2 rounded-lg hover:bg-zinc-200 transition-colors"
             >
               <RefreshCw className="w-4 h-4" />
-              Tekrar Dene
+              {c.chat.retryButton}
             </button>
           </div>
         )}
@@ -239,7 +258,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
                 <MessageBubble
                   message={{
                     role: 'assistant',
-                    content: "Hi there! 👋 I’m **Lundo**, Mert’s personal assistant. I’ve been fed with everything Mert has ever read, written, or dreamed of (I even know about his childhood crushes!)."
+                    content: c.chat.welcome1
                   }}
                 />
 
@@ -264,15 +283,46 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
                   <MessageBubble
                     message={{
                       role: 'assistant',
-                      content: "Remember i am not just a simple chatbot rather an agentic entity capable of merging Mert’s personal archives with the vast knowledge of the web and has long-/short term memory. Feel free to explore his projects, his mind, and his world with me."
+                      content: c.chat.welcome2
                     }}
                   />
+                )}
+
+                {showSecondMessage && (
+                  <div className="flex flex-col gap-2 pl-10 animate-messageSlideIn">
+                    <span className="text-[11px] uppercase tracking-wider text-zinc-600 flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3" />
+                      {c.chat.suggestionsLabel}
+                    </span>
+                    <div className="flex flex-col gap-2 items-start">
+                      {c.chat.suggestions.map((s, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => sendMessage(s)}
+                          disabled={isLoading}
+                          className="text-left text-[13px] leading-snug text-zinc-300
+                            bg-zinc-900 border border-white/10 rounded-2xl px-3.5 py-2
+                            hover:bg-zinc-800 hover:border-white/20 hover:text-white
+                            disabled:opacity-50 disabled:cursor-not-allowed
+                            transition-all duration-200 max-w-[85%]"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
 
             {messages.map((message, index) => (
-              <MessageBubble key={index} message={message} />
+              <MessageBubble
+                key={index}
+                message={message}
+                animate={index === animateIdx}
+                onScroll={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+              />
             ))}
 
             {/* Agent Status Indicator */}
@@ -299,7 +349,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
                         }`}
                     >
                       {display.icon}
-                      <span>{display.name}</span>
+                      <span>{c.chat.tools[display.key]}</span>
                       {tc.status === 'completed' && (
                         <span className="text-[10px]">✓</span>
                       )}
@@ -342,7 +392,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
       {
         citations.length > 0 && (
           <div className="px-4 py-2 border-t border-white/10 bg-black">
-            <p className="text-xs text-zinc-500 mb-2">Kaynaklar:</p>
+            <p className="text-xs text-zinc-500 mb-2">{c.chat.citationsLabel}</p>
             <div className="flex flex-wrap gap-2">
               {citations.slice(0, 3).map((citation, index) => (
                 <CitationChip key={index} citation={citation} />
@@ -361,7 +411,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={isReady ? "Bir şeyler sor..." : "Hazırlanıyor..."}
+              placeholder={isReady ? c.chat.inputPlaceholderReady : c.chat.inputPlaceholderNotReady}
               className="w-full bg-zinc-900 text-white placeholder-zinc-500
                 rounded-xl px-4 py-3.5 pr-12 outline-none
                 focus:ring-1 focus:ring-white/20
@@ -389,7 +439,7 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
               disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500
               transition-all duration-200 shadow-lg
               group overflow-hidden"
-            aria-label="Send message"
+            aria-label={c.chat.sendAria}
           >
             <Send className={`w-5 h-5 relative z-10 transition-transform ${isLoading ? 'animate-pulse' : 'group-hover:translate-x-0.5 group-hover:-translate-y-0.5'}`} />
           </button>
@@ -403,9 +453,54 @@ export const ChatWidget: React.FC<ChatWidgetProps> = ({
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
+const MessageBubble: React.FC<{
+  message: Message;
+  animate?: boolean;
+  onScroll?: () => void;
+}> = ({ message, animate = false, onScroll }) => {
+  const c = useContent();
   const isUser = message.role === 'user';
-  const timestamp = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  const timestamp = new Date().toLocaleTimeString(c.chat.locale, { hour: '2-digit', minute: '2-digit' });
+
+  // Progressive reveal for the newest assistant reply (streaming feel).
+  const shouldAnimate = animate && !isUser && !prefersReducedMotion();
+  const [shownChars, setShownChars] = useState(shouldAnimate ? 0 : message.content.length);
+  useEffect(() => {
+    if (!shouldAnimate) {
+      setShownChars(message.content.length);
+      return;
+    }
+    const total = message.content.length;
+    const step = Math.max(2, Math.ceil(total / 120)); // finish in ~2s regardless of length
+    let i = 0;
+    setShownChars(0);
+    const id = setInterval(() => {
+      i += step;
+      onScroll?.();
+      if (i >= total) {
+        setShownChars(total);
+        clearInterval(id);
+      } else {
+        setShownChars(i);
+      }
+    }, 16);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [message.content, shouldAnimate]);
+  const visibleContent = isUser ? message.content : message.content.slice(0, shownChars);
+  const isRevealing = shouldAnimate && shownChars < message.content.length;
+
+  // Copy-to-clipboard for assistant answers.
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable — ignore */
+    }
+  };
 
   const renderContent = (content: string) => {
     return (
@@ -453,7 +548,7 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
         </div>
       )}
 
-      <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[85%]`}>
+      <div className={`group flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[85%]`}>
         <div
           className={`group relative rounded-2xl px-4 py-3 ${isUser
             ? 'bg-white text-black rounded-br-md shadow-sm'
@@ -463,7 +558,12 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
           {isUser ? (
             <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
           ) : (
-            renderContent(message.content)
+            <>
+              {renderContent(visibleContent)}
+              {isRevealing && (
+                <span className="inline-block w-1.5 h-4 -mb-0.5 ml-0.5 bg-white/70 align-middle animate-pulse" />
+              )}
+            </>
           )}
 
           {/* Timestamp tooltip */}
@@ -472,6 +572,20 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
             {timestamp}
           </span>
         </div>
+
+        {/* Copy button for assistant answers */}
+        {!isUser && !isRevealing && message.content.trim().length > 0 && (
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="mt-1 inline-flex items-center gap-1 text-[11px] text-zinc-600
+              hover:text-zinc-300 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+            aria-label={copied ? c.chat.copiedLabel : c.chat.copyLabel}
+          >
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+            <span>{copied ? c.chat.copiedLabel : c.chat.copyLabel}</span>
+          </button>
+        )}
       </div>
 
       {/* Avatar for user */}

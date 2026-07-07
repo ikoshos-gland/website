@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Menu, X, Mail, Instagram, MessageSquare } from 'lucide-react';
+import { useContent } from '../i18n/LanguageContext';
+import LanguageSwitcher from '../i18n/LanguageSwitcher';
 
 const Navbar: React.FC<{ onChatClick: () => void }> = ({ onChatClick }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { nav } = useContent();
 
   useEffect(() => {
     if (isMobileMenuOpen) {
@@ -31,18 +35,20 @@ const Navbar: React.FC<{ onChatClick: () => void }> = ({ onChatClick }) => {
           <X size={32} strokeWidth={1.5} />
         </button>
         <nav className="flex flex-col gap-8 text-center text-3xl font-heading font-medium tracking-tight text-[#F5F5F5]">
-          <a href="#" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>Projects</a>
-          <a href="#" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>CV</a>
+          <a href="#" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>{nav.projects}</a>
+          <Link to="/blog" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>{nav.blog}</Link>
+          <a href="#" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>{nav.cv}</a>
           <button
             onClick={() => { toggleMenu(); onChatClick(); }}
             className="hover:text-[#D6FF4F] transition-colors"
           >
-            Chat
+            {nav.chat}
           </button>
         </nav>
-        <div className="mt-12 flex gap-6">
+        <div className="mt-12 flex flex-col items-center gap-6">
+          <LanguageSwitcher />
           <a href="#" className="text-xs font-sans uppercase tracking-widest text-[#A1A1A6] hover:text-[#F5F5F5] border-b border-[#23252B] pb-1">
-            Start a Project
+            {nav.startProject}
           </a>
         </div>
       </div>
@@ -53,7 +59,8 @@ const Navbar: React.FC<{ onChatClick: () => void }> = ({ onChatClick }) => {
 
           {/* Desktop Left Nav */}
           <div className="hidden md:flex gap-6 lg:gap-8 items-center">
-            <a href="#" className="text-xs lg:text-sm font-medium text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">Projects</a>
+            <a href="#" className="text-xs lg:text-sm font-medium text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">{nav.projects}</a>
+            <Link to="/blog" className="text-xs lg:text-sm font-medium text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors">{nav.blog}</Link>
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -61,7 +68,7 @@ const Navbar: React.FC<{ onChatClick: () => void }> = ({ onChatClick }) => {
               }}
               className="text-xs lg:text-sm font-medium text-[#F5F5F5] hover:text-[#D6FF4F] transition-colors"
             >
-              Chat
+              {nav.chat}
             </button>
           </div>
 
@@ -80,13 +87,14 @@ const Navbar: React.FC<{ onChatClick: () => void }> = ({ onChatClick }) => {
           </div>
 
           {/* Desktop Right Nav */}
-          <div className="hidden md:flex gap-4 lg:gap-8 items-center">
-            <a href="#" className="text-xs lg:text-sm font-medium text-[#A1A1A6] hover:text-[#F5F5F5] transition-colors">CV</a>
+          <div className="hidden md:flex gap-4 lg:gap-6 items-center">
+            <a href="#" className="text-xs lg:text-sm font-medium text-[#A1A1A6] hover:text-[#F5F5F5] transition-colors">{nav.cv}</a>
+            <LanguageSwitcher />
             <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="text-[#A1A1A6] hover:text-[#D6FF4F] transition-colors">
               <Instagram size={18} />
             </a>
             <a href="mailto:fatih.mertkoca2@gmail.com" className="bg-[#F5F5F5] hover:bg-[#D6FF4F] text-[#0E0F11] px-3 lg:px-5 py-1.5 lg:py-2 rounded-full text-[10px] lg:text-xs font-semibold uppercase tracking-wider transition-colors">
-              Contact
+              {nav.contact}
             </a>
           </div>
 

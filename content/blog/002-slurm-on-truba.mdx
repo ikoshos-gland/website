@@ -1,0 +1,406 @@
+---
+title: Asking a Queue for GPUs: A Biology Student's Field Guide to SLURM on TRUBA
+date: 2026-06-23
+contentType: compute
+tags: [SLURM, HPC, TRUBA, JAX, GPU]
+excerpt: Everything I wish someone had told me on day one about running real GPU training on a shared national HPC cluster — from the queue mindset to the six failures that cost me real time.
+cover: /img/case-4.webp
+draft: false
+---
+## Why You Ask a Queue Instead of Just Running Things
+
+<DropCap>I</DropCap>'m a molecular-biotech student, not a sysadmin. But I'm training a flood-filling network (an FFN) to segment neurons in expansion-microscopy connectomics volumes — and that needs real GPUs for real hours. My laptop can't do it. So I learned to use TRUBA, Turkey's national HPC cluster. This post is everything I wish someone had told me on day one.
+
+I'll build it up the way it actually clicked for me: first the mindset (why a scheduler exists at all), then the setup, then the job script itself, then the daily submit-watch-debug loop, then the container that makes it all run — and finally the six failures that taught me each of these lessons the hard way.
+
+### Why does a scheduler like SLURM even exist?
+
+Here's the thing that confused me at first. On my laptop, I type `python train.py` and it just *runs*. So why can't I do that on the cluster?
+
+Because the cluster is **shared**. Hundreds of researchers are on TRUBA, and there is a **finite** number of GPUs. If everyone just launched their training the instant they logged in, the machine would melt — 200 jobs fighting over 16 GPU nodes, all of them crawling, no one finishing.
+
+So a cluster doesn't let you *run* things. It lets you **ask for** things. You write down what you need — one GPU, 10 CPU cores, 30 minutes — hand that request to a program called **SLURM** (the scheduler), and SLURM puts you in a **queue**. When the resources you asked for are free, SLURM hands them to you, runs your job, and moves on to the next person. That's the entire mental shift: *you are not a user running a program, you are a customer placing an order.*
+
+This is why a GPU job can show a state like `PD` (pending) for a while. When the GPU partition is full — I once hit it at 15 of 16 nodes allocated — your estimated start can be **days** away. That's not a bug. That's the queue working as designed.
+
+### Login node vs compute node
+
+The second thing I had to unlearn: the machine you log into is **not** the machine that does the work.
+
+When you SSH in, you land on a **login node** (on TRUBA these are named `arf-ui*`). The login node is a lobby. It's where you edit scripts, copy files, and *submit* jobs. It is shared by everyone at once, and it has **no GPUs for you**. If you run heavy training right there, you're hogging the lobby and slowing everyone down — and the cluster admins will not be happy.
+
+The real horsepower lives on the **compute nodes**. You never touch those directly. You reach them *only* through SLURM. You write a job script, you submit it, and SLURM finds a free compute node and runs your work there.
+
+<SlurmFlow />
+
+Keep that picture in your head and 90% of "wait, why didn't it work" questions answer themselves.
+
+### Setting up TRUBA concretely
+
+Three things you need before any of this is real.
+
+**1. VPN, then SSH.** TRUBA lives behind a VPN. Bring the VPN up first, *then* SSH in:
+
+```bash
+ssh avural@172.16.6.11
+```
+
+No VPN, no cluster. There is no second step until this one works.
+
+**2. Two storage areas — and they are not interchangeable.** You get:
+
+- **`/arf/home/<user>`** — small, but **persistent**. Your scripts and final results live here.
+- **`/arf/scratch/<user>`** — big, fast, but **wiped periodically**. This is your workspace.
+
+You *work* in scratch and you *keep* in home. If a result only exists in scratch and scratch gets wiped, it's gone — so copy anything you care about back to `/arf/home` (or off the cluster entirely).
+
+**3. The container.** This surprised me. You don't `pip install` your software onto TRUBA. Everything — JAX, the `ffn` package, all the dependencies — is baked into a single **Apptainer/Singularity** image, a `.sif` file (mine is `ffn-jax.sif`). When you run training, you run it *inside* that container. The cluster's filesystem has a strict limit on how many files you can create (the inode quota), and a fresh `pip`/`conda` install spews thousands of small files and blows right through it. The container sidesteps all of that — it's one big file that already has everything inside. I'll come back to the container in detail near the end, because it explains the shape of every command I run.
+
+### The 5 golden rules
+
+Everything above distills into five rules I now treat as law. Every one of these I learned the way you'd expect — by breaking it.
+
+1. **VPN must be up.** It's the front door. Nothing reaches the cluster without it.
+2. **No heavy compute on the login node.** Real work goes through the scheduler — `srun` or `sbatch` — never a bare `python` on `arf-ui*`.
+3. **Submit from `/arf/scratch`, not `/arf/home`.** TRUBA literally *rejects* a job submitted from home with a message telling you to use scratch. `cd /arf/scratch/<user>/...` first, every time.
+4. **Don't `pip`/`conda` install onto `/arf`.** You'll hit the inode (file-count) quota. Everything lives inside the container instead.
+5. **`/arf/scratch` is wiped periodically.** Copy results out to `/arf/home` or off-cluster, or lose them.
+
+That's the whole worldview: ask a queue, work on the right node, in the right folder, inside the container, and rescue your results. The rest of this tutorial is just learning to speak SLURM fluently — writing the job, watching it in the queue, and reading the logs when it inevitably surprises you.
+
+## Anatomy of a job script
+
+When I first opened `liconn_real_1gpu.sbatch`, the top of the file looked like a wall of `#SBATCH` comment lines. They're not real comments — they're instructions to SLURM. Each one answers a question the scheduler asks before it lets my job run: *which machines, how many, for how long, and where do the logs go?* Let me walk the real block line by line.
+
+Here is the actual directive block from my single-GPU script:
+
+```bash
+#!/bin/bash
+#SBATCH -p akya-cuda
+#SBATCH -A avural
+#SBATCH -J ffn_real_1gpu
+#SBATCH -N 1
+#SBATCH -n 1
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=10
+#SBATCH --time=00:30:00
+#SBATCH --export=NONE
+#SBATCH -o .../runs/ffn_real_1gpu_%j.out
+#SBATCH -e .../runs/ffn_real_1gpu_%j.err
+```
+
+What each line means, in plain language:
+
+- **`#!/bin/bash`** — the shebang. The body of the script (everything after the directives) is a normal bash script; this says run it with bash.
+- **`-p akya-cuda`** — the **partition**, i.e. which pool of machines. `akya-cuda` is TRUBA's GPU partition, where the real training runs. (For quick smoke tests I override this with `debug`, which starts fast — more on that in the next section.)
+- **`-A avural`** — the **account** to charge the compute to. If you omit this, SLURM uses your default account.
+- **`-J ffn_real_1gpu`** — the **job name**. Purely cosmetic, but it's what shows up next to the job in `squeue`, so a clear name saves you squinting later.
+- **`-N 1`** — request **1 node** (one physical machine).
+- **`-n 1`** — request **1 task** (one process). One node, one task — a single training process.
+- **`--gres=gpu:1`** — a **generic resource** request: give me **1 GPU**. Without this you land on the GPU partition but get no actual GPU.
+- **`--cpus-per-task=10`** — **10 CPU cores** for that task. On `akya-cuda` the rule is 10 cores per GPU, so one GPU gets ten cores. (This is also why the 4-GPU version asks for 40.)
+- **`--time=00:30:00`** — the **wall-clock limit**, `HH:MM:SS`. Here, 30 minutes. This is a hard ceiling: once it's hit, SLURM **kills** the job whether it's done or not. (The 4-GPU script uses the long format `1-00:00:00`, which is `D-HH:MM:SS` = 1 day.)
+- **`--export=NONE`** — start the job from a **clean environment**, not inheriting whatever variables happened to be set in my login shell. It makes runs reproducible: the job sees only what the script itself sets up. The flip side: the script must establish its own environment (PATH, any `module load`s) — nothing from your login shell carries over.
+- **`-o .../runs/ffn_real_1gpu_%j.out`** — where **stdout** goes. The `%j` expands to the job id, so every run gets its own log file instead of clobbering the last one.
+- **`-e .../runs/ffn_real_1gpu_%j.err`** — where **stderr** goes. Worth knowing: with JAX/absl, the live logs **and the training loss** print to **stderr**, so this `.err` file is the one I actually `tail -f` to watch training.
+
+**The body, at a high level.** After the directives, the script does a few sanity things and then launches training. It runs with `set -euo pipefail` (stop on the first error), verifies the GPU is actually visible (`nvidia-smi -L`, plus a quick check inside the container that `jax.device_count()` equals 1), and makes a timestamped `WORK_DIR` under `runs/` so outputs don't collide. Then the real work is one `apptainer exec` line — it runs my training **inside the container** rather than against anything pip-installed on `/arf`:
+
+```bash
+apptainer exec --nv --bind /arf:/arf --pwd <project> \
+  --env PYTHONPATH=<project> \
+  --env XLA_PYTHON_CLIENT_PREALLOCATE=true \
+  --env XLA_PYTHON_CLIENT_MEM_FRACTION=0.80 \
+  --env OMP_NUM_THREADS=10 \
+  <image>.sif python ffn/jax/main.py --config <config>.py --workdir <WORK_DIR>
+```
+
+The flags that matter: **`--nv`** exposes the NVIDIA GPU into the container; **`--bind /arf:/arf`** makes cluster storage visible inside it; the **`XLA_*`** env vars tune how JAX grabs GPU memory; and the **`OMP_NUM_THREADS=10`** (with matching `TF_NUM_INTEROP_THREADS`/`TF_NUM_INTRAOP_THREADS=10`) line up the thread count with the 10 cores I allocated above. The last line is just the actual command: run `ffn/jax/main.py` with a config and the work directory. I'll unpack every one of those flags later — for now, just notice that the body is the *work* and the `#SBATCH` block above it is the *resource request form*.
+
+> **Lesson** — With JAX/absl the training loss goes to **stderr**, not stdout — so it's the `_%j.err` file you `tail -f`, not the `.out`.
+
+> **Lesson** — `--time` is a hard kill, not a hint. On `akya-cuda` budget enough wall-clock, and remember the long format is `D-HH:MM:SS` (e.g. `1-00:00:00` is one day).
+
+## Requesting the right resources and choosing a partition
+
+Now that you can read the directive block, the real skill is *tuning* it. Ask for too little and your job dies; ask for too much and you wait in the queue longer than you need to. Here's what I actually learned dialing in my FFN training scripts.
+
+### The three knobs that matter: GPU, cores, time
+
+These three `#SBATCH` directives are the heart of my single-GPU script:
+
+```bash
+#SBATCH --gres=gpu:1           # request 1 GPU (gres = "generic resource")
+#SBATCH --cpus-per-task=10     # akya-cuda rule: 10 CPU cores per GPU
+#SBATCH --time=00:30:00        # wall-clock limit HH:MM:SS; job is KILLED past this
+```
+
+**`--gres=gpu:N`** is how you ask for GPUs. `gpu:1` gives you one, `gpu:4` gives you four. Without this line you get zero GPUs, and JAX will quietly fall back to CPU (or fail) — so on a GPU partition this line is non-negotiable.
+
+**The 10-cores-per-GPU rule.** On `akya-cuda`, each GPU comes with 10 CPU cores. So `--gres=gpu:1` pairs with `--cpus-per-task=10`. Those cores feed the GPU — data loading, the input pipeline, and so on. In my script the thread-count env vars (`OMP_NUM_THREADS=10`, `TF_NUM_INTEROP_THREADS`, `TF_NUM_INTRAOP_THREADS` all `=10`) are set to match exactly the cores I asked for. Allocated cores and thread counts should agree.
+
+**`--time` and overrunning.** The format is `HH:MM:SS`. `00:30:00` is 30 minutes. There is also a long form, `D-HH:MM:SS`, where the part before the dash is **days** — so `1-00:00:00` is exactly one day. This matters because **SLURM kills your job the instant it passes `--time`**, mid-step, no mercy. I learned this the hard way on a CPU prep step:
+
+> **Lesson** — My `compute_partitions` step timed out at 40 minutes. It's a single-core job, about 9 s per label times 1756 labels = 4–5 hours on the full 768³ volume — but I'd only asked for 40 minutes, so SLURM killed it. The fix was twofold: iterate on a small 192³ crop (about 12 s, fits in any short window) and run the full volume as a separate long CPU batch job with an honest multi-hour `--time`.
+
+So estimate your real runtime, then add headroom. Too short and the scheduler executes you; too long and you sit in the queue longer (and on a busy partition that's days, see below).
+
+### Picking a partition
+
+The partition is set with `#SBATCH -p <name>`. Three I actually use, and when:
+
+| Partition | What it's for | Limit / catch |
+|---|---|---|
+| `akya-cuda` | GPU — long, real training | Often **full** (e.g. 15 of 16 nodes allocated), so estimated start can be **days** |
+| `debug` | Smoke tests, quick iteration | Max ~4 hours, but **starts fast** |
+| `hamsi` | Long CPU-heavy prep (e.g. `compute_partitions` on full data) | CPU only, multi-hour `--time` |
+
+My rule of thumb:
+
+- **Real GPU training** goes to `akya-cuda`. Submit it and let it wait in the queue.
+- **Anything I want to check *right now*** — does the script even start, is the GPU visible, does one training step run — goes to `debug`. It caps at ~4 hours but it *starts fast*, which is the whole point.
+- **CPU-only prep that takes hours** (like partition computation on the full volume) goes to a long CPU partition like `hamsi`. No reason to burn a GPU allocation on a single-core CPU job.
+
+> **Lesson** — `akya-cuda` was full once — 15/16 nodes allocated, 1 draining — and `squeue --start` estimated my start about **5 days** out. I didn't fight it. I ran all my smoke and scaling tests on `debug` (which started in minutes) and just let the long real training wait its turn in `akya-cuda`. Don't sit idle waiting on a full GPU queue when `debug` will give you fast feedback.
+
+You don't even have to edit the script to switch partitions for a quick test — override it on the command line:
+
+```bash
+sbatch -p debug liconn_real/liconn_real_1gpu.sbatch   # smoke test on the fast queue
+```
+
+### Scaling 1 GPU to 4: what actually changes
+
+This is the part that surprised me — going from 1 GPU to 4 is almost entirely a SLURM change, **not a code change**.
+
+My `liconn_real_4gpu.sbatch` is *identical* to the 1-GPU script except three directives:
+
+```bash
+#SBATCH --gres=gpu:4           # 4 GPUs instead of 1
+#SBATCH --cpus-per-task=40     # 10 cores per GPU x 4 = 40
+#SBATCH --time=1-00:00:00      # 1 day (long format D-HH:MM:SS)
+```
+
+Notice the 10-cores-per-GPU rule scaling cleanly: 1 GPU → 10 cores, 4 GPUs → 40 cores. And the longer `--time` simply reflects that real training takes longer than a 30-minute test.
+
+**And the Python? Unchanged.** JAX automatically builds a device mesh over all 4 GPUs and shards the batch across them — no code edit, no manual device placement. The practical consequence is that your **global batch size scales with the GPU count**:
+
+```text
+global batch = per_device_batch_size * 4
+```
+
+So when you ask for `gpu:4`, you're not just getting more memory — JAX is splitting each step's batch four ways and running it in parallel, transparently. The only things *I* touch are the three `#SBATCH` lines above. (This clean 1-vs-2-vs-4 behavior is exactly why a scaling comparison — steps/sec at each GPU count — is on my to-do list for a thesis plot.)
+
+The takeaway: request GPUs with `--gres`, keep cores at 10 per GPU, set an honest `--time` (and remember overrun = instant kill), pick `debug` to iterate fast and `akya-cuda` for the real run — and trust JAX to handle the sharding when you scale up.
+
+## The submit → monitor → debug loop
+
+Once my job script exists, the rest of my life on TRUBA is one tight loop: submit, watch, react. Here's exactly how I run it.
+
+### Rule 3 first: `cd /arf/scratch`
+
+Before anything else, I move to scratch. Jobs **must** be submitted from `/arf/scratch` — submit from `/arf/home` and the scheduler rejects you outright with a message telling you to use scratch. (I learned this the dumb way: an `srun` from `/arf/home` came back with *"please run your jobs from /arf/scratch"*.)
+
+```bash
+cd /arf/scratch/<user>/<repo>
+```
+
+### Submit with `sbatch`
+
+```bash
+sbatch liconn_real/liconn_real_1gpu.sbatch
+```
+
+It prints back a job id, which is the handle for everything that follows:
+
+```text
+Submitted batch job 1234567
+```
+
+The real GPU partition (`akya-cuda`) is often slammed, so for a quick smoke test I override the partition on the command line — no editing the script — and land in the fast `debug` queue (max ~4 hours, but it *starts*):
+
+```bash
+sbatch -p debug liconn_real/liconn_real_1gpu.sbatch
+```
+
+> **Lesson** — `akya-cuda` was 15/16 nodes allocated (1 draining) and my estimated start was ~5 days. I don't wait 5 days to find a typo — smoke/scale tests go to `debug`, and only the long real training waits in `akya-cuda`.
+
+### Monitor with `squeue`
+
+```bash
+squeue -u <user>
+```
+
+The column I care about is **ST** (state). `PD` = pending (waiting in queue), `R` = running.
+
+```text
+JOBID    PARTITION  NAME          USER    ST  TIME  NODES NODELIST(REASON)
+1234567  akya-cuda  ffn_real_1gp  avural  PD  0:00      1 (Priority)
+1234568  debug      ffn_real_1gp  avural   R  0:42      1 <compute-node>
+```
+
+Note that the running job is allocated on a **compute node** — never on `arf-ui*`. The `arf-ui*` names are the login nodes; your work physically runs somewhere else.
+
+### "When will it actually start?"
+
+Two ways to ask, neither of which submits real work:
+
+```bash
+squeue --start -j <id>      # estimated start time for a queued job
+sbatch --test-only <script> # validates the job and prints WHEN it would start, without submitting
+```
+
+And to see whether the partition has any room at all:
+
+```bash
+sinfo -p akya-cuda
+```
+
+> **Lesson** — if a job is waiting on a `--dependency`, `squeue --start` shows `N/A` — SLURM won't estimate while a dependency is unmet. Once the dependency clears it works again; or just use `sbatch --test-only`, which estimates regardless.
+
+### Follow the live log — on the `.err`
+
+My script writes stdout to `..._%j.out` and stderr to `..._%j.err`. The trap for JAX: **the loss prints to STDERR**, because JAX/absl logging goes there. So I tail the `.err`, not the `.out`:
+
+```bash
+tail -f runs/ffn_real_1gpu_<id>.err
+```
+
+> **Lesson** — a `cuInit ... error 303` line on a CPU-only step (like `compute_partitions`) is a **harmless** warning — it's a CPU job, there's no GPU to init. Ignore it.
+
+### After it finishes: `sacct`
+
+`squeue` only shows live jobs. Once mine drops off, I get the post-mortem from accounting:
+
+```bash
+sacct -j <id> --format=JobID,State,Elapsed,ExitCode -X
+```
+
+State (`COMPLETED` / `FAILED` / `TIMEOUT`), wall time, and exit code — that's my verdict.
+
+### Kill a job: `scancel`
+
+```bash
+scancel <id>
+```
+
+### `srun` for a quick CPU prep job
+
+For short, interactive CPU work I run it synchronously in the foreground with `srun` instead of queuing a batch job — for example a quick prep step on the `debug` partition:
+
+```bash
+srun -p debug -A <user> -N1 -n1 -c8 --mem=16G -t0:30:00 bash <script>.sh
+```
+
+This blocks my terminal and streams output live, which is perfect for iterating on a small prep step before committing to a long batch run.
+
+> **Lesson** — don't chain a training job behind a prep job with `--dependency=afterok:<prep_id>` unless you trust the prep. Mine timed out (= failed), so the dependent smoke job never ran — `DependencyNeverSatisfied`. Now I produce the coords first, confirm they exist, *then* submit the training with no dependency.
+
+## Containers: why every job runs inside a .sif
+
+I promised earlier I'd come back to the container, because once you understand why it's there, the whole job script stops looking like magic and starts looking obvious. On a normal machine, you'd just `pip install jax ffn ...` and run your script. On TRUBA you can't.
+
+### Rule 4: no pip/conda on /arf
+
+`/arf` isn't just disk-quota'd, it's **inode**-quota'd: there's a hard cap on the *number of files* you may keep, not just their total size. A single conda/pip environment is tens of thousands of tiny files (every `.py`, every `.pyc`, every transitive dependency). Install a couple of those and you blow past the inode quota — at which point the cluster stops you from writing *anything*, including your actual results. I learned to treat `/arf` as "data and code, not environments."
+
+So instead the entire software stack — JAX, the GPU runtime, `ffn`, every dependency — gets baked, once, into a single **Apptainer** image file: `ffn-jax.sif`. That's *one* file as far as the filesystem is concerned. One inode, not fifty thousand. You ship the `.sif` to the cluster and the environment problem is solved for good.
+
+> **Lesson** — The inode quota, not the size quota, is what bites you on shared HPC. One `.sif` is one file; one conda env is tens of thousands. Put the environment in the container.
+
+### How a job actually runs the software
+
+Because nothing is installed on the node, every command runs *through* the container. The pattern is always the same shape:
+
+```bash
+apptainer exec --nv --bind /arf:/arf "$SIF" python ffn/jax/main.py ...
+```
+
+Read it left to right:
+
+- **`apptainer exec`** — run a command inside the image.
+- **`--nv`** — hand the NVIDIA **GPU** through into the container. Without this flag, the container can't see the card SLURM gave you, and JAX silently drops to CPU.
+- **`--bind /arf:/arf`** — mount cluster **storage** into the container. By default a container can't see the host filesystem; this makes `/arf` (your code, your data, your `--workdir`) visible *inside*. GPU in via `--nv`, storage in via `--bind` — that's the mental model.
+- **`"$SIF" python ...`** — the image, then the command to run inside it.
+
+In the real job script there are two more conveniences: `--pwd "$PROJ"` starts you in the project directory, and `--env PYTHONPATH="$PROJ"` so `import ffn` resolves. Here it is verbatim from `liconn_real_1gpu.sbatch`:
+
+```bash
+apptainer exec --nv --bind /arf:/arf --pwd "$PROJ" --env PYTHONPATH="$PROJ" \
+  --env XLA_PYTHON_CLIENT_PREALLOCATE=true --env XLA_PYTHON_CLIENT_MEM_FRACTION=0.80 \
+  --env OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-10}" \
+  --env TF_NUM_INTEROP_THREADS="${SLURM_CPUS_PER_TASK:-10}" \
+  --env TF_NUM_INTRAOP_THREADS="${SLURM_CPUS_PER_TASK:-10}" \
+  "$SIF" python ffn/jax/main.py --config "$CONFIG" --workdir "$WORK_DIR"
+```
+
+### The env vars, and why each one is there
+
+These aren't decoration — each one matches the resources SLURM actually allocated:
+
+- **`XLA_PYTHON_CLIENT_PREALLOCATE=true`** and **`XLA_PYTHON_CLIENT_MEM_FRACTION=0.80`** — these tune **GPU memory**. JAX/XLA grabs a chunk of VRAM up front (`PREALLOCATE`) and is told to use up to 80% of the card (`MEM_FRACTION`), leaving headroom so you don't OOM at a bad moment.
+- **`OMP_NUM_THREADS`**, **`TF_NUM_INTEROP_THREADS`**, **`TF_NUM_INTRAOP_THREADS`** — these cap **CPU threads** to match the cores you were given. The job asked for `--cpus-per-task=10`, so all three are set to 10 (via `${SLURM_CPUS_PER_TASK:-10}`). If you *don't* cap them, the libraries assume they own the whole machine, spawn threads for every physical core on a shared node, and thrash against everyone else's jobs.
+
+That `${SLURM_CPUS_PER_TASK:-10}` pattern is nice: it reads back the exact core count SLURM handed this job, so the threads always match the allocation. The 4-GPU script is the *same* container invocation — it just requests `--gres=gpu:4` / `--cpus-per-task=40`, and JAX shards the batch across the mesh with no code change.
+
+### Assert the GPU before you train
+
+Here's the habit that has saved me the most wasted queue time. Before the real run, the script asks the container how many devices JAX can actually see:
+
+```bash
+N=$(apptainer exec --nv "$SIF" python -c "import jax;print(jax.device_count())" 2>/dev/null || echo 0)
+echo "JAX visible devices = $N"
+```
+
+(The 4-GPU script even prints `(expected 4)` next to it.)
+
+Why bother? Because the worst failure mode on a GPU cluster isn't a crash — it's a job that **silently runs on CPU**. If `--nv` didn't take, or the node's driver is off, or you forgot the flag, JAX just falls back to CPU and trains... maybe 50x slower. You'd wait days in the `akya-cuda` queue, finally start, and only notice from the loss curve crawling. Printing `jax.device_count()` first turns that into a **fail-fast**: you see `JAX visible devices = 0` in the log immediately and kill the job instead of burning a day of allocation on a CPU run. Cheap check, enormous payoff.
+
+> **Lesson** — On a GPU cluster the dangerous failure is silent CPU fallback, not a crash. Assert `jax.device_count()` at the top of every job so a mis-allocated run dies loud and early.
+
+## War stories: 6 gotchas that cost me real time
+
+Everything above was the clean version. Here is what actually happened — six failures, each one a lesson I only learned by hitting it.
+
+**LESSON: A single-core CPU step can blow your wall-clock budget.**
+What happened: my `compute_partitions` prep step timed out at the 40-minute mark on the full 768³ volume. Why: it is a single-core job, ~9 s per label × 1756 labels ≈ 4–5 hours — there was never any chance it finished in 40 minutes. Fix: I iterate on a small 192³ crop (about 12 s end to end), and run the full volume as its own long CPU batch job on a partition like `hamsi` with a multi-hour `--time`. Match the time limit to the actual work, not to your impatience.
+
+**LESSON: Submit from /arf/scratch, never from /arf/home.**
+What happened: I ran `srun` from my home directory and SLURM rejected it outright — *"please run your jobs from /arf/scratch"*. Why: home is the small persistent space; the scheduler wants jobs launched from scratch. Fix: `cd` first, every time.
+
+```bash
+cd /arf/scratch/avural/liconn-ffn-truba
+sbatch liconn_real/liconn_real_1gpu.sbatch
+```
+
+**LESSON: A full GPU partition means a multi-day wait — plan around it, don't stare at it.**
+What happened: `akya-cuda` was full (15 of 16 nodes allocated, 1 draining), so my estimated start was about 5 days out. Why: it is a shared national cluster and the GPU queue is contended. Fix: I do all my smoke tests and quick iteration on `debug` (capped ~4 hours, but it starts *fast*) and let the long real run sit patiently in `akya-cuda`.
+
+```bash
+sbatch -p debug liconn_real/liconn_real_1gpu.sbatch   # quick smoke test, starts fast
+squeue -u avural                                       # PD = pending, R = running
+sinfo -p akya-cuda                                     # see how full the GPU partition is
+```
+
+**LESSON: A dependency is only as reliable as the job it waits on.**
+What happened: I chained a smoke job to a prep job with `--dependency=afterok:<prep_id>`, and the smoke job died with state `DependencyNeverSatisfied` — it never ran. Why: the prep job timed out (gotcha #1), and a timeout is a *failure*, so `afterok` was never satisfied. Fix: I stopped chaining. I produce the coords first, confirm they exist, then submit the training with no dependency at all.
+
+**LESSON: Not every scary line in the log is an error.**
+What happened: `compute_partitions` printed `cuInit ... error 303` and I assumed something was broken. Why: it ran on a GPU-less node — but it is a CPU job, so there is no GPU to initialize. The line is a harmless warning. Fix: ignore it. Learn which of your logs' red lines are real before you go chasing them.
+
+**LESSON: `N/A` start time usually means "blocked", not "broken".**
+What happened: `squeue --start` showed `N/A` for my GPU job's estimated start. Why: the job was waiting on a dependency, and SLURM will not estimate a start time while a job is blocked. Fix: once the dependency clears, `squeue --start -j <id>` works again. When I want an answer immediately, I ask the scheduler directly without committing:
+
+```bash
+sbatch --test-only liconn_real/liconn_real_1gpu.sbatch   # prints when it WOULD start
+```
+
+## Where this goes next
+
+A few threads I'm pulling on from here:
+
+- **Full data.** Promote training off the 192³ crop onto the real 768³ volume — same `liconn_real_4gpu.sbatch`, no code change, just the long queue and patience.
+- **A 1-vs-2-vs-4-GPU scaling plot.** JAX shards the batch across the device mesh automatically (global batch = per-device batch × number of GPUs), so I can run the same script at 1, 2, and 4 GPUs and plot steps/sec. That scaling curve is going straight into the thesis.
+- **Inference as a SLURM job array.** Split the volume into bounding boxes and let a job array fan them out across the cluster in parallel, instead of grinding through them one at a time.
+
+None of these gotchas were obvious beforehand, and every one of them is now a thirty-second fix. That is the whole game on an HPC cluster — you trade a confusing afternoon once for a checklist you keep forever. Ask the queue, work on the right node, in the right folder, inside the container, and rescue your results. Keep going; the cluster rewards stubbornness.

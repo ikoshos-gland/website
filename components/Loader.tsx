@@ -1,7 +1,9 @@
 import React from 'react';
+import { useContent } from '../i18n/LanguageContext';
 const brainLoader = '/brain-loader.png';
 
 const Loader: React.FC = () => {
+  const { loader } = useContent();
   return (
     <div className="fixed inset-0 z-[100] bg-[#0E0F11] flex flex-col items-center justify-center overflow-hidden">
       <style>
@@ -85,7 +87,7 @@ const Loader: React.FC = () => {
       >
         <img
           src={brainLoader}
-          alt="Loading Brain"
+          alt={loader.brainAlt}
           className="w-full h-full object-contain animate-pulse drop-shadow-[0_0_15px_rgba(214,255,79,0.3)]"
         />
         {/* Glitch/Ghost effect layers */}
@@ -106,15 +108,15 @@ const Loader: React.FC = () => {
       {/* Text */}
       <div className="relative">
         <h2 className="font-mono text-[#D6FF4F] text-sm tracking-[0.5em] uppercase animate-pulse">
-          Loading...
+          {loader.loading}
         </h2>
         {/* Shadow under text */}
         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[800px] h-4 bg-[#D6FF4F] opacity-20 blur-xl rounded-[100%]"></div>
         <div className="absolute top-0 left-0 w-full h-full text-cyan-400 opacity-50 blur-[1px] animate-[vibrate_0.2s_infinite] pointer-events-none mix-blend-screen" aria-hidden="true">
-          Loading...
+          {loader.loading}
         </div>
         <div className="absolute top-0 left-0 w-full h-full text-red-500 opacity-50 blur-[1px] animate-[vibrate_0.2s_infinite_reverse] pointer-events-none mix-blend-screen" aria-hidden="true">
-          Loading...
+          {loader.loading}
         </div>
       </div>
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowRight, RotateCw } from 'lucide-react';
+import { useContent } from '../i18n/LanguageContext';
 
 interface FlashCardProps {
   subtitle: string;
@@ -9,6 +10,7 @@ interface FlashCardProps {
 }
 
 const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, description }) => {
+  const c = useContent();
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -40,7 +42,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
             </h3>
             <div className="hidden sm:flex items-center gap-2 mt-2 sm:mt-4 text-[#A1A1A6] text-[10px] sm:text-xs uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <RotateCw size={10} className="sm:w-3 sm:h-3" />
-              <span>Click to flip</span>
+              <span>{c.categories.flipHint}</span>
             </div>
           </div>
         </div>
@@ -49,7 +51,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
         <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl sm:rounded-3xl border border-[#23252B] bg-[#15171B] p-2 sm:p-4 md:p-6 flex flex-col justify-center overflow-y-auto no-scrollbar">
           <div className="h-full flex flex-col justify-center">
             <h4 className="text-[#D6FF4F] font-heading text-[10px] sm:text-base md:text-lg mb-1 sm:mb-4 leading-tight border-b border-[#23252B] pb-1 sm:pb-2">
-              Key Achievements
+              {c.categories.keyAchievements}
             </h4>
             <ul className="space-y-1 sm:space-y-3 md:space-y-4">
               {description.map((point, i) => (
@@ -60,7 +62,7 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
               ))}
             </ul>
             <div className="mt-2 sm:mt-8 pt-1 sm:pt-4 border-t border-[#23252B] flex justify-end">
-              <span className="text-[6px] sm:text-[10px] uppercase tracking-widest text-[#52525B]">Tap to return</span>
+              <span className="text-[6px] sm:text-[10px] uppercase tracking-widest text-[#52525B]">{c.categories.tapToReturn}</span>
             </div>
           </div>
         </div>
@@ -70,11 +72,12 @@ const FlashCard: React.FC<FlashCardProps> = ({ subtitle, title, image, descripti
 };
 
 const Categories: React.FC = () => {
+  const c = useContent();
   const categories: FlashCardProps[] = [
     {
       subtitle: "TUSEB PROJECT",
       title: "1.5 Year Tuseb Embedded Machine Learning Scholar",
-      image: "https://i.ibb.co/JWpD5p89/Gemini-Generated-Image-4cjhe94cjhe94cjh.png",
+      image: "/img/category-1.webp",
       description: [
         "Created graphs, charts and other visualizations (Manim package) to convey results of data analysis using python.",
         "Worked with LSTM + CNN, Random Forest and Gaussian process machine learning models to interpret our EMG data.",
@@ -84,7 +87,7 @@ const Categories: React.FC = () => {
     {
       subtitle: "Internship Project",
       title: "1 Year Long-Internship in KUTTAM",
-      image: "https://i.ibb.co/zTsqcFL2/Gemini-Generated-mage-kjwbhekjwbhekjwb.png",
+      image: "/img/category-2.webp",
       description: [
         "KUTTAM: Koç University Research Center for Translational Medicine.",
         "Studies Expansion Microscopy Techniques to surpass light diffraction limit.",
@@ -117,13 +120,13 @@ const Categories: React.FC = () => {
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-8 sm:mb-12 gap-6 sm:gap-8">
         <div>
           <span className="text-[10px] font-mono text-[#D6FF4F] block mb-3 sm:mb-4 border-b border-[#23252B] w-fit pb-1 tracking-widest">
-            01 — EXPERTISE
+            {c.categories.sectionLabel}
           </span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-[#F5F5F5] font-heading font-medium tracking-tight leading-tight">
-            My Internship and Projects
+            {c.categories.heading}
           </h2>
           <a href="#" className="mt-6 sm:mt-8 inline-flex items-center gap-2 sm:gap-3 bg-[#23252B] px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#F5F5F5] transition-colors hover:bg-[#D6FF4F] hover:text-[#0E0F11]">
-            All Projects
+            {c.categories.allProjectsCta}
             <ArrowRight size={14} className="sm:w-4 sm:h-4" />
           </a>
         </div>
@@ -131,7 +134,13 @@ const Categories: React.FC = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         {categories.map((cat, index) => (
-          <FlashCard key={index} {...cat} />
+          <FlashCard
+            key={index}
+            image={cat.image}
+            subtitle={c.categories.items[index].subtitle}
+            title={c.categories.items[index].title}
+            description={c.categories.items[index].description as unknown as string[]}
+          />
         ))}
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { useContent } from '../i18n/LanguageContext';
 
 interface Publication {
   year: string;
@@ -83,6 +84,7 @@ const PublicationCard: React.FC<Publication> = ({ year, journal, journalColor, t
 };
 
 const Publications: React.FC = () => {
+  const c = useContent();
   const publications: Publication[] = [
     {
       year: "2025",
@@ -119,19 +121,29 @@ const Publications: React.FC = () => {
     <div className="py-12 sm:py-16 md:py-24 px-4 md:px-8 max-w-[1550px] mx-auto border-t border-[#23252B]">
       <div className="flex flex-col items-center text-center mb-8 sm:mb-12 md:mb-16">
         <span className="text-[10px] font-mono text-[#D6FF4F] block mb-4 sm:mb-6 border-b border-[#23252B] w-fit pb-1 tracking-widest">
-          04 — PUBLICATIONS
+          {c.publications.sectionLabel}
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-[#F5F5F5] font-heading font-medium tracking-tight mb-3 sm:mb-4">
-          Publications
+          {c.publications.heading}
         </h2>
         <p className="text-[#A1A1A6] text-sm sm:text-base md:text-lg max-w-xl px-4">
-          My Published Articles
+          {c.publications.subheading}
         </p>
       </div>
 
       <div className="flex flex-col gap-3 sm:gap-4">
         {publications.map((pub, index) => (
-          <PublicationCard key={index} {...pub} />
+          <PublicationCard
+            key={index}
+            year={pub.year}
+            journalColor={pub.journalColor}
+            link={pub.link}
+            journal={c.publications.items[index].journal}
+            title={c.publications.items[index].title}
+            authors={c.publications.items[index].authors}
+            metricLabel={c.publications.items[index].metricLabel}
+            metricValue={c.publications.items[index].metricValue}
+          />
         ))}
       </div>
     </div>

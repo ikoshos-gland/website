@@ -44,3 +44,6 @@ coverage/
 *.pem
 *.key
 .cache/
+
+# Blog drafts (not published)
+content/_blog_drafts/

@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mertoshi — Blog mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@300;400;500&family=Great+Vibes&family=Space+Mono:wght@400;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+  :root{
+    --bg:#0E0F11; --surface:#15171B; --surface2:#0A0B0D; --hair:#23252B;
+    --ink:#B7B9BF; --ink-bright:#ECEDEE; --muted:#7C7E85;
+    --gold-a:#FFD700; --gold-b:#B8860B; --silver-a:#F5F5F5; --silver-b:#9A9A9A; --lime:#D6FF4F;
+    --serif:'Instrument Serif',serif; --head:'Space Grotesk',sans-serif; --body:'Inter',sans-serif;
+    --mono:'Space Mono',monospace; --script:'Great Vibes',cursive;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-weight:300;
+       line-height:1.8;font-size:18px;-webkit-font-smoothing:antialiased}
+  ::selection{background:rgba(255,215,0,.18)}
+  .gold{background:linear-gradient(135deg,var(--gold-a),var(--gold-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .silver{background:linear-gradient(135deg,var(--silver-a),var(--silver-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* reading-progress "ink nib" on the left margin */
+  .nib-track{position:fixed;top:0;left:0;width:2px;height:100vh;background:var(--hair);z-index:50}
+  .nib-fill{position:absolute;top:0;left:0;width:100%;height:100%;transform:scaleY(0);transform-origin:top;
+            background:linear-gradient(180deg,var(--gold-a),var(--gold-b))}
+
+  .topbar{max-width:1080px;margin:0 auto;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;
+          font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+  .topbar a{color:var(--muted);text-decoration:none}
+  .topbar a:hover{color:var(--ink-bright)}
+
+  article{max-width:1080px;margin:0 auto;padding:0 28px 120px}
+  .col{max-width:720px;margin:0 auto}
+
+  .kicker{font-family:var(--mono);font-size:12.5px;letter-spacing:.28em;text-transform:uppercase;margin:48px 0 22px}
+  h1.title{font-family:var(--serif);font-style:italic;font-weight:400;font-size:60px;line-height:1.08;
+           letter-spacing:.01em;margin:0 0 20px;color:var(--ink-bright)}
+  .deck{font-size:20px;color:var(--muted);font-weight:300;margin:0 0 30px;max-width:600px}
+  .byline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;
+          letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+          padding-bottom:30px;border-bottom:1px solid var(--hair)}
+  .byline .name{font-family:var(--script);font-size:26px;letter-spacing:0;text-transform:none;color:var(--silver-a)}
+  .chip{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;padding:3px 9px;border:1px solid var(--hair);border-radius:999px}
+  .chip.compute{color:var(--silver-a)}
+  .chip.live{color:var(--lime);border-color:rgba(214,255,79,.35)}
+
+  p{margin:26px 0}
+  .lead{margin-top:34px}
+  .dropcap{float:left;font-family:var(--serif);font-weight:400;font-size:78px;line-height:1;padding:.06em .02em 0 0;margin:0 .14em 0 0;
+        background:linear-gradient(135deg,var(--gold-a),var(--gold-b));-webkit-background-clip:text;background-clip:text;color:transparent}
+  h2.sec{font-family:var(--head);font-weight:500;font-size:15px;letter-spacing:.06em;color:var(--ink-bright);
+         margin:64px 0 10px;display:flex;align-items:center;gap:12px}
+  h2.sec .tick{font-family:var(--mono);font-size:13px;color:transparent;background:linear-gradient(135deg,var(--gold-a),var(--gold-b));-webkit-background-clip:text;background-clip:text}
+  em{color:var(--ink-bright);font-style:italic;font-family:var(--serif)}
+  a.link{color:var(--ink-bright);text-decoration:none;border-bottom:1px solid rgba(255,215,0,.4);transition:.3s}
+  a.link:hover{border-color:var(--gold-a)}
+
+  /* margin note (Distill-style aside) */
+  .aside{font-family:var(--body);font-size:14.5px;line-height:1.65;color:var(--muted);
+         border-left:2px solid;border-image:linear-gradient(180deg,var(--gold-a),var(--gold-b)) 1;
+         padding-left:14px;margin:30px 0}
+  @media(min-width:1080px){
+    .aside{float:right;clear:right;width:230px;margin-right:-274px;margin-top:6px}
+  }
+  .aside b{color:var(--gold-a);font-weight:500;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:4px}
+
+  /* display equation */
+  .eq{margin:34px 0;padding:22px;background:var(--surface);border:1px solid var(--hair);border-radius:12px;overflow-x:auto;text-align:center;font-size:17px}
+
+  /* interactive figure */
+  .figure{margin:40px 0}
+  .panel{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:20px 20px 14px}
+  .ctrl{display:flex;align-items:center;gap:14px;margin:0 0 12px}
+  .ctrl label{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);min-width:118px}
+  .ctrl output{font-family:var(--mono);font-size:13px;color:var(--gold-a);min-width:30px;text-align:right}
+  input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:3px;border-radius:3px;background:var(--hair);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+        background:linear-gradient(135deg,var(--gold-a),var(--gold-b));cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--gold-a);cursor:pointer}
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);
+       background:transparent;border:1px solid var(--hair);border-radius:8px;padding:7px 12px;cursor:pointer;transition:.25s}
+  .btn:hover{border-color:var(--silver-b);color:var(--ink-bright)}
+  figcaption{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6}
+  figcaption b{color:var(--silver-a);font-weight:400}
+
+  /* console pane (compute) */
+  .console{background:var(--surface2);border:1px solid var(--hair);border-radius:12px;font-family:var(--mono);font-size:13px;margin:34px 0;overflow:hidden}
+  .console .bar{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--hair)}
+  .console .dot{width:9px;height:9px;border-radius:50%;background:var(--hair)}
+  .console .ttl{margin-left:8px;color:var(--muted);font-size:11px;letter-spacing:.1em}
+  .console pre{margin:0;padding:14px 16px;line-height:1.75;white-space:pre-wrap;color:var(--ink)}
+  .console .pr{color:var(--lime)}.console .cm{color:var(--muted)}.console .ok{color:var(--silver-a)}
+
+  /* code block */
+  .code{background:var(--surface2);border:1px solid var(--hair);border-radius:12px;margin:34px 0;overflow:hidden}
+  .code .head{display:flex;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--hair);
+              font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em}
+  .code pre{margin:0;padding:14px 16px;font-family:var(--mono);font-size:13px;line-height:1.75;overflow-x:auto;color:var(--ink)}
+  .kw{color:#E0B341}.st{color:#A7C886}.cm{color:var(--muted)}.fn{color:var(--silver-a)}
+
+  /* specimen figure */
+  .specimen{margin:40px 0}
+  .specimen .frame{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--surface)}
+  .specimen img{display:block;width:100%;height:auto;filter:saturate(.95)}
+
+  .pull{font-family:var(--serif);font-style:italic;font-size:27px;line-height:1.35;margin:48px 0;color:var(--ink-bright);text-align:center}
+
+  footer.post{margin-top:70px;padding-top:26px;border-top:1px solid var(--hair);display:flex;justify-content:space-between;
+              font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  footer.post a{color:var(--muted);text-decoration:none}footer.post a:hover{color:var(--gold-a)}
+  .note-banner{max-width:720px;margin:30px auto 0;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+               text-transform:uppercase;color:var(--muted);text-align:center;opacity:.6}
+</style>
+</head>
+<body>
+<div class="nib-track"><div class="nib-fill" id="nibfill"></div></div>
+
+<div class="topbar">
+  <a href="/">← Mertoshi</a>
+  <span>The Logbook · Mockup</span>
+</div>
+
+<article>
+  <div class="col">
+    <div class="kicker"><span class="gold">№ 001</span> · Computational · Lesson</div>
+    <h1 class="title">Feeling the <span class="gold">Kernel</span><br>A visual note on Gaussian processes</h1>
+    <p class="deck">A function isn't a fixed line — it's a distribution you can shape. Drag a slider and watch the prior breathe.</p>
+    <div class="byline">
+      <span class="name">Mert Koca</span>
+      <span>2026 · 06 · 23</span><span>·</span><span>8 min</span>
+      <span class="chip compute">Compute</span>
+      <span class="chip live">Interactive</span>
+    </div>
+
+    <p class="lead"><span class="dropcap">G</span>aussian processes sound intimidating until you see one move. The core idea is almost playful: instead of fitting <em>one</em> function to your data, you keep a whole cloud of plausible functions, and let the data narrow the cloud. Everything else is bookkeeping over that cloud.</p>
+
+    <h2 class="sec"><span class="tick">01</span> The intuition</h2>
+    <p>Before any data, a GP is defined entirely by its <em>kernel</em> — a function that says how related two points are. The most common one, the RBF kernel, says: points that are close should have similar values, and that similarity decays smoothly with distance.</p>
+
+    <aside class="aside"><b>note to self</b>The length scale ℓ is the only knob that ever confused my students. Showing it as a slider fixed that in one afternoon.</aside>
+
+    <p>Formally, the covariance between two inputs $x$ and $x'$ is</p>
+    <div class="eq">$$k(x,x') \;=\; \sigma^2 \,\exp\!\left(-\,\frac{\lVert x - x' \rVert^2}{2\,\ell^{2}}\right)$$</div>
+    <p>Two knobs: the amplitude $\sigma$ sets how far functions wander, and the length scale $\ell$ sets how quickly they wiggle. The figure below draws three functions straight from this prior. Move the sliders and feel what each parameter does.</p>
+
+    <figure class="figure">
+      <div class="panel">
+        <div class="ctrl"><label>Length scale ℓ</label><input id="ls" type="range" min="0.2" max="3" step="0.1" value="1"><output id="lso">1.0</output></div>
+        <div class="ctrl"><label>Amplitude σ</label><input id="amp" type="range" min="0.3" max="2" step="0.1" value="1"><output id="ampo">1.0</output></div>
+        <div class="ctrl" style="margin-bottom:14px"><button class="btn" id="resample">↻ Resample functions</button></div>
+        <div style="position:relative;height:280px;width:100%"><canvas id="gp"></canvas></div>
+      </div>
+      <figcaption><b>Fig. 1</b> — Three functions sampled from a Gaussian-process prior with an RBF kernel. Drag <b>length scale</b> to make them smoother or wigglier; the silver band is the ±2σ range.</figcaption>
+    </figure>
+
+    <h2 class="sec"><span class="tick">02</span> On the cluster</h2>
+    <p>When the kernel matrix gets large, you stop doing this in a notebook and start doing it on a node. Here is the actual job I submit on TRUBA — every compute post carries its real run, copy-pasteable:</p>
+
+    <div class="console">
+      <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ttl">mert@truba:~/gp</span></div>
+      <pre><span class="pr">mert@truba:~$</span> sbatch --partition=akya-cuda gp_fit.slurm
+Submitted batch job 4827193
+<span class="pr">mert@truba:~$</span> squeue -u mert
+   JOBID  PARTITION   NAME    ST   TIME
+ 4827193  akya-cuda   gp_fit   R   0:14
+<span class="cm"># 4096×4096 kernel, Cholesky on GPU</span>
+<span class="ok">✓ marginal log-likelihood: -1283.4</span></pre>
+    </div>
+
+    <div class="code">
+      <div class="head"><span>gp_fit.py</span><span>python</span></div>
+      <pre><span class="kw">def</span> <span class="fn">rbf</span>(x, xp, sigma, ell):
+    d2 = (x[:, <span class="kw">None</span>] - xp[<span class="kw">None</span>, :]) ** <span class="st">2</span>
+    <span class="kw">return</span> sigma**<span class="st">2</span> * jnp.<span class="fn">exp</span>(-d2 / (<span class="st">2</span> * ell**<span class="st">2</span>))  <span class="cm"># the kernel above</span></pre>
+    </div>
+
+    <figure class="specimen">
+      <div class="frame"><img src="/img/case-1.webp" alt="specimen figure placeholder" loading="lazy"></div>
+      <figcaption><b>Fig. 2</b> — Specimen card. Wet-lab posts drop microscopy frames here with the same numbered caption treatment.</figcaption>
+    </figure>
+
+    <p class="pull silver">“A kernel is just a hypothesis about smoothness — and the best way to test a hypothesis is to let someone drag it.”</p>
+
+    <p>That is the whole pitch for this blog: not to <em>tell</em> you how the machine thinks, but to hand you the sliders. <a class="link" href="#">Next lesson — conditioning on data →</a></p>
+
+    <footer class="post">
+      <a href="#">← № 000 · Why a logbook</a>
+      <a href="#">№ 002 · Conditioning →</a>
+    </footer>
+  </div>
+</article>
+<p class="note-banner">— mockup · Dark Distill skin · real fonts &amp; palette —</p>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+  onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<script>
+(function(){
+  var nib=document.getElementById('nibfill');
+  function onScroll(){var h=document.documentElement;var p=h.scrollTop/((h.scrollHeight-h.clientHeight)||1);nib.style.transform='scaleY('+Math.min(1,Math.max(0,p))+')';}
+  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  function start(){
+    if(typeof Chart==='undefined'){return setTimeout(start,60);}
+    var N=100,K=3,M=30,xs=[];for(var i=0;i<N;i++)xs.push(-5+10*i/(N-1));
+    function randn(){var u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+    var draws=[];function reseed(){draws=[];for(var k=0;k<K;k++){var w=[],b=[],z=[];for(var m=0;m<M;m++){w.push(randn());b.push(2*Math.PI*Math.random());z.push(randn());}draws.push({w:w,b:b,z:z});}}
+    function sample(d,ls,amp){var o=[],s2=amp*Math.sqrt(2/M);for(var i=0;i<N;i++){var x=xs[i],s=0;for(var m=0;m<M;m++)s+=d.z[m]*Math.cos((d.w[m]/ls)*x+d.b[m]);o.push({x:x,y:s2*s});}return o;}
+    function band(sg,amp){var o=[];for(var i=0;i<N;i++)o.push({x:xs[i],y:sg*2*amp});return o;}
+    var ls=document.getElementById('ls'),amp=document.getElementById('amp');
+    var gold='rgba(255,215,0,0.92)',silver='rgba(245,245,245,0.10)',grid='rgba(255,255,255,0.055)',tick='#5f6066';
+    function build(){var L=parseFloat(ls.value),A=parseFloat(amp.value),ds=[];
+      ds.push({data:band(1,A),borderWidth:0,pointRadius:0,fill:'+1',backgroundColor:silver});
+      ds.push({data:band(-1,A),borderWidth:0,pointRadius:0,fill:false});
+      for(var k=0;k<K;k++)ds.push({data:sample(draws[k],L,A),borderColor:gold,borderWidth:1.6,pointRadius:0,tension:0.25,fill:false});
+      ds.push({data:[{x:-5,y:0},{x:5,y:0}],borderColor:tick,borderWidth:1,borderDash:[4,4],pointRadius:0,fill:false});
+      return ds;}
+    reseed();
+    var ch=new Chart(document.getElementById('gp'),{type:'line',data:{datasets:build()},
+      options:{animation:false,responsive:true,maintainAspectRatio:false,
+        scales:{x:{type:'linear',min:-5,max:5,grid:{color:grid},ticks:{color:tick,maxTicksLimit:6}},
+                y:{min:-6.5,max:6.5,grid:{color:grid},ticks:{color:tick,maxTicksLimit:5}}},
+        plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+    function fit(){try{ch.resize();}catch(e){}}
+    requestAnimationFrame(fit);setTimeout(fit,120);setTimeout(fit,400);
+    window.addEventListener('resize',fit);window.addEventListener('load',fit);
+    function refresh(){document.getElementById('lso').textContent=parseFloat(ls.value).toFixed(1);document.getElementById('ampo').textContent=parseFloat(amp.value).toFixed(1);ch.data.datasets=build();ch.update();}
+    ls.addEventListener('input',refresh);amp.addEventListener('input',refresh);
+    document.getElementById('resample').addEventListener('click',function(){reseed();refresh();});
+  }
+  start();
+})();
+</script>
+</body>
+</html>

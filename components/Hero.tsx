@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 // Lazy load Spline for better performance - only on desktop
 const Spline = lazy(() => import('@splinetool/react-spline'));
 import ScrambleText from './ScrambleText';
+import { useContent } from '../i18n/LanguageContext';
 
 // Mobile detection hook for performance optimization
 const useIsMobile = () => {
@@ -32,22 +33,21 @@ const Hero: React.FC = () => {
   const [shouldLoadSpline, setShouldLoadSpline] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const { hero } = useContent();
 
   useEffect(() => {
-    // Only load Spline on desktop for performance
-    if (!isMobile) {
-      setShouldLoadSpline(true);
+    // Desktop only — and defer the ~4MB Spline engine to idle AFTER first paint
+    // so its parse/WASM-init never fights the loader-dismissal frame.
+    if (isMobile) return;
+    const load = () => setShouldLoadSpline(true);
+    const w = window as any;
+    if (typeof w.requestIdleCallback === 'function') {
+      const id = w.requestIdleCallback(load, { timeout: 2500 });
+      return () => w.cancelIdleCallback?.(id);
     }
+    const id = window.setTimeout(load, 1500);
+    return () => window.clearTimeout(id);
   }, [isMobile]);
-
-  // Preconnect to Spline CDN for faster loading
-  useEffect(() => {
-    const link = document.createElement('link');
-    link.rel = 'preconnect';
-    link.href = 'https://prod.spline.design';
-    document.head.appendChild(link);
-    return () => document.head.removeChild(link);
-  }, []);
 
   useEffect(() => {
     // Use Intersection Observer to detect when hero is out of view
@@ -66,94 +66,79 @@ const Hero: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const updateColors = (factor: number) => {
-      if (!heroRef.current) return;
+    const hero = heroRef.current;
+    if (!hero) return;
 
-      // Silver/Metallic
-      const silverStart = [245, 245, 245];
-      const silverEnd = [160, 160, 160];
+    const silverStart = [245, 245, 245];
+    const silverEnd = [160, 160, 160];
+    const goldStart = [255, 215, 0];
+    const goldEnd = [184, 134, 11];
 
-      // Gold/Premium
-      const goldStart = [255, 215, 0];
-      const goldEnd = [184, 134, 11];
-
-      // Main Text: Default (factor 0) = Gold, Hover (factor 1) = Silver
+    const applyFactor = (factor: number) => {
+      // Main Text: Default (0) = Gold, Hover (1) = Silver
       const mainStart = interpolateColor(goldStart, silverStart, factor);
       const mainEnd = interpolateColor(goldEnd, silverEnd, factor);
-
-      // Machina Text: Default (factor 0) = Silver, Hover (factor 1) = Gold
+      // Machina Text: Default (0) = Silver, Hover (1) = Gold
       const machinaStart = interpolateColor(silverStart, goldStart, factor);
       const machinaEnd = interpolateColor(silverEnd, goldEnd, factor);
-
       const currentShadow = interpolateColor([0, 0, 0], [139, 69, 19], factor * 0.5);
 
-      heroRef.current.style.setProperty('--main-gradient-start', mainStart);
-      heroRef.current.style.setProperty('--main-gradient-end', mainEnd);
-      heroRef.current.style.setProperty('--machina-gradient-start', machinaStart);
-      heroRef.current.style.setProperty('--machina-gradient-end', machinaEnd);
-      heroRef.current.style.setProperty('--text-shadow-color', `rgba(${currentShadow}, 0.6)`);
+      hero.style.setProperty('--main-gradient-start', mainStart);
+      hero.style.setProperty('--main-gradient-end', mainEnd);
+      hero.style.setProperty('--machina-gradient-start', machinaStart);
+      hero.style.setProperty('--machina-gradient-end', machinaEnd);
+      hero.style.setProperty('--text-shadow-color', `rgba(${currentShadow}, 0.6)`);
     };
 
-    // Initialize immediately
-    updateColors(0);
+    // Paint the default gold state immediately (also the only state on touch / reduced-motion)
+    applyFactor(0);
 
-    let lastUpdate = 0;
-    const throttleMs = 33; // ~30fps
+    // Skip the per-pointer hover work where it can't be seen or isn't wanted
+    const fine = window.matchMedia('(pointer: fine)').matches;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!fine || reduced) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const now = Date.now();
-      if (now - lastUpdate < throttleMs) return;
-      lastUpdate = now;
+    const headline = hero.querySelector('h1');
+    if (!headline) return;
 
-      if (!heroRef.current) return;
+    // Cache the headline rect; refresh only when it can actually change
+    // (scroll/resize, and ResizeObserver for the ScrambleText / font-load reflow).
+    let rect = headline.getBoundingClientRect();
+    const refreshRect = () => { rect = headline.getBoundingClientRect(); };
+    const ro = new ResizeObserver(refreshRect);
+    ro.observe(headline);
 
-      // Get the headline element's position
-      const headline = heroRef.current.querySelector('h1');
-      if (!headline) return;
-
-      const rect = headline.getBoundingClientRect();
-      const textCenterX = rect.left + rect.width / 2;
-      const textCenterY = rect.top + rect.height / 2;
-
-      // Calculate distance from mouse to text center
-      const dx = e.clientX - textCenterX;
-      const dy = e.clientY - textCenterY;
+    // Coalesce pointer moves to one update per animation frame — no per-event
+    // getBoundingClientRect (which forced a synchronous layout every move).
+    let rafId = 0;
+    let pending: { x: number; y: number } | null = null;
+    const flush = () => {
+      rafId = 0;
+      if (!pending) return;
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = pending.x - cx;
+      const dy = pending.y - cy;
       const distance = Math.sqrt(dx * dx + dy * dy);
-
-      // Max distance for effect (300px radius)
-      const maxDistance = 300;
-
-      // Factor: 1 when on text, 0 when far away
-      const factor = Math.max(0, 1 - distance / maxDistance);
-
-      // Silver/Metallic
-      const silverStart = [245, 245, 245];
-      const silverEnd = [160, 160, 160];
-
-      // Gold/Premium
-      const goldStart = [255, 215, 0];
-      const goldEnd = [184, 134, 11];
-
-      // Interpolate based on proximity
-      // Main Text: Default (factor 0) = Gold, Hover (factor 1) = Silver
-      const mainStart = interpolateColor(goldStart, silverStart, factor);
-      const mainEnd = interpolateColor(goldEnd, silverEnd, factor);
-
-      // Machina Text: Default (factor 0) = Silver, Hover (factor 1) = Gold
-      const machinaStart = interpolateColor(silverStart, goldStart, factor);
-      const machinaEnd = interpolateColor(silverEnd, goldEnd, factor);
-
-      const currentShadow = interpolateColor([0, 0, 0], [139, 69, 19], factor * 0.5);
-
-      heroRef.current.style.setProperty('--main-gradient-start', mainStart);
-      heroRef.current.style.setProperty('--main-gradient-end', mainEnd);
-      heroRef.current.style.setProperty('--machina-gradient-start', machinaStart);
-      heroRef.current.style.setProperty('--machina-gradient-end', machinaEnd);
-      heroRef.current.style.setProperty('--text-shadow-color', `rgba(${currentShadow}, 0.6)`);
+      const factor = Math.max(0, 1 - distance / 300); // 300px radius
+      applyFactor(factor);
+      pending = null;
+    };
+    const handleMouseMove = (e: MouseEvent) => {
+      pending = { x: e.clientX, y: e.clientY };
+      if (!rafId) rafId = requestAnimationFrame(flush);
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('scroll', refreshRect, { passive: true });
+    window.addEventListener('resize', refreshRect);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('scroll', refreshRect);
+      window.removeEventListener('resize', refreshRect);
+      ro.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   return (
@@ -230,7 +215,7 @@ const Hero: React.FC = () => {
           </span>
         </h1>
         <p className="mt-4 sm:mt-6 md:mt-8 text-xs sm:text-sm md:text-base lg:text-lg text-gray-400 tracking-[0.2em] sm:tracking-[0.3em] uppercase font-mono text-center px-4">
-          Mind in the Machine, Machine in the Mind
+          {hero.tagline}
         </p>
       </div>
 
@@ -245,7 +230,7 @@ const Hero: React.FC = () => {
           </div>
           <div className="font-mono text-xs sm:text-sm text-gray-400 space-y-3 sm:space-y-4 leading-relaxed tracking-wide text-center">
             <p>
-              Molecular Biotechnology student and future neuroscientist, balancing relentless discipline with a boundless imagination. I strive to push the boundaries of the visible—merging scientific precision with a photographer's eye to illuminate the unseen wonders of the neural world.
+              {hero.bio}
             </p>
             <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="inline-block underline underline-offset-4 decoration-gray-600 hover:decoration-white hover:text-white transition-all pt-2">
               @augst.von.mackenss

@@ -12,39 +12,33 @@ const Process = lazy(() => import('./components/Process'));
 const Publications = lazy(() => import('./components/Philosophy'));
 const Testimonials = lazy(() => import('./components/Testimonials'));
 const Footer = lazy(() => import('./components/Footer'));
-import ChatWidget from './components/ChatWidget';
+const HomeBlog = lazy(() => import('./components/HomeBlog'));
+// Lazy: pulls the react-markdown / remark-gfm stack out of the entry chunk
+const ChatWidget = lazy(() => import('./components/ChatWidget'));
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  // Defer mounting the chat (and its markdown chunk) until the user first opens it
+  const [chatMounted, setChatMounted] = useState(false);
 
   useEffect(() => {
-    // Smart loading: wait for critical resources - non-blocking approach
-    const preloadCriticalResources = async () => {
-      const criticalImages = [
-        'https://i.ibb.co/rfqN2BC2/Whats-App-mage-2024-10-04-at-20-37-32-526fd566.jpg'
-      ];
+    let cancelled = false;
+    const after = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
-      // Wait for fonts to be ready
-      await document.fonts.ready;
+    // Reveal as soon as fonts are ready, but never block on the font CDN for
+    // more than 800ms (display=swap already prevents invisible text). Keep a
+    // small 400ms floor so the loader doesn't flash — NOT a 500ms floor stacked
+    // on top of fonts + an image. The below-the-fold MyStory image is lazy-loaded
+    // by its own component, so it no longer gates the reveal here.
+    Promise.all([
+      Promise.race([document.fonts.ready, after(800)]),
+      after(400),
+    ]).then(() => {
+      if (!cancelled) setIsLoading(false);
+    });
 
-      // Preload critical images
-      await Promise.all(criticalImages.map(src => {
-        return new Promise<void>((resolve) => {
-          const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = () => resolve();
-          img.src = src;
-        });
-      }));
-
-      // Minimum 500ms for nice loader animation (reduced from 1.5s)
-      // Spline now loads independently in Hero.tsx, no blocking
-      await new Promise(r => setTimeout(r, 500));
-      setIsLoading(false);
-    };
-
-    preloadCriticalResources();
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -61,7 +55,7 @@ function App() {
           transition: 'opacity 0.3s ease-out'
         }}
       >
-        <Navbar onChatClick={() => setIsChatOpen(true)} />
+        <Navbar onChatClick={() => { setChatMounted(true); setIsChatOpen(true); }} />
         <main className="w-full mt-20">
           <Hero />
           <Suspense fallback={<div className="min-h-[200px]" />}>
@@ -72,11 +66,16 @@ function App() {
             <Publications />
             <Process />
             <Testimonials />
+            <HomeBlog />
             <Footer />
           </Suspense>
         </main>
       </div>
-      <ChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      {chatMounted && (
+        <Suspense fallback={null}>
+          <ChatWidget isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+        </Suspense>
+      )}
     </>
   );
 }
