@@ -130,40 +130,6 @@
   .blg-choice-title{font-size:30px}
 }
 
-/* ── Lightning split: bolt cracks down the middle of the shelf choice ──── */
-.blg-choice-grid{position:relative}
-/* the two cards spring apart from the center as the bolt strikes */
-.blg-library .blg-choice-card.lab{animation:blg-split-left .72s cubic-bezier(.2,.75,.2,1) both}
-.blg-library .blg-choice-card.thesis{animation:blg-split-right .72s cubic-bezier(.2,.75,.2,1) both}
-@keyframes blg-split-left{0%{opacity:0;transform:translateX(30px) scale(.985)}100%{opacity:1;transform:none}}
-@keyframes blg-split-right{0%{opacity:0;transform:translateX(-30px) scale(.985)}100%{opacity:1;transform:none}}
-
-.blg-bolt{position:absolute;top:-7%;bottom:-7%;left:50%;width:60px;transform:translateX(-50%);
-  z-index:6;pointer-events:none;display:flex;justify-content:center}
-.blg-bolt-svg{height:100%;width:60px;overflow:visible}
-.blg-bolt-svg path{fill:none;stroke-linecap:round;stroke-linejoin:round}
-.blg-bolt-svg .glow{stroke:var(--gold-a);stroke-width:7;filter:blur(5px);opacity:0;
-  animation:blg-bolt-glow 1.2s ease-out both}
-.blg-bolt-svg .core{stroke:#fff;stroke-width:2.4;stroke-dasharray:1000;stroke-dashoffset:1000;
-  animation:blg-bolt-strike .5s cubic-bezier(.2,.7,.2,1) both}
-@keyframes blg-bolt-strike{0%{stroke-dashoffset:1000;opacity:0}10%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}
-@keyframes blg-bolt-glow{0%{opacity:0}9%{opacity:.95}30%{opacity:.5}100%{opacity:.3}}
-/* a vertical seam of light down the split line, flashing on strike */
-.blg-bolt-flash{position:absolute;top:0;bottom:0;left:50%;width:2px;transform:translateX(-50%);
-  background:linear-gradient(180deg,transparent,rgba(255,215,0,.85),transparent);
-  box-shadow:0 0 44px 13px rgba(255,215,0,.28);opacity:0;
-  animation:blg-bolt-seam 1.2s ease-out both}
-@keyframes blg-bolt-seam{0%{opacity:0}6%{opacity:1}24%{opacity:.4}100%{opacity:.16}}
-
-@media(max-width:760px){.blg-bolt{display:none}
-  .blg-library .blg-choice-card.lab,.blg-library .blg-choice-card.thesis{animation:blg-reveal-in .6s ease-out both}}
-@media(prefers-reduced-motion:reduce){
-  .blg-library .blg-choice-card.lab,.blg-library .blg-choice-card.thesis{animation:none}
-  .blg-bolt-svg .core{animation:none;stroke-dashoffset:0}
-  .blg-bolt-svg .glow{animation:none;opacity:.3}
-  .blg-bolt-flash{animation:none;opacity:.16}
-}
-
 /* SLURM job-flow animation */
 .blg-slurmflow{margin:42px 0}
 .blg-sf{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:24px 20px 16px}

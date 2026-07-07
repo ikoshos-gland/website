@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, BookOpen, FlaskConical } from 'lucide-react';
 import './blog.css';
 import { getPosts } from './posts';
 import { useLang, useContent } from '../i18n/LanguageContext';
 import LanguageSwitcher from '../i18n/LanguageSwitcher';
-import LightningBolt from './LightningBolt';
 
 const THESIS_SLUGS = new Set([
   'a-brain-is-its-connections',
@@ -20,8 +19,6 @@ export default function BlogIndex() {
   const posts = getPosts(lang);
   const labPosts = posts.filter((p) => !p.draft && !THESIS_SLUGS.has(p.slug));
   const section = searchParams.get('section');
-  const [strike, setStrike] = useState(0);
-  const fire = () => setStrike((s) => s + 1);
   const ct = (t: string) => (c.blog.contentType as Record<string, string>)[t] ?? t;
 
   const topbar = (
@@ -46,8 +43,7 @@ export default function BlogIndex() {
           </div>
 
           <div className="blg-choice-grid" aria-label={c.blog.chooseTitle}>
-            <LightningBolt run={strike} />
-            <Link className="blg-choice-card lab" to="/blog?section=lab" onMouseEnter={fire} onFocus={fire}>
+            <Link className="blg-choice-card lab" to="/blog?section=lab">
               <span className="blg-choice-icon" aria-hidden="true">
                 <FlaskConical size={24} strokeWidth={1.7} />
               </span>
@@ -57,7 +53,7 @@ export default function BlogIndex() {
               <span className="blg-choice-cta">{c.blog.openSection}<ArrowRight size={15} strokeWidth={1.8} /></span>
             </Link>
 
-            <Link className="blg-choice-card thesis" to="/thesis" onMouseEnter={fire} onFocus={fire}>
+            <Link className="blg-choice-card thesis" to="/thesis">
               <span className="blg-choice-icon" aria-hidden="true">
                 <BookOpen size={24} strokeWidth={1.7} />
               </span>
