@@ -42,6 +42,69 @@ const markDeckSeen = (slug: string) => {
   }
 };
 
+interface ScrubSection {
+  id: string;
+  title: string;
+  level: 2 | 3;
+  marker: number;
+  top: number;
+}
+
+const makeSectionId = (text: string, index: number) => {
+  const slug = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 70);
+  return `section-${slug || index}`;
+};
+
+const clampPercent = (value: number) => Math.min(100, Math.max(0, value));
+
+function SectionScrubber({
+  sections,
+  activeId,
+  progress,
+  label,
+  onJump,
+}: {
+  sections: ScrubSection[];
+  activeId: string;
+  progress: number;
+  label: string;
+  onJump: (id: string) => void;
+}) {
+  if (sections.length < 2) return null;
+
+  return (
+    <nav
+      className="blg-scrub"
+      aria-label={label}
+      style={{ '--scrub-progress': `${progress}%` } as React.CSSProperties}
+    >
+      <div className="blg-scrub-rail" aria-hidden="true" />
+      <div className="blg-scrub-fill" aria-hidden="true" />
+      <div className="blg-scrub-thumb" aria-hidden="true" />
+      {sections.map((section) => (
+        <button
+          key={section.id}
+          type="button"
+          className={`blg-scrub-point level-${section.level}${section.id === activeId ? ' is-active' : ''}`}
+          style={{ '--scrub-marker': `${section.marker}%` } as React.CSSProperties}
+          onClick={() => onJump(section.id)}
+          aria-label={section.title}
+          aria-current={section.id === activeId ? 'location' : undefined}
+        >
+          <span className="blg-scrub-dot" aria-hidden="true" />
+          <span className="blg-scrub-label">{section.title}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLang();
@@ -49,6 +112,10 @@ export default function BlogPost() {
   const meta = slug ? getMeta(slug, lang) : undefined;
   const [Body, setBody] = useState<React.ComponentType | null>(null);
   const nibRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [scrubSections, setScrubSections] = useState<ScrubSection[]>([]);
+  const [activeSectionId, setActiveSectionId] = useState('');
+  const [scrubProgress, setScrubProgress] = useState(0);
   const ct = (t: string) => (c.blog.contentType as Record<string, string>)[t] ?? t;
 
   // Streaming-deck gating: decide once per slug whether to play the reveal, and
@@ -138,6 +205,112 @@ export default function BlogPost() {
     return () => window.removeEventListener('scroll', onScroll);
   }, [Body, revealed]);
 
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!revealed || !Body || !body) {
+      setScrubSections([]);
+      setActiveSectionId('');
+      setScrubProgress(0);
+      return;
+    }
+
+    let frame = 0;
+    let latestSections: ScrubSection[] = [];
+
+    const updateScrollState = () => {
+      const currentBody = bodyRef.current;
+      if (!currentBody || latestSections.length === 0) return;
+
+      const bodyTop = currentBody.getBoundingClientRect().top + window.scrollY;
+      const bodyBottom = bodyTop + currentBody.offsetHeight;
+      const span = Math.max(1, bodyBottom - bodyTop - window.innerHeight * 0.45);
+      const focusY = window.scrollY + Math.min(260, window.innerHeight * 0.34);
+      const progress = clampPercent(((focusY - bodyTop) / span) * 100);
+
+      let active = latestSections[0]?.id || '';
+      for (const section of latestSections) {
+        if (section.top <= focusY) active = section.id;
+        else break;
+      }
+
+      setScrubProgress(progress);
+      setActiveSectionId(active);
+    };
+
+    const collectSections = () => {
+      const currentBody = bodyRef.current;
+      if (!currentBody) return;
+
+      const headings = Array.from(
+        currentBody.querySelectorAll<HTMLHeadingElement>('h2, h3')
+      ).filter((heading) => heading.textContent?.trim());
+
+      const used = new Set<string>();
+      const bodyTop = currentBody.getBoundingClientRect().top + window.scrollY;
+      const bodyBottom = bodyTop + currentBody.offsetHeight;
+      const span = Math.max(1, bodyBottom - bodyTop - window.innerHeight * 0.45);
+
+      latestSections = headings.map((heading, index) => {
+        const title = (heading.textContent || '').replace(/\s+/g, ' ').trim();
+        let id = heading.id || makeSectionId(title, index);
+        while (used.has(id)) id = `${id}-${index + 1}`;
+        used.add(id);
+        heading.id = id;
+
+        const top = heading.getBoundingClientRect().top + window.scrollY;
+        return {
+          id,
+          title,
+          level: heading.tagName === 'H3' ? 3 : 2,
+          marker: clampPercent(((top - bodyTop) / span) * 100),
+          top,
+        };
+      });
+
+      setScrubSections(latestSections);
+      updateScrollState();
+    };
+
+    const scheduleCollect = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(collectSections);
+    };
+
+    const scheduleScrollState = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateScrollState);
+    };
+
+    const imageNodes = Array.from(body.querySelectorAll('img'));
+    imageNodes.forEach((img) => img.addEventListener('load', scheduleCollect));
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined'
+      ? new ResizeObserver(scheduleCollect)
+      : null;
+    resizeObserver?.observe(body);
+
+    scheduleCollect();
+    window.addEventListener('scroll', scheduleScrollState, { passive: true });
+    window.addEventListener('resize', scheduleCollect);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', scheduleScrollState);
+      window.removeEventListener('resize', scheduleCollect);
+      resizeObserver?.disconnect();
+      imageNodes.forEach((img) => img.removeEventListener('load', scheduleCollect));
+    };
+  }, [Body, revealed, metaSlug, lang]);
+
+  const jumpToSection = (id: string) => {
+    const target = document.getElementById(id);
+    if (!target) return;
+    target.scrollIntoView({
+      behavior: reducedMotion() ? 'auto' : 'smooth',
+      block: 'start',
+    });
+  };
+
   const topbar = (
     <div className="blg-topbar">
       <Link to="/">← Mertoshi</Link>
@@ -163,6 +336,15 @@ export default function BlogPost() {
     <div className="blog-root">
       {introBackdrop && heroReady && <BlogIntro key={metaSlug} mode="backdrop" dissolve={revealed} />}
       <div className="blg-nib-track"><div className="blg-nib-fill" ref={nibRef} /></div>
+      {revealed && (
+        <SectionScrubber
+          sections={scrubSections}
+          activeId={activeSectionId}
+          progress={scrubProgress}
+          label={c.blog.tableOfContents}
+          onJump={jumpToSection}
+        />
+      )}
       {topbar}
       <article className="blg-article">
         <div className="blg-col">
@@ -182,7 +364,7 @@ export default function BlogPost() {
                 <span>{fmtDate(meta.date)}</span>
                 <span className={'blg-chip ' + meta.contentType}>{ct(meta.contentType)}</span>
               </div>
-              <div className="blg-body">
+              <div className="blg-body" ref={bodyRef}>
                 <MDXProvider components={mdxComponents}>
                   {Body ? <Body /> : <div className="blg-loading">Loading…</div>}
                 </MDXProvider>
