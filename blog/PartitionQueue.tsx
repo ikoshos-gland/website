@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLang } from '../i18n/LanguageContext';
 
-// "Which queue do you stand in?" — a small squeue/sinfo board. Pick a partition
+// "Which queue do you stand in?",a small squeue/sinfo board. Pick a partition
 // and watch where your job lands: instant R on debug, days of PD on a full
 // akya-cuda. Drives home why you iterate on debug and let the real run wait.
 
@@ -32,27 +32,27 @@ const STR = {
     submit: 'submit here',
     gpu: 'GPU', cpu: 'CPU',
     free: 'free', full: 'full',
-    hint: 'akya-cuda is where the real training runs — and where you wait. debug barely has a line.',
+    hint: 'akya-cuda is where the real training runs,and where you wait. debug barely has a line.',
     picked: (p: string) => `You submitted to ${p}.`,
-    capA: 'The GPU queue', capB: 'is contended on a national cluster — a full', capC: 'can mean a multi-day wait. So I smoke-test everything on', capD: 'and only the long real run waits its turn on', capE: '.',
+    capA: 'The GPU queue', capB: 'is contended on a national cluster,a full', capC: 'can mean a multi-day wait. So I smoke-test everything on', capD: 'and only the long real run waits its turn on', capE: '.',
   },
   tr: {
     title: 'squeue: hangi sıraya gireceksin?',
     submit: 'buraya gönder',
     gpu: 'GPU', cpu: 'CPU',
     free: 'boş', full: 'dolu',
-    hint: 'Gerçek eğitim akya-cuda’da koşar — ve orada beklersin. debug’ta neredeyse sıra yok.',
+    hint: 'Gerçek eğitim akya-cuda’da koşar,ve orada beklersin. debug’ta neredeyse sıra yok.',
     picked: (p: string) => `${p} kuyruğuna gönderdin.`,
-    capA: 'GPU kuyruğu', capB: 'ulusal bir kümede rekabetlidir — dolu bir', capC: 'günlerce bekleme demek olabilir. O yüzden her şeyi', capD: '’ta denerim ve yalnızca uzun gerçek koşu', capE: '’da sırasını bekler.',
+    capA: 'GPU kuyruğu', capB: 'ulusal bir kümede rekabetlidir,dolu bir', capC: 'günlerce bekleme demek olabilir. O yüzden her şeyi', capD: '’ta denerim ve yalnızca uzun gerçek koşu', capE: '’da sırasını bekler.',
   },
   de: {
     title: 'squeue: in welcher Schlange stehst du?',
     submit: 'hier abschicken',
     gpu: 'GPU', cpu: 'CPU',
     free: 'frei', full: 'voll',
-    hint: 'Auf akya-cuda läuft das echte Training — und da wartest du. debug hat kaum eine Schlange.',
+    hint: 'Auf akya-cuda läuft das echte Training,und da wartest du. debug hat kaum eine Schlange.',
     picked: (p: string) => `Du hast an ${p} abgeschickt.`,
-    capA: 'Die GPU-Queue', capB: 'ist auf einem nationalen Cluster umkämpft — ein volles', capC: 'kann Tage Wartezeit bedeuten. Also teste ich alles auf', capD: 'und nur der lange echte Lauf wartet auf', capE: '.',
+    capA: 'Die GPU-Queue', capB: 'ist auf einem nationalen Cluster umkämpft,ein volles', capC: 'kann Tage Wartezeit bedeuten. Also teste ich alles auf', capD: 'und nur der lange echte Lauf wartet auf', capE: '.',
   },
 };
 

@@ -3,31 +3,31 @@ title: "Eine Warteschlange um GPUs bitten: Feldführer eines Biotechnologie-Stud
 date: 2026-06-23
 contentType: compute
 tags: [SLURM, HPC, TRUBA, JAX, GPU]
-excerpt: Ich bin Student der molekularen Biotechnologie, brauchte echte GPUs und hatte nie zuvor einen Supercomputer angefasst. So fühlt sich ein nationaler HPC-Cluster von innen an — die Warteschlange, der Container und die sechs Fehler, die mir die Regeln beibrachten.
+excerpt: Ich bin Student der molekularen Biotechnologie, brauchte echte GPUs und hatte nie zuvor einen Supercomputer angefasst. So fühlt sich ein nationaler HPC-Cluster von innen an, die Warteschlange, der Container und die sechs Fehler, die mir die Regeln beibrachten.
 cover: /img/case-4.webp
 draft: false
 ---
 <DropCap>D</DropCap>as Erste, was TRUBA je zu mir sagte, war *nein.*
 
-Ich hatte ein Flood-Filling-Netz zu trainieren — ein FFN, das Neuronen aus Volumen der Expansionsmikroskopie segmentiert — und mein Laptop hatte seine Haltung klargemacht: lieber schmelzen als fertig werden. Also besorgte ich mir ein Konto auf TRUBA, dem nationalen HPC-Cluster der Türkei, loggte mich per SSH ein, tippte `python train.py` wie tausend Mal zuvor, und die Maschine... tat nichts. Keine GPU. Kein Absturz. Nicht einmal ein Fehler, den ich googeln konnte. Nur eine Shell, die offensichtlich davon ausging, dass ich längst wüsste, wie das hier läuft.
+Ich hatte ein Flood-Filling-Netz zu trainieren, ein FFN, das Neuronen aus Volumen der Expansionsmikroskopie segmentiert, und mein Laptop hatte seine Haltung klargemacht: lieber schmelzen als fertig werden. Also besorgte ich mir ein Konto auf TRUBA, dem nationalen HPC-Cluster der Türkei, loggte mich per SSH ein, tippte `python train.py` wie tausend Mal zuvor, und die Maschine... tat nichts. Keine GPU. Kein Absturz. Nicht einmal ein Fehler, den ich googeln konnte. Nur eine Shell, die offensichtlich davon ausging, dass ich längst wüsste, wie das hier läuft.
 
 Ich wusste nicht, wie das lief. Das ist der Leitfaden, den mir diese Shell hätte reichen sollen.
 
 ## Du führst Dinge nicht aus. Du bittest darum.
 
-Hier ist der eine Satz, der alles aufgeschlossen hat, und ich will ihn vor allem Technischen sagen: **Auf einem Cluster bist du kein Benutzer, der ein Programm ausführt. Du bist ein Kunde, der eine Bestellung aufgibt.**
+Hier ist der eine Satz, der alles aufgeschlossen hat, und ich will ihn vor allem Technischen sagen. Auf einem Cluster bist du kein Benutzer, der ein Programm ausführt. Du bist ein Kunde, der eine Bestellung aufgibt.
 
-Auf meinem Laptop läuft `python train.py`, weil der Laptop *mir* gehört. Auf TRUBA gibt es Hunderte Forscher und einen sehr endlichen Haufen GPUs. Würde jeder sein Training in dem Moment starten, in dem er sich einloggt, würde das Ganze festhängen — zweihundert Jobs, die sich um sechzehn GPU-Knoten prügeln, alle im Schneckentempo, niemand fertig. Also verteilt der Cluster Rechenleistung nicht auf Zuruf. Er verteilt sie über eine **Warteschlange**.
+Auf meinem Laptop läuft `python train.py`, weil der Laptop *mir* gehört. Auf TRUBA gibt es Hunderte Forscher und einen sehr endlichen Haufen GPUs. Würde jeder sein Training in dem Moment starten, in dem er sich einloggt, würde das Ganze festhängen, zweihundert Jobs, die sich um sechzehn GPU-Knoten prügeln, alle im Schneckentempo, niemand fertig. Also verteilt der Cluster Rechenleistung nicht auf Zuruf. Er verteilt sie über eine **Warteschlange**.
 
-Du schreibst genau auf, was du brauchst — eine GPU, zehn CPU-Kerne, dreißig Minuten — und reichst diese kleine Anfrage einem Programm namens **SLURM**. SLURM ist der Scheduler, der Oberkellner. Er nimmt deine Bestellung, stellt dich in die Reihe, und wenn der Tisch frei wird, setzt er dich, führt deinen Job aus und geht zum Nächsten. Das ist der ganze Denk-Wandel. Sobald er saß, beantworteten sich die Hälfte meiner „Moment, warum ging das nicht"-Fragen von selbst.
+Du schreibst genau auf, was du brauchst, eine GPU, zehn CPU-Kerne, dreißig Minuten, und reichst diese kleine Anfrage einem Programm namens **SLURM**. SLURM ist der Scheduler, der Oberkellner. Er nimmt deine Bestellung, stellt dich in die Reihe, und wenn der Tisch frei wird, setzt er dich, führt deinen Job aus und geht zum Nächsten. Das ist der ganze Denk-Wandel. Sobald er saß, beantworteten sich die Hälfte meiner „Moment, warum ging das nicht"-Fragen von selbst.
 
-Deshalb kann ein Job auch gefühlt ewig im Zustand `PD` — *pending*, wartend — sitzen. Als die GPU-Partition einmal an fünfzehn von sechzehn Knoten voll war, lag mein geschätzter Start **Tage** entfernt. Das ist nicht der Cluster, der kaputt ist. Das ist die Warteschlange, die genau ihre Arbeit tut.
+Deshalb kann ein Job auch gefühlt ewig im Zustand `PD` (pending, wartend) sitzen. Als die GPU-Partition einmal an fünfzehn von sechzehn Knoten voll war, lag mein geschätzter Start **Tage** entfernt. Das ist nicht der Cluster, der kaputt ist. Das ist die Warteschlange, die genau ihre Arbeit tut.
 
 ### Die Lobby und die Werkstatt
 
 Das Zweite, das ich verlernen musste: Die Maschine, in die du dich einloggst, ist nicht die Maschine, die die Arbeit macht.
 
-Beim Einloggen landest du auf einem **login node** — auf TRUBA heißen sie `arf-ui*`. Denk an eine Lobby. Hier bearbeitest du Skripte, verschiebst Dateien und *reichst* Jobs ein. Alle teilen sie sich gleichzeitig, und sie hat exakt null GPUs für dein Training. Etwas Schweres dort laufen zu lassen ist nicht nur langsam, du blockierst die Lobby für alle — und die Admins merken das.
+Beim Einloggen landest du auf einem **login node**, auf TRUBA heißen sie `arf-ui*`. Denk an eine Lobby. Hier bearbeitest du Skripte, verschiebst Dateien und *reichst* Jobs ein. Alle teilen sie sich gleichzeitig, und sie hat exakt null GPUs für dein Training. Etwas Schweres dort laufen zu lassen ist nicht nur langsam, du blockierst die Lobby für alle, und die Admins merken das.
 
 Die eigentliche Pferdestärke wohnt hinten, auf den **compute nodes**. Nach hinten gehst du nie selbst. Der einzige Weg dorthin ist, den Job SLURM zu reichen und *ihn* zu einer freien Maschine tragen zu lassen. Behalte dieses Bild im Kopf:
 
@@ -45,13 +45,13 @@ Bevor du überhaupt bestellen kannst, müssen drei Teile sitzen, und bei jedem l
 ssh avural@172.16.6.11
 ```
 
-Kein VPN, kein Cluster. Es gibt keinen zweiten Schritt, bis dieser funktioniert — ich habe ehrlich peinlich viel Zeit damit verbracht, ein „Netzwerk"-Problem zu debuggen, das nur ein VPN war, das ich zu verbinden vergessen hatte.
+Kein VPN, kein Cluster. Es gibt keinen zweiten Schritt, bis dieser funktioniert. Ich habe ehrlich peinlich viel Zeit damit verbracht, ein „Netzwerk"-Problem zu debuggen, das nur ein VPN war, das ich zu verbinden vergessen hatte.
 
-**Du hast zwei Speicherbereiche, und sie zu verwechseln kostet dich.** Da ist `/arf/home/<user>` — klein, aber *persistent*; hier leben Skripte und Endergebnisse. Und `/arf/scratch/<user>` — groß und schnell, aber **regelmäßig gelöscht**; das ist deine Werkbank. Die Regel ist langweilig und absolut: In scratch wird *gearbeitet*, in home wird *aufbewahrt*. Existiert ein Ergebnis nur in scratch und scratch wird gewischt, ist es weg. Kopiere alles, was dir lieb ist, zurück nach `/arf/home` oder ganz vom Cluster herunter.
+**Du hast zwei Speicherbereiche, und sie zu verwechseln kostet dich.** Da ist `/arf/home/<user>`, klein, aber *persistent*, hier leben Skripte und Endergebnisse. Und `/arf/scratch/<user>`, groß und schnell, aber **regelmäßig gelöscht**, das ist deine Werkbank. Die Regel ist langweilig und absolut: In scratch wird *gearbeitet*, in home wird *aufbewahrt*. Existiert ein Ergebnis nur in scratch und scratch wird gewischt, ist es weg. Kopiere alles, was dir lieb ist, zurück nach `/arf/home` oder ganz vom Cluster herunter.
 
-**Und du installierst deine Software nicht. Du verschiffst sie.** Das hat mich wirklich überrascht. Du machst kein `pip install` von JAX und den Abhängigkeiten auf TRUBA. Alles — JAX, das `ffn`-Paket, bis zur letzten transitiven Abhängigkeit — wird in ein einziges **Apptainer**-Container-Image gebacken, eine `.sif`-Datei. Beim Training trainierst du *innerhalb* dieser Datei. Ich komme darauf zurück, denn es entpuppt sich als eine der interessantesten Beschränkungen des ganzen Systems — aber fürs Erste: Jeder Befehl, den ich ausführe, hat einen Container in sich stecken.
+**Und du installierst deine Software nicht. Du verschiffst sie.** Das hat mich wirklich überrascht. Du machst kein `pip install` von JAX und den Abhängigkeiten auf TRUBA. Alles, JAX, das `ffn`-Paket, bis zur letzten transitiven Abhängigkeit, wird in ein einziges **Apptainer**-Container-Image gebacken, eine `.sif`-Datei. Beim Training trainierst du *innerhalb* dieser Datei. Ich komme darauf zurück, denn es entpuppt sich als eine der interessantesten Beschränkungen des ganzen Systems. Fürs Erste: Jeder Befehl, den ich ausführe, hat einen Container in sich stecken.
 
-<Pull>Frag die Warteschlange, arbeite auf der richtigen Maschine, im richtigen Ordner, im Container — und rette deine Ergebnisse, bevor scratch sie frisst.</Pull>
+<Pull>Frag die Warteschlange, arbeite auf der richtigen Maschine, im richtigen Ordner, im Container, und rette deine Ergebnisse, bevor scratch sie frisst.</Pull>
 
 Dieser Satz ist die ganze Weltsicht. Alles darunter ist nur ich, der SLURM gut genug lernt, um darin zu leben.
 
@@ -76,23 +76,23 @@ Hier der echte Direktiven-Block aus meinem Ein-GPU-Skript:
 #SBATCH -e .../runs/ffn_real_1gpu_%j.err
 ```
 
-In Klartext: `-p akya-cuda` wählt die **Partition** — den Maschinen-Pool — und `akya-cuda` ist der GPU-Pool, wo echtes Training läuft. `-A avural` ist das **Konto**, dem die Rechenzeit belastet wird. `-J` ist nur ein **Name**, damit ich den Job später in der Liste finde. `-N 1` und `-n 1` erbitten einen Knoten und eine Task — ein einzelner Trainingsprozess. `--gres=gpu:1` ist die Zeile, die dir tatsächlich eine GPU verschafft; lass sie weg und du landest ohne GPU auf der GPU-Partition, was genau so nutzlos ist, wie es klingt. `--cpus-per-task=10` passt zur Regel von `akya-cuda`: zehn Kerne pro GPU. `--time=00:30:00` ist eine harte Obergrenze — dazu gleich mehr, denn sie hat Zähne. `--export=NONE` startet den Job aus einer sauberen Umgebung, damit Läufe reproduzierbar sind; der Haken: Das Skript muss dann seine eigene Welt aufbauen. Und die letzten beiden Zeilen leiten stdout und stderr in Job-eigene Logdateien, wobei `%j` zur Job-ID expandiert, damit Läufe sich nicht überschreiben.
+In Klartext. `-p akya-cuda` wählt die **Partition**, den Maschinen-Pool, und `akya-cuda` ist der GPU-Pool, wo echtes Training läuft. `-A avural` ist das **Konto**, dem die Rechenzeit belastet wird. `-J` ist nur ein **Name**, damit ich den Job später in der Liste finde. `-N 1` und `-n 1` erbitten einen Knoten und eine Task, ein einzelner Trainingsprozess. `--gres=gpu:1` ist die Zeile, die dir tatsächlich eine GPU verschafft. Lass sie weg und du landest ohne GPU auf der GPU-Partition, was genau so nutzlos ist, wie es klingt. `--cpus-per-task=10` passt zur Regel von `akya-cuda`, zehn Kerne pro GPU. `--time=00:30:00` ist eine harte Obergrenze, und sie hat Zähne (dazu gleich mehr). `--export=NONE` startet den Job aus einer sauberen Umgebung, damit Läufe reproduzierbar sind, und der Haken ist, dass das Skript dann seine eigene Welt aufbauen muss. Und die letzten beiden Zeilen leiten stdout und stderr in Job-eigene Logdateien, wobei `%j` zur Job-ID expandiert, damit Läufe sich nicht überschreiben.
 
 Etwas, das mich einen Nachmittag vor der falschen Datei kostete:
 
-> **Lektion** — Mit JAX/absl geht der Trainings-Loss auf **stderr**, nicht auf stdout. Die Datei, die du wirklich mit `tail -f` verfolgst, ist also die `_%j.err`, nicht die `.out`. Ich starrte zwanzig Minuten auf eine leere `.out`, überzeugt, der Job hänge.
+> **Lektion:** Mit JAX/absl geht der Trainings-Loss auf **stderr**, nicht auf stdout. Die Datei, die du wirklich mit `tail -f` verfolgst, ist also die `_%j.err`, nicht die `.out`. Ich starrte zwanzig Minuten auf eine leere `.out`, überzeugt, der Job hänge.
 
-Nach den Direktiven macht der Rumpf ein paar Sanity-Checks und startet dann die eigentliche Arbeit durch den Container — eine einzige `apptainer exec`-Zeile. Die zerlege ich gegen Ende; fürs Erste merk dir nur die Form der Datei. Der `#SBATCH`-Block oben ist die *Anfrage*. Alles darunter ist die *Arbeit*.
+Nach den Direktiven macht der Rumpf ein paar Sanity-Checks und startet dann die eigentliche Arbeit durch den Container, eine einzige `apptainer exec`-Zeile. Die zerlege ich gegen Ende. Fürs Erste merk dir nur die Form der Datei. Der `#SBATCH`-Block oben ist die *Anfrage*. Alles darunter ist die *Arbeit*.
 
 ## Die richtige Reihe zum Anstellen wählen
 
-Sobald du den Direktiven-Block lesen kannst, ist die eigentliche Kunst, ihn zu *justieren*. Bittest du um zu wenig, stirbt dein Job; um zu viel, wartest du länger als nötig. Und der größte Hebel sind nicht Kerne oder Speicher — es ist die Partition, in die du einreichst.
+Sobald du den Direktiven-Block lesen kannst, ist die eigentliche Kunst, ihn zu *justieren*. Bittest du um zu wenig, stirbt dein Job. Um zu viel, wartest du länger als nötig. Und der größte Hebel sind nicht Kerne oder Speicher. Es ist die Partition, in die du einreichst.
 
 <PartitionQueue />
 
-Meine Faustregel setzte sich in drei Spuren: **Echtes GPU-Training** geht auf `akya-cuda` — ich reiche es ein und lasse es warten, so lange es dauert. **Alles, was ich *jetzt* prüfen will** — startet das Skript überhaupt, ist die GPU sichtbar, läuft ein einzelner Trainingsschritt — geht auf `debug`. Es ist bei etwa vier Stunden gedeckelt, aber es *startet schnell*, und schnelles Feedback ist der ganze Sinn eines Smoke-Tests. Und **stundenlange reine CPU-Vorbereitung** geht auf eine lange CPU-Partition wie `hamsi`; es gibt keinen Grund, eine GPU-Zuteilung für einen Single-Core-Job zu verbrennen.
+Meine Faustregel setzte sich in drei Spuren. **Echtes GPU-Training** geht auf `akya-cuda`. Ich reiche es ein und lasse es warten, so lange es dauert. **Alles, was ich *jetzt* prüfen will**, startet das Skript überhaupt, ist die GPU sichtbar, läuft ein einzelner Trainingsschritt, geht auf `debug`. Es ist bei etwa vier Stunden gedeckelt, aber es *startet schnell*, und schnelles Feedback ist der ganze Sinn eines Smoke-Tests. Und **stundenlange reine CPU-Vorbereitung** geht auf eine lange CPU-Partition wie `hamsi`, denn es gibt keinen Grund, eine GPU-Zuteilung für einen Single-Core-Job zu verbrennen.
 
-An dem Tag, an dem ich das wirklich verinnerlichte, war `akya-cuda` voll — fünfzehn von sechzehn Knoten belegt, einer im Draining — und `squeue --start` setzte meinen Start etwa **fünf Tage** entfernt. Mein erster Impuls war, dazusitzen und es wie eine Abflugtafel zu aktualisieren. Dann fing ich mich: Für einen Tippfehler brauche ich keine GPU. Ich fuhr alle Smoke- und Skalierungstests auf `debug`, das in Minuten startete, und ließ den einen echten Trainingsjob warten. Du musst nicht mal das Skript ändern — überschreib die Partition auf der Kommandozeile:
+An dem Tag, an dem ich das wirklich verinnerlichte, war `akya-cuda` voll, fünfzehn von sechzehn Knoten belegt, einer im Draining, und `squeue --start` setzte meinen Start etwa **fünf Tage** entfernt. Mein erster Impuls war, dazusitzen und es wie eine Abflugtafel zu aktualisieren. Dann fing ich mich. Für einen Tippfehler brauche ich keine GPU. Ich fuhr alle Smoke- und Skalierungstests auf `debug`, das in Minuten startete, und ließ den einen echten Trainingsjob warten. Du musst nicht mal das Skript ändern. Überschreib die Partition auf der Kommandozeile:
 
 ```bash
 sbatch -p debug liconn_real/liconn_real_1gpu.sbatch   # Smoke-Test, schnelle Queue
@@ -100,21 +100,21 @@ sbatch -p debug liconn_real/liconn_real_1gpu.sbatch   # Smoke-Test, schnelle Que
 
 ### Die Zeile, die dich wirklich umbringt: --time
 
-Drei Direktiven leisten die meiste Arbeit — GPU-Zahl, Kern-Zahl und Wall-Clock-Limit:
+Drei Direktiven leisten die meiste Arbeit, GPU-Zahl, Kern-Zahl und Wall-Clock-Limit:
 
 ```bash
 #SBATCH --gres=gpu:1           # 1 GPU  (gres = "generic resource")
 #SBATCH --cpus-per-task=10     # akya-cuda-Regel: 10 Kerne pro GPU
-#SBATCH --time=00:30:00        # HH:MM:SS — danach wird der Job GETÖTET
+#SBATCH --time=00:30:00        # HH:MM:SS, danach wird der Job GETÖTET
 ```
 
-`--gres=gpu:N` ist, wie du GPUs erbittest; `gpu:1` gibt eine, `gpu:4` gibt vier, und ohne die Zeile fällt JAX still auf CPU zurück. Die Zehn-Kerne-pro-GPU-Regel skaliert sauber — eine GPU will zehn Kerne, vier GPUs vierzig. Aber die Zeile, die Blut fließen lässt, ist `--time`, denn SLURM setzt sie mit null Gefühl durch: In dem Moment, in dem dein Job das Limit überschreitet, stirbt er, mitten im Schritt, egal was er gerade tat.
+`--gres=gpu:N` ist, wie du GPUs erbittest. `gpu:1` gibt eine, `gpu:4` gibt vier, und ohne die Zeile fällt JAX still auf CPU zurück. Die Zehn-Kerne-pro-GPU-Regel skaliert sauber, eine GPU will zehn Kerne, vier GPUs vierzig. Aber die Zeile, die Blut fließen lässt, ist `--time`, denn SLURM setzt sie mit null Gefühl durch. In dem Moment, in dem dein Job das Limit überschreitet, stirbt er, mitten im Schritt, egal was er gerade tat.
 
 <WallClock />
 
-Ich lernte das genau so, wie die Animation es zeigt. Mein `compute_partitions`-Schritt ist Single-Core, etwa neun Sekunden pro Label mal 1.756 Labels — macht vier bis fünf Stunden auf dem vollen 768³-Volumen. Ich bat um vierzig Minuten. SLURM ließ ihn genau vierzig Minuten laufen und guillotinierte ihn dann, ohne Warnung, ohne Teilpunkte. Die Lösung war zweiteilig: auf einem kleinen 192³-Ausschnitt iterieren, der in Sekunden fertig ist, und das volle Volumen als eigenen langen CPU-Batch-Job mit einer ehrlichen, mehrstündigen `--time` fahren.
+Ich lernte das genau so, wie die Animation es zeigt. Mein `compute_partitions`-Schritt ist Single-Core, etwa neun Sekunden pro Label mal 1.756 Labels, macht vier bis fünf Stunden auf dem vollen 768³-Volumen. Ich bat um vierzig Minuten. SLURM ließ ihn genau vierzig Minuten laufen und guillotinierte ihn dann, ohne Warnung, ohne Teilpunkte. Die Lösung war zweiteilig. Auf einem kleinen 192³-Ausschnitt iterieren, der in Sekunden fertig ist, und das volle Volumen als eigenen langen CPU-Batch-Job mit einer ehrlichen, mehrstündigen `--time` fahren.
 
-> **Lektion** — Schätze deine echte Laufzeit, dann leg Puffer drauf. Zu kurz, und der Scheduler richtet dich hin; zu lang, und du sitzt länger in der Queue als nötig. Und denk an das Langformat `D-HH:MM:SS` — `1-00:00:00` ist ein voller Tag, nicht eine Stunde.
+> **Lektion:** Schätze deine echte Laufzeit, dann leg Puffer drauf. Zu kurz, und der Scheduler richtet dich hin. Zu lang, und du sitzt länger in der Queue als nötig. Und denk an das Langformat `D-HH:MM:SS`, also ist `1-00:00:00` ein voller Tag, nicht eine Stunde.
 
 ### Von 1 GPU auf 4 ist eine SLURM-Änderung, kein Code
 
@@ -126,13 +126,13 @@ Das ist der Teil, der mich wirklich gefreut hat. Mein Vier-GPU-Skript ist *ident
 #SBATCH --time=1-00:00:00      # 1 Tag
 ```
 
-Das Python ändert sich gar nicht. JAX bemerkt die vier GPUs, baut ein Device-Mesh darüber und shardet jeden Batch von selbst in vier — keine manuelle Geräteplatzierung, keine Edits. Die einzige praktische Folge: Die globale Batch-Größe skaliert mit der GPU-Zahl (`global batch = per_device_batch × 4`). Bittest du um `gpu:4`, bekommst du nicht nur mehr Speicher, sondern einen vierfach geteilten, parallel laufenden Batch, transparent. Ich nehme mir ständig vor, daraus einen sauberen 1-2-4-Schritte-pro-Sekunde-Plot für die Arbeit zu machen, gerade weil die Skalierung so ordentlich ist.
+Das Python ändert sich gar nicht. JAX bemerkt die vier GPUs, baut ein Device-Mesh darüber und shardet jeden Batch von selbst in vier, keine manuelle Geräteplatzierung, keine Edits. Die einzige praktische Folge ist, dass die globale Batch-Größe mit der GPU-Zahl skaliert (`global batch = per_device_batch × 4`). Bittest du um `gpu:4`, bekommst du nicht nur mehr Speicher, sondern einen vierfach geteilten, parallel laufenden Batch, transparent. Ich nehme mir ständig vor, daraus einen sauberen 1-2-4-Schritte-pro-Sekunde-Plot für die Arbeit zu machen, gerade weil die Skalierung so ordentlich ist.
 
 ## Die Schleife, in der du wirklich lebst
 
 Sobald das Skript existiert, ist der Rest meines Lebens auf TRUBA eine enge Schleife: einreichen, beobachten, reagieren.
 
-Sie beginnt jedes Mal mit `cd /arf/scratch`. Jobs *müssen* aus scratch eingereicht werden — reich aus `/arf/home` ein, und der Scheduler weist dich rundheraus ab, mit einer kleinen Notiz, die dich nach scratch schickt. (Ja, ich lernte das aus der Notiz.) Dann `sbatch`st du das Skript, und es reicht dir eine Job-ID zurück, den Griff für alles Weitere:
+Sie beginnt jedes Mal mit `cd /arf/scratch`. Jobs *müssen* aus scratch eingereicht werden. Reich aus `/arf/home` ein, und der Scheduler weist dich rundheraus ab, mit einer kleinen Notiz, die dich nach scratch schickt. (Ja, ich lernte das aus der Notiz.) Dann `sbatch`st du das Skript, und es reicht dir eine Job-ID zurück, den Griff für alles Weitere:
 
 ```bash
 cd /arf/scratch/<user>/<repo>
@@ -140,15 +140,15 @@ sbatch liconn_real/liconn_real_1gpu.sbatch
 # Submitted batch job 1234567
 ```
 
-Von da beobachte ich mit `squeue -u <user>`. Die Spalte, die zählt, ist **ST**, der Zustand: `PD` wartet in der Reihe, `R` läuft.
+Von da beobachte ich mit `squeue -u <user>`. Die Spalte, die zählt, ist **ST**, der Zustand. `PD` wartet in der Reihe, `R` läuft.
 
 <Console title="squeue -u avural" body="JOBID    PARTITION  NAME          ST  TIME  NODELIST(REASON)
 1234567  akya-cuda  ffn_real_1gp  PD  0:00  (Priority)
 1234568  debug      ffn_real_1gp   R  0:42  <compute-node>" />
 
-Beachte, dass der laufende Job auf einem compute node sitzt — nie auf `arf-ui*`. Die Lobby-Namen tauchen in der Spalte „wo läuft das wirklich" nie auf, und als das saß, war es nicht mehr mysteriös.
+Beachte, dass der laufende Job auf einem compute node sitzt, nie auf `arf-ui*`. Die Lobby-Namen tauchen in der Spalte „wo läuft das wirklich" nie auf, und als das saß, war es nicht mehr mysteriös.
 
-Wenn ich wissen will, *wann* ein wartender Job startet, ohne etwas Echtes einzureichen, frage ich zweifach: `squeue --start -j <id>` für eine Schätzung, oder `sbatch --test-only <script>`, das den Job validiert und ausgibt, wann er starten *würde*, ohne ihn je einzureihen. Und das Live-Training verfolge ich — sag's mit mir — an der `.err`-Datei:
+Wenn ich wissen will, *wann* ein wartender Job startet, ohne etwas Echtes einzureichen, frage ich zweifach. `squeue --start -j <id>` für eine Schätzung, oder `sbatch --test-only <script>`, das den Job validiert und ausgibt, wann er starten *würde*, ohne ihn je einzureihen. Und das Live-Training verfolge ich, sag's mit mir, an der `.err`-Datei:
 
 ```bash
 tail -f runs/ffn_real_1gpu_<id>.err
@@ -160,21 +160,21 @@ Wenn der Job schließlich aus `squeue` fällt, kommt die Obduktion aus der Buchh
 sacct -j <id> --format=JobID,State,Elapsed,ExitCode -X
 ```
 
-Zustand, Wall-Clock, Exit-Code — `COMPLETED`, `FAILED` oder `TIMEOUT`. Das ist das Urteil. Und wenn ich etwas töten muss, `scancel <id>`, und weg ist es.
+Zustand, Wall-Clock, Exit-Code, also `COMPLETED`, `FAILED` oder `TIMEOUT`. Das ist das Urteil. Und wenn ich etwas töten muss, `scancel <id>`, und weg ist es.
 
-> **Lektion** — Häng keinen Trainingsjob mit `--dependency=afterok:<id>` hinter einen Prep-Job, es sei denn, du vertraust dem Prep vollständig. Meiner lief in einen Timeout — und ein Timeout zählt als *Fehlschlag* — also lief der abhängige Job nie und starb mit `DependencyNeverSatisfied`. Jetzt erzeuge ich erst die Koordinaten, bestätige mit eigenen Augen, dass sie da sind, und reiche *dann* das Training ganz ohne Abhängigkeit ein.
+> **Lektion:** Häng keinen Trainingsjob mit `--dependency=afterok:<id>` hinter einen Prep-Job, es sei denn, du vertraust dem Prep vollständig. Meiner lief in einen Timeout, und ein Timeout zählt als *Fehlschlag*, also lief der abhängige Job nie und starb mit `DependencyNeverSatisfied`. Jetzt erzeuge ich erst die Koordinaten, bestätige mit eigenen Augen, dass sie da sind, und reiche *dann* das Training ganz ohne Abhängigkeit ein.
 
 ## Warum alles in einer .sif läuft
 
-Ich versprach, auf den Container zurückzukommen, und die Sache ist: Sobald du verstehst, *warum* er da ist, hört das Job-Skript auf, wie Zeremonie auszusehen, und wird offensichtlich.
+Ich versprach, auf den Container zurückzukommen, und die Sache ist. Sobald du verstehst, *warum* er da ist, hört das Job-Skript auf, wie Zeremonie auszusehen, und wird offensichtlich.
 
-Auf einer normalen Maschine machst du `pip install jax ffn ...` und gut. Auf TRUBA kannst du das nicht — und der Grund ist nicht der Speicherplatz. `/arf` hat eine **Inode**-Quota. Es gibt eine harte Obergrenze für die *Anzahl der Dateien*, die du behalten darfst, nicht nur für die Gesamtgröße. Und eine einzige conda- oder pip-Umgebung sind Zehntausende winziger Dateien — jede `.py`, jede `.pyc`, jede transitive Abhängigkeit versprüht kleine Dateien überallhin. Installiere ein paar davon, und du sprengst die Inode-Quota direkt; ab da lässt dich der Cluster *nichts* mehr schreiben, auch nicht die Ergebnisse, die dir wichtig sind.
+Auf einer normalen Maschine machst du `pip install jax ffn ...` und gut. Auf TRUBA kannst du das nicht, und der Grund ist nicht der Speicherplatz. `/arf` hat eine **Inode**-Quota. Es gibt eine harte Obergrenze für die *Anzahl der Dateien*, die du behalten darfst, nicht nur für die Gesamtgröße. Und eine einzige conda- oder pip-Umgebung sind Zehntausende winziger Dateien, jede `.py`, jede `.pyc`, jede transitive Abhängigkeit versprüht kleine Dateien überallhin. Installiere ein paar davon, und du sprengst die Inode-Quota direkt, ab da lässt dich der Cluster *nichts* mehr schreiben, auch nicht die Ergebnisse, die dir wichtig sind.
 
 <InodeContainer />
 
-Stattdessen wird der ganze Software-Stack einmal in ein `.sif`-Image gebacken. Fürs Dateisystem ist das eine einzige Datei — ein Inode, nicht fünfzigtausend. Du verschiffst die `.sif` zum Cluster, und das Umgebungsproblem ist ein für alle Mal gelöst.
+Stattdessen wird der ganze Software-Stack einmal in ein `.sif`-Image gebacken. Fürs Dateisystem ist das eine einzige Datei, ein Inode, nicht fünfzigtausend. Du verschiffst die `.sif` zum Cluster, und das Umgebungsproblem ist ein für alle Mal gelöst.
 
-> **Lektion** — Auf geteiltem HPC beißt die Inode-Quota vor der Größen-Quota. Eine `.sif` ist eine Datei; eine conda-Umgebung Zehntausende. Pack die Umgebung in den Container und hör auf, daran zu denken.
+> **Lektion:** Auf geteiltem HPC beißt die Inode-Quota vor der Größen-Quota. Eine `.sif` ist eine Datei, eine conda-Umgebung Zehntausende. Pack die Umgebung in den Container und hör auf, daran zu denken.
 
 Weil auf dem Knoten nichts installiert ist, läuft jeder Befehl *durch* den Container, und das Muster hat immer dieselbe Form:
 
@@ -182,7 +182,7 @@ Weil auf dem Knoten nichts installiert ist, läuft jeder Befehl *durch* den Cont
 apptainer exec --nv --bind /arf:/arf "$SIF" python ffn/jax/main.py ...
 ```
 
-Lies von links nach rechts: `apptainer exec` führt einen Befehl im Image aus; `--nv` reicht die NVIDIA-GPU in den Container (lass das Flag weg, und JAX fällt still auf CPU zurück — merk dir das); `--bind /arf:/arf` mountet deinen Speicher, damit der Container Code und Daten sieht; dann das Image und der Befehl. GPU rein über `--nv`, Speicher rein über `--bind` — das ist das ganze mentale Modell. Das echte Skript ergänzt ein paar Bequemlichkeiten (`--pwd` zum Start im Projektverzeichnis, ein paar `--env`s, die Threads deckeln und einstellen, wie JAX sich GPU-Speicher greift), aber das Skelett ändert sich nie.
+Lies von links nach rechts. `apptainer exec` führt einen Befehl im Image aus. `--nv` reicht die NVIDIA-GPU in den Container (lass das Flag weg, und JAX fällt still auf CPU zurück, merk dir das). `--bind /arf:/arf` mountet deinen Speicher, damit der Container Code und Daten sieht. Dann das Image und der Befehl. GPU rein über `--nv`, Speicher rein über `--bind`, das ist das ganze mentale Modell. Das echte Skript ergänzt ein paar Bequemlichkeiten, `--pwd` zum Start im Projektverzeichnis und ein paar `--env`s, die Threads deckeln und einstellen, wie JAX sich GPU-Speicher greift, aber das Skelett ändert sich nie.
 
 ### Der eine Check, der am meisten Zeit spart
 
@@ -193,13 +193,13 @@ N=$(apptainer exec --nv "$SIF" python -c "import jax;print(jax.device_count())" 
 echo "JAX visible devices = $N"
 ```
 
-Wozu die Mühe? Weil der schlimmste Fehlschlag auf einem GPU-Cluster kein Absturz ist — ein Absturz ist *laut*, den bemerkst du. Der schlimmste Fehlschlag ist ein Job, der still auf CPU läuft. Hat `--nv` nicht gegriffen, ist der Treiber aus, oder hast du das Flag vergessen, zuckt JAX mit den Schultern und trainiert vielleicht fünfzigmal langsamer auf CPU. Du wartest Tage in der `akya-cuda`-Queue, wirst endlich gesetzt und merkst erst am kriechenden Loss, dass etwas faul ist. Erst `jax.device_count()` auszugeben verwandelt diese langsame, teure Katastrophe in eine sofortige: Du siehst `JAX visible devices = 0` im Log und tötest den Job in den ersten zehn Sekunden, statt einen Tag Zuteilung zu verbrennen. Billiger Check, enormer Nutzen.
+Wozu die Mühe? Weil der schlimmste Fehlschlag auf einem GPU-Cluster kein Absturz ist. Ein Absturz ist *laut*, den bemerkst du. Der schlimmste Fehlschlag ist ein Job, der still auf CPU läuft. Hat `--nv` nicht gegriffen, ist der Treiber aus, oder hast du das Flag vergessen, zuckt JAX mit den Schultern und trainiert vielleicht fünfzigmal langsamer auf CPU. Du wartest Tage in der `akya-cuda`-Queue, wirst endlich gesetzt und merkst erst am kriechenden Loss, dass etwas faul ist. Erst `jax.device_count()` auszugeben verwandelt diese langsame, teure Katastrophe in eine sofortige. Du siehst `JAX visible devices = 0` im Log und tötest den Job in den ersten zehn Sekunden, statt einen Tag Zuteilung zu verbrennen. Billiger Check, enormer Nutzen.
 
-> **Lektion** — Auf einem GPU-Cluster ist der gefährliche Fehlschlag der stille CPU-Rückfall, nicht der Absturz. Prüfe `jax.device_count()` ganz oben in jedem Job, damit ein fehlzugeteilter Lauf laut und früh stirbt.
+> **Lektion:** Auf einem GPU-Cluster ist der gefährliche Fehlschlag der stille CPU-Rückfall, nicht der Absturz. Prüfe `jax.device_count()` ganz oben in jedem Job, damit ein fehlzugeteilter Lauf laut und früh stirbt.
 
 ## Sechs Arten, wie ich wirklich Zeit verlor
 
-Alles oben war die saubere Version, geschrieben mit dem Selbstvertrauen des Rückblicks. Hier die ehrliche Version — sechs Fehlschläge, jeder eine Lektion, die ich nur bekam, indem ich hineinlief.
+Alles oben war die saubere Version, geschrieben mit dem Selbstvertrauen des Rückblicks. Hier die ehrliche Version, sechs Fehlschläge, jeder eine Lektion, die ich nur bekam, indem ich hineinlief.
 
 **Ein Single-Core-CPU-Schritt sprengte mein ganzes Zeitbudget.** `compute_partitions` lief nach vierzig Minuten in einen Timeout, weil es echt vier bis fünf Stunden braucht, und keine Hoffnung würde diese Arithmetik ändern. Passe die `--time` an die echte Arbeit an, nicht an deine Ungeduld.
 
@@ -207,14 +207,14 @@ Alles oben war die saubere Version, geschrieben mit dem Selbstvertrauen des Rüc
 
 **Eine volle GPU-Partition bedeutete fünf Tage Warten, und ich hätte es fast ausgesessen.** Fünfzehn von sechzehn Knoten weg. Die Lösung war nicht Geduld, sondern alle schnelle Iteration auf `debug` zu verlagern und nur den echten Lauf in `akya-cuda` warten zu lassen.
 
-**Eine Abhängigkeit war nur so verlässlich wie der Job, auf den sie wartete.** Ich hängte einen Smoke-Job mit `afterok` an einen Prep-Job; der Prep lief in einen Timeout, also starb der Smoke-Job mit `DependencyNeverSatisfied`, ohne je zu laufen. Ich hörte auf, Dinge zu verketten, die ich nicht verifiziert hatte.
+**Eine Abhängigkeit war nur so verlässlich wie der Job, auf den sie wartete.** Ich hängte einen Smoke-Job mit `afterok` an einen Prep-Job, der Prep lief in einen Timeout, also starb der Smoke-Job mit `DependencyNeverSatisfied`, ohne je zu laufen. Ich hörte auf, Dinge zu verketten, die ich nicht verifiziert hatte.
 
-**Nicht jede furchteinflößende rote Zeile ist ein Fehler.** `compute_partitions` gab `cuInit ... error 303` aus, und ich ging auf Bug-Jagd. Es ist ein CPU-Job — keine GPU zu initialisieren — also ist die Zeile eine harmlose Warnung. Lerne, welche deiner roten Zeilen echt sind, bevor du sie jagst.
+**Nicht jede furchteinflößende rote Zeile ist ein Fehler.** `compute_partitions` gab `cuInit ... error 303` aus, und ich ging auf Bug-Jagd. Es ist ein CPU-Job, keine GPU zu initialisieren, also ist die Zeile eine harmlose Warnung. Lerne, welche deiner roten Zeilen echt sind, bevor du sie jagst.
 
-**Eine Startzeit von `N/A` bedeutete „blockiert", nicht „kaputt".** `squeue --start` zeigte `N/A` für einen Job, weil er auf eine Abhängigkeit wartete, und SLURM schätzt keinen Start, solange ein Job blockiert ist. Räum die Abhängigkeit ab, und die Schätzung kommt zurück; oder nimm `sbatch --test-only`, das ohnehin antwortet.
+**Eine Startzeit von `N/A` bedeutete „blockiert", nicht „kaputt".** `squeue --start` zeigte `N/A` für einen Job, weil er auf eine Abhängigkeit wartete, und SLURM schätzt keinen Start, solange ein Job blockiert ist. Räum die Abhängigkeit ab, und die Schätzung kommt zurück, oder nimm `sbatch --test-only`, das ohnehin antwortet.
 
 ## Wohin das als Nächstes geht
 
-Ein paar Fäden, an denen ich noch ziehe: das Training vom 192³-Ausschnitt auf das volle 768³-Volumen heben (dasselbe Skript, keine Code-Änderung, nur die lange Queue und etwas Geduld); der 1-2-4-GPU-Skalierungs-Plot, den ich ständig androhe und der direkt in die Arbeit wandert; und Inferenz als SLURM-Job-Array fahren, das Bounding-Boxen parallel über den Cluster fächert, statt sie einzeln durchzukauen.
+Ein paar Fäden, an denen ich noch ziehe. Das Training vom 192³-Ausschnitt auf das volle 768³-Volumen heben (dasselbe Skript, keine Code-Änderung, nur die lange Queue und etwas Geduld). Der 1-2-4-GPU-Skalierungs-Plot, den ich ständig androhe und der direkt in die Arbeit wandert. Und Inferenz als SLURM-Job-Array fahren, das Bounding-Boxen parallel über den Cluster fächert, statt sie einzeln durchzukauen.
 
-Keiner dieser sechs Stolpersteine war vorher offensichtlich, und jeder ist jetzt eine Dreißig-Sekunden-Lösung. Das ist wirklich das ganze Spiel auf einem HPC-Cluster: Du tauschst einen verwirrenden Nachmittag gegen eine Checkliste, die du für immer behältst. Frag die Warteschlange, arbeite auf dem richtigen Knoten, im richtigen Ordner, im Container, und rette deine Ergebnisse. Mach weiter — der Cluster belohnt Sturheit im Stillen.
+Keiner dieser sechs Stolpersteine war vorher offensichtlich, und jeder ist jetzt eine Dreißig-Sekunden-Lösung. Das ist wirklich das ganze Spiel auf einem HPC-Cluster. Du tauschst einen verwirrenden Nachmittag gegen eine Checkliste, die du für immer behältst. Frag die Warteschlange, arbeite auf dem richtigen Knoten, im richtigen Ordner, im Container, und rette deine Ergebnisse. Mach weiter, der Cluster belohnt Sturheit im Stillen.
