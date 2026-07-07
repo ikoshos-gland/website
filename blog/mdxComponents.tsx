@@ -2,6 +2,9 @@ import React from 'react';
 import { useLang } from '../i18n/LanguageContext';
 import { GLOSSARY } from './glossary';
 import SlurmFlow from './SlurmFlow';
+import PartitionQueue from './PartitionQueue';
+import WallClock from './WallClock';
+import InodeContainer from './InodeContainer';
 import ExpansionMicro from './ExpansionMicro';
 import ScaleEscalation from './ScaleEscalation';
 import FFNFlood from './FFNFlood';
@@ -68,6 +71,9 @@ export const mdxComponents = {
   Pull,
   Term,
   SlurmFlow,
+  PartitionQueue,
+  WallClock,
+  InodeContainer,
   ExpansionMicro,
   ScaleEscalation,
   FFNFlood,
