@@ -3,32 +3,26 @@ title: Bu Blogu Yazmak: Sıfırdan MDX Rehberi
 date: 2026-07-07
 contentType: lesson
 tags: [MDX, yazım, meta]
-excerpt: Ömründe bir satır MDX yazmamış birine göre, bu blogun nasıl çalıştığı. Frontmatter, bileşenler, resimler, canlı animasyonlar ve üç altın kural, her biri tam da bu sayfada gösteriliyor.
+excerpt: Ömründe bir satır bile MDX yazmamış birine göre, bu blogun nasıl çalıştığını anlatacağım. Formüller, bileşenler, resimler, canlı animasyonlar ve websiteme entegre atıf mekanizması gibi özelliklerin kullanımını açıkladığım ve yazılarımı yazarken buradan yardım aldığım bir tutorial oluşturmayı amaçladım.
 cover: /img/oogway.webp
 draft: false
 ---
-<DropCap>B</DropCap>u yazı, başlarken keşke elimde olsaydı dediğim şey. Ömründe hiç MDX'e dokunmamışken bu blog için nasıl yazacağını anlatıyor, ve bir rehberin yapması gereken dürüst şeyi yapıyor. Anlattığım her özelliği, tam da bu sayfada çalışır halde gösteriyorum.
+<DropCap>B</DropCap>u yazı, ana mekanizmalar olarak MDX'in (benim word'üm gibi düşünebilirsiniz) tanımını, ve tam olarak olgunlaşmış bir blog'da kullanılabilecek websitemin sunduğu bütün özellikleri detaylıca açıklayacak. Yavaştan başlayalım.
 
-## MDX nedir, tek nefeste
+## MDX Nedir?
 
-Markdown, biçimli metni kolayca yazma yöntemi. `**kalın**`, `## başlık`, `- madde` yazarsın, o da öyle görünür. MDX ise Markdown artı canlı bileşenler. Yani sıradan bir paragraf yazarken araya animasyon gibi interaktif şeyler koyabilir, onlar da çalışır. Markdown'ın kolaylığı, bir web uygulamasının gücü, tek dosyada.
+Markdown, biçimli metni kolayca yazma yöntemi olarak da bahsedebiliriz. `**kalın**`, `## başlık`, `- madde` şeklinde ifade ediliş şekilleriyle kendine has bir görünüşü vardır (Colab kullananlar ve overleaf kullananların da bu tarz şeylere aşina olduğunu varsayıyorum). MDX ise Markdown artı canlı bileşenleri kapsar. Yani sıradan bir paragraf yazarken araya animasyon gibi interaktif şeyler koyabilirsiniz. Markdown'ın en güzel kolaylığı tek dosyada detaylı bir şekilde her şeyin görselleştirilebilmesidir.
 
-## Bütün sistem, tek kural
-
-Aklında tutman gereken tek bir şey var. **`content/blog/` klasörüne bir `.mdx` dosyası koy, o bir yazı olur.** Hiçbir yere kaydetmezsin. Site klasörü kendi tarar.
-
-Dosya adları tek bir kalıptadır, `NNN-slug.dil.mdx`. `NNN` sadece dosyaları düzenli tutan bir numara. `slug` URL'de görünen ad. `dil` bir dil eki, eki yoksa İngilizce demektir.
+Benim kullandığım mimaride her websitesinin 3 dili olduğu için her dile özel bir MDX hazırlıyorum (DeepL ve İngilizce Almanca Bilgim sağolsun:) Bu arada bir yazının tüm dilleri aynı URL'i paylaşıyor.
 
 ```text
 content/blog/006-writing-this-blog.mdx      → İngilizce, URL /blog/writing-this-blog
 content/blog/006-writing-this-blog.tr.mdx   → Türkçe, aynı URL
 ```
 
-Bir yazının tüm dilleri aynı URL'i paylaşır. Sitenin dil değiştiricisi hangisini göreceğini belirler, ve eksik bir dil İngilizce'ye düşer.
+## Frontmatter Nedir?
 
-## Frontmatter, küçük üst bilgi
-
-Her yazı, üç tireli iki satır arasındaki bir üst bilgiyle açılır. Sistemin ihtiyaç duyduğu tek veri budur.
+Her yazı, üç tireli iki satır arasındaki bir üst bilgiyle açılmaktadır (Claude Skills kullanlar da frontmatter'ı daha önce görmüş olaiblir). Sistemin ihtiyaç duyduğu tek veri budur.
 
 ```yaml
 ---
@@ -42,11 +36,11 @@ draft: false              # true, yazıyı canlı siteden gizler
 ---
 ```
 
-`date` sıralamayı belirler. `excerpt` hem yazı listesinde hem de başlığın arkasındaki sinematik girişte belirir. Keskin tut.
+`date` sıralamayı belirler. `excerpt` hem yazı listesinde hem de başlığın arkasındaki sinematik girişte belirir (Çiçekli animasyon gibi). Bunun için ikisinin düzgün belirlenmesi önemli
 
-## Markdown temelleri
+## Markdown Temelleri
 
-Bunların hepsi düz metin, öğrenmesi beş dakika.
+Bunların hepsi düz metin, hızlıca göz atabiliriz:
 
 ```md
 ## Bölüm başlığı
@@ -75,16 +69,16 @@ Bilmeye değer küçük bir püf noktası var. Bir alıntı **kalın bir etiketl
 
 Tablolar ve çizgiler de her zamanki Markdown yöntemiyle çalışır.
 
-## Kod ve matematik
+## Kod ve Matematik Kısmına Giriş
 
-Kodu üç ters-tırnak ve bir dil adıyla çerçevele.
+Kodu üç ters-tırnak ve bir dil adıyla çerçeveleyerek belirtebilirsin. Örneğin:
 
 ```python
 import jax
 print(jax.device_count())
 ```
 
-Matematik LaTeX'tir, KaTeX ile çizilir. Satır içinde `$...$`, blok için `$$...$$`.
+Matematik LaTeX'tir, KaTeX ile çizilir. Klasik satır içinde `$...$`, blok için `$$...$$`.
 
 ```md
 Global batch, GPU sayısıyla ölçeklenir, $b_\text{global} = b_\text{device} \times N$.
@@ -94,9 +88,9 @@ Global batch, GPU sayısıyla ölçeklenir, $b_\text{global} = b_\text{device} \
 
 ## Atıflar
 
-Bir yazı başkasının çalışmasına yaslandığında, ona atıf verirsin, ve bu sayfanın en altındaki kaynakça kendi kendine oluşur. Zotero gibi çalışır. Metne kısa bir anahtar yazarsın, altta numaralı giriş, senin için biçimlenmiş halde belirir.
+Bir yazı başkasının çalışmasına yaslandığında, ona atıf vermek istersem diye Zotero gibi çalışan bir mekanizma kurduk (CC sağolsun). Metne kısa bir anahtar yazdığında, altta numaralı giriş, senin için biçimlenmiş halde belirir.
 
-Atıf vermek için, bir `@` işaretinin ardından anahtarı köşeli parantez içine koyarsın. Anahtar, tüm kaynakları tutan tek dosya olan `content/references.bib` içindeki bir girişi adlandırır.
+Atıf vermek için, bir `@` işaretinin ardından anahtarı köşeli parantez içine koymalısın. Anahtar, tüm kaynakları tutan tek dosya olan `content/references.bib` içindeki bir girişi adlandırır.
 
 ```mdx
 Taşkın-doldurma ağları makalesi [@januszewskiHighprecisionAutomatedReconstruction2018] bunu pratik kıldı.
@@ -114,9 +108,9 @@ Listenin kendisi, kendi satırına küçük harf `[^ref]` koyduğun yere, yazın
 
 Bu sayfanın altındaki kaynakça, o işaretçinin iş başında hali, IEEE stiliyle çizilmiş, blogun sade görünüşüne uyan köşeli parantezli numaralarla.
 
-> **Ders:** doğruluğun kaynağı `content/references.bib` dosyasıdır, ve onu asla elle düzenlemezsin. Zotero'da Better BibTeX eklentisini kur, koleksiyonunu "keep updated" işaretli olarak dışa aktar, ve bu dosyaya yönlendir. Zotero'ya bir makale ekle, dosya güncellenir, sen commit'lersin. `[@anahtar]`'ı `[1]`'e çevirmek ve listeyi kurmak, ikisi de derleme anında olur.
+> **Ders:** doğruluğun kaynağı `content/references.bib` dosyasıdır, ve onu asla elle düzenlemezsin. Zotero'da Better BibTeX eklentisini kur [@retorquereReleasesRetorquereZoterobetterbibtex], koleksiyonunu "keep updated" işaretli olarak dışa aktar, ve bu dosyaya yönlendir. Zotero'ya bir makale eklediğinde dosya güncellenir, senin sadece commit'lemen gerekir. `[@anahtar]`'ı `[1]`'e çevirmek ve listeyi kurmak, ikisi de derleme anında olur.
 
-## Bileşenler, asıl güzel kısım
+## Bileşenler, Asıl Güzel Kısım
 
 Bunlar hazır yapı taşları. Hiçbirini import etmezsin. Sadece etiketini yazarsın, her yazıda çalışır. İşte her biri, kodu ve canlı hali yan yana.
 
@@ -148,7 +142,7 @@ Bunlar hazır yapı taşları. Hiçbirini import etmezsin. Sadece etiketini yaza
 1234567  PD  0:00
 1234568   R  0:42" />
 
-**Term**, bir kelimenin altına çizgi çeker ve üstüne gelince küçük bir sözlükten tanımını gösterir.
+**Term**, bir kelimenin altına çizgi çeker ve üstüne gelince küçük bir sözlükten tanımını gösterir. küçüktür işareti ve büyüktür işareti arasına sandviç yaparsın ve iki Term yazarsın.
 
 ```mdx
 Beyni bir <Term k="connectome">konnektom</Term> olarak modelliyoruz.
@@ -158,7 +152,7 @@ Beyni bir <Term k="connectome">konnektom</Term> olarak modelliyoruz. (Noktalı k
 
 ## Resimler
 
-Kural kısa. **Resimler `public/img/`'de durur ve `/img/...` ile çağrılır.** Küçük ve hızlı dosyalar için `.webp` kullan.
+Kuralı oldukça basit. **Resimler `public/img/`'de durur ve `/img/...` ile çağrılır.**.
 
 Çerçeveli ve altyazılı bir görsel için `Figure` kullan.
 
@@ -172,7 +166,7 @@ Yola asla `public` yazmazsın. `public/` içindeki her şey sitenin kökünden s
 
 ## Animasyonlar
 
-Animasyonlar da birer bileşen. Etiketi koyarsın, gerisi halledilir. Her biri interaktiftir, kendi başına üç dil konuşur, ve okuyucu hareket azaltmayı tercih ederse sakinleşir.
+Animasyonlar da birer bileşen. Etiketi koyarsın, gerisi halledilir. Her biri interaktiftir, kendi başına üç dil konuşulacak şekilde ayarlandı.
 
 İşte ikisi canlı çalışıyor. Sen sadece `<SlurmFlow />` ve `<WallClock />` yazdın.
 
