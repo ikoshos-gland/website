@@ -9,20 +9,18 @@ draft: false
 ---
 ## TRUBA Nedir?
 
-<DropCap>B</DropCap>en bir moleküler biyoteknoloji öğrencisiyim ve ne kadar daha önce biyoinformatik, python ve R dersleri alsam da 2025'e kadar hiç süperbilgisayarlar ile uğraşmamıştım. Ama petavoxel seviyesinde beyin modelleme çalışmaları için normal bilgisayarlar ne yazık ki yüzeysel kalıyor. Bu yüzden Türkiye'nin ulusal HPC kümesi TRUBA'yı kullanmaya başladım ve ilk başta anlaması biraz zor geldi bunun için öğrendiklerimi agentic sistemlerin kullanabileceği bir SKILL dosyası haline getirdim. Böylece Claude Code veya Codex gibi LLM'ler SSH köprüsü kurarak artık sizin yerinize TRUBA kullanabilecek hale gelmiş oldu. Yine de her şeyi LLM'lere yıkmak saçma ve bu yazıda güzelce TRUBA'yı beyin modellemesi kullanımı çerçevesinde inceleyeceğiz. 
+<DropCap>B</DropCap>en bir moleküler biyoteknoloji öğrencisi olarak ve ne kadar daha önce biyoinformatik, python ve R dersleri alsam da 2025'e kadar hiç süperbilgisayarlar ile uğraşmamıştım. Ama petavoxel seviyesinde beyin modelleme çalışmaları için normal bilgisayarlar ne yazık ki yüzeysel kalıyor. Bu yüzden Türkiye'nin ulusal HPC kümesi TRUBA'yı kullanmaya başladım ve ilk başta anlaması biraz zor gelse de daha sonra bunun için öğrendiklerimi agentic sistemlerin kullanabileceği bir SKILL dosyası haline getirdim. Böylece Claude Code veya Codex gibi LLM'ler SSH köprüsü kurarak artık sizin yerinize TRUBA kullanabilir hale geldi. Yine de her şeyi LLM'lere yıkmak saçma (prefrontal korteksimiz LLM'ler ile konuşurken daha az çalışıyor onun için biraz da yanlış[@kosmynaYourBrainChatGPT2025, p. 96]) ve bu yazıda güzelce TRUBA'yı beyin modellemesi kullanımı çerçevesinde inceleyeceğiz. 
 
+TRUBA, “Türk Ulusal Bilim e-Altyapısı”nın kısaltmasıdır. TÜBİTAK ULAKBİM tarafından işletilen, araştırmacılara yüksek başarımlı hesaplama—HPC, veri depolama ve bilimsel hesaplama olanakları sağlayan ulusal altyapıdır. Daha basitçe söylemek gerekirse TRUBA, çok güçlü bilgisayarların araştırmacılar tarafından ortaklaşa kullanıldığı bir sistemdir. Normal bir bilgisayarda haftalar veya aylar sürebilecek hesaplamalar, işin çok sayıda işlemciye bölünmesiyle (paralelizasyon) daha kısa sürede gerçekleştirilebilir [@TRUBAOlusumuTurkish].
 ### SLURM gibi bir scheduler neden var olur ki?
 
-Başta kafamı karıştıran şey, dizüstü bilgisayarımda `python train.py` yazdığımda script çalıştırabilirken bir anda iş isteği gönderme prensibi oldu. Oldukça karmaşık bir altyapıya sahip bu "schedulin" teknolojisi  paralelizasyon ve süperbilgisayarların daha muhteşem teknolojilerinden sadece birisi.
+Başta kafamı karıştıran şeylerden birisi, dizüstü bilgisayarımda `python train.py` yazdığımda script çalıştırabilirken süperbilgisayarlarda karşıma çıkan yeni **zamanlama** yapısı oldu. Süperbilgisayarlarda kümeler **paylaşımlıdır**. TRUBA'da yüzlerce araştırmacı var ama yeterli GPU mevcut değil. Eğer herkes giriş yaptığı an eğitimini başlatsaydı, makine maalesef boku yerdi. Burada TRUBA'da benim de kullandığım SLURM, paylaşımlı işlerin donanım düzeyinde organizasyonunu sağlayan oldukça önemli bir iş yükü ve kaynak yöneticisi. Kubernetes veya IBM tarafından geliştirilmiş LSF gibi alternatifler olsa da SLURM hem ücretsiz olması hem de çok fazla desteklenmesinden dolayı TRUBA'da iş zamanlayıcısı olarka tercih ediliyor (ben de dahil).
 
-Süperbilgisayarlarda kümeler **paylaşımlıdır**. TRUBA'da yüzlerce araştırmacı var, buna karşılık sınırlı sayıda GPU mevcut. Eğer herkes giriş yaptığı an eğitimini başlatsaydı, makine boku yerdi. Burada TRUBA'da benim de kullandığım **SLURM**, paylaşımlı işlerin donanım düzeyinde organizasyonunu sağlayan oldukça önemli bir iş yükü ve kaynak yöneticisi. Kubernetes veya IBM tarafından geliştirilmiş LSF gibi alternatifler olsa da SLURM hem ücretsiz olması hem de çok fazla desteklenmesinden dolayı TRUBA'da sıklıkla tercih ediliyor (ben de dahil).
-
-Yeni kurulması gereken mantıkta kümemiz bir şeyleri *çalıştırmana* izin vermekten ziyade bir şeyleri **istemeni** sağlar. Neye ihtiyacın olduğuna göre bir dosya yazıp istek atarak bir **kuyruğa** girersin. İstediğin kaynaklar boşaldığında isteğin çalıştırılır ve bitince bir sonraki kişiye geçer.
+Yeni kurulması gereken zamanlama mantığında kümemiz bir şeyleri çalıştırmaya izin vermekten ziyade bir şeyleri istemeyi sağlıyor. Neye ihtiyacın olduğuna göre bir dosya yazıp istek atarak bir kuyruğa girersin. İstediğin kaynaklar boşaldığında isteğin çalıştırılır ve bitince bir sonraki kişiye geçer.
 
 ### Login Node İle Compute Node Karşılaştırması
 
-SSH ile bağlandığında bir **login node**'a düşersin (TRUBA'da bunların adı `arf-ui*`). Login node aslında oyunlardaki giriş lobisi gibi. Script'leri düzenlediğin, dosyaları kopyaladığın ve job'ları *gönderdiğin* yer olarak da hafızanda tutabilirsin. Aynı anda herkes tarafından paylaşıldığı çin ağır işleri login node'da çalıştıramazsın (uyarı veya ban artık keyiflerine göre). 
-
+ 
 Asıl beygir gücü **compute node**'larda yaşar. Daha önce de yazıldığı gibi onlara dokunmazsın. Bir job script yazdığında SLURM boş bir compute node bulup işini orada çalıştırır.
 
 <SlurmFlow />
@@ -37,12 +35,12 @@ Bütün bunlar gerçek olmadan önce ihtiyacın olan üç şey.
 ssh kullaniciadi@172.16.6.11
 ```
 
-**2. İki depolama alanı — ve bunlar birbirinin yerine geçmez.**:
+**2. İki depolama alanı**:
 
-- **`/arf/home/<user>`** — küçük, ama **kalıcı**. Script'lerin ve sonuçların burada yaşar.
-- **`/arf/scratch/<user>`** — büyük, hızlı, ama **periyodik olarak silinir**. Burası senin çalışma alanın.
+- **`/arf/home/<user>`** küçük, ama kalıcı olan. Script'lerin ve sonuçların burada yaşar.
+- **`/arf/scratch/<user>`** büyük, hızlı, ama periyodik olarak silinen. Burası senin çalışma alanın.
 
-Dosyalarınla Scratch'te çalışır, öncesinde / sonrasında onları home'da saklarsın. Bir sonuç yalnızca scratch'te varsa ve scratch silinirse, gitmiştir. Bu yüzden önem verdiğin her şeyi `/arf/home`'a (veya tamamen kümenin dışına) geri kopyala.
+Dosyalarınla Scratch'te çalışır, öncesinde / sonrasında onları home'da saklarsın. Bir sonuç yalnızca scratch'te varsa ve scratch silinirse gider. Bu yüzden önem verdiğin her şeyi `/arf/home` (veya tamamen kümenin dışına) kısmında tut .
 
 **3. Container.** Yazılımın TRUBA'ya `pip install` ile kurulur (çok paket yüklendiği için maksimum dosya sayısı aşma gibi bir problemi var). Projede bundan dolayı her şey (JAX, `ffn` paketi, tüm bağımlılıklar) tek bir **Apptainer/Singularity** imajına, bir `.sif` dosyasına gömülü olarak ayarlanmıştır (projedeki adı `ffn-jax.sif`). Eğitimi çalıştırdığında, onu *o container'ın içinde* çalıştırırsın. Container kullanımı bunları atlatır çünkü içinde zaten her şey olan tek bir büyük dosyadır.
 
@@ -60,7 +58,7 @@ Yukarıdaki her şey, özetle beş kurala damıtılabilir. Bunları SKILL.md dos
 
 Şimdi `liconn_real_1gpu.sbatch`'i , SLURM'e gidecek olan talimatları açıklamak için kullanacağım ne de olsa kendi script'im :D Her biri farklı soruları cevaplıyor:
 
-İşte tek-GPU script'imdeki gerçek direktif bloğu:
+Tek-GPU script'indeki SLURM direktiflerini içeren kısım:
 
 ```bash
 #!/bin/bash
@@ -79,19 +77,19 @@ Yukarıdaki her şey, özetle beş kurala damıtılabilir. Bunları SKILL.md dos
 
 Anlamları:
 
-- **`#!/bin/bash`** — shebang. Script'in gövdesi (direktiflerden sonraki her şey) normal bir bash script'idir; bu, onu bash ile çalıştır demek.
-- **`-p akya-cuda`** — **partition**, yani hangi makine havuzu. `akya-cuda`, TRUBA'nın gerçek eğitimin çalıştığı GPU partition'ıdır. (Hızlı duman testleri için bunu `debug` ile geçersiz kılınabilir, ki o hızlı başlar — bir sonraki bölümde bununla ilgili daha fazlası.)
-- **`-A avural`** — hesaplamanın faturalandırılacağı **account**. Bunu atlarsan, SLURM varsayılan account'unu kullanır.
-- **`-J ffn_real_1gpu`** — **job name**. Tamamen kozmetik, ama `squeue`'da job'un yanında görünen şey budur, bu yüzden net bir isim koymazsan labda etiketlemediğin eppendorf tüplerinin hangisi olduğunu anlamakla benzer bir hengame çıkabilir.
-- **`-N 1`** — **1 node** (bir fiziksel makine) iste.
-- **`-n 1`** — **1 task** (bir process) iste. Bir node, bir task  / tek bir eğitim process'i.
-- **`--gres=gpu:1`** — bir **generic resource** isteği: bana **1 GPU** ver. Bu olmadan GPU partition'ına düşersin ama gerçek bir GPU almazsın.
-- **`--cpus-per-task=10`** — o task için **10 CPU çekirdeği**. `akya-cuda`'da kural GPU başına 10 çekirdektir, yani bir GPU on çekirdek alır. (4-GPU sürümünün neden 40 istediği de budur.)
-- **`--time=00:30:00`** — **wall-clock limiti**, `HH:MM:SS`. Buradaki süreyi ayarlamak oldukça önemli (asıl script'te günler süreceği hesaba katılmalı ve checkpoint'lerden devam edilmesi seçeneği değerlendirilmesi) SLURM job'u bitmiş olsun veya olmasın süre bitince **öldürür**. (4-GPU script'i uzun format `1-00:00:00` kullanır, ki bu `D-HH:MM:SS` = 1 gündür.)
-  - **`-o .../runs/ffn_real_1gpu_%j.out`** — **stdout**'un gittiği yer. `%j`, job id'ye genişler, böylece her çalıştırma sonuncusunun üzerine yazmak yerine kendi log dosyasını alır.
-- **`-e .../runs/ffn_real_1gpu_%j.err`** — **stderr**'in gittiği yer. Bilinmeye değer: JAX/absl ile canlı loglar **ve eğitim loss'u** **stderr**'e yazdırılır, bu yüzden eğitimi izlemek için aslında `tail -f` yaptığım dosya bu `.err` dosyasıdır.
+- **`#!/bin/bash`** : normal bir bash script'idir; bu, onu bash ile çalıştır demek.
+- **`-p akya-cuda`** : partition, yani hangi makine havuzu. `akya-cuda`, TRUBA'nın gerçek eğitimin çalıştığı GPU partition'ıdır. (Hızlı duman testleri için bunu `debug` ile geçersiz kılınabilir, ki o hızlı başlar — bir sonraki bölümde bununla ilgili daha fazlası.)
+- **`-A avural`** : hesaplamanın faturalandırılacağı account. Bunu atlarsan, SLURM varsayılan account'unu kullanır.
+- **`-J ffn_real_1gpu`** : **job name**. Tamamen kozmetik, ama `squeue`'da job'un yanında görünen şey budur, bu yüzden net bir isim koymazsan labda etiketlemediğin eppendorf tüplerinin hangisi olduğunu anlamakla benzer bir hengame çıkabilir.
+- **`-N 1`** : 1 node (bir fiziksel makine) iste.
+- **`-n 1`** : 1 task (bir process) iste. Bir node, bir task  / tek bir eğitim process'i.
+- **`--gres=gpu:1`** : bir generic resource isteği: bana **1 GPU** ver. Bu olmadan GPU partition'ına düşersin ama gerçek bir GPU almazsın.
+- **`--cpus-per-task=10`** : o task için 10 CPU çekirdeği. `akya-cuda`'da kural GPU başına 10 çekirdektir, yani bir GPU on çekirdek alır. (4-GPU sürümünün neden 40 istediği de budur.)
+- **`--time=00:30:00`** : wall-clock limiti, `HH:MM:SS`. Buradaki süreyi ayarlamak oldukça önemli (asıl script'te günler süreceği hesaba katılmalı ve checkpoint'lerden devam edilmesi seçeneği değerlendirilmesi) SLURM job'u bitmiş olsun veya olmasın süre bitince öldürür. (4-GPU script'i uzun format `1-00:00:00` kullanır, ki bu `D-HH:MM:SS` = 1 gündür.)
+  - **`-o .../runs/ffn_real_1gpu_%j.out`** : stdout'un gittiği yer. `%j`, job id'ye genişler, böylece her çalıştırma sonuncusunun üzerine yazmak yerine kendi log dosyasını alır.
+- **`-e .../runs/ffn_real_1gpu_%j.err`** : stderr'in gittiği yer. Bilinmeye değer: JAX/absl ile canlı loglar ve eğitim loss'u stderr'e yazdırılır, bu yüzden eğitimi izlemek için aslında `tail -f` yaptığım dosya bu `.err` dosyasıdır.
 
-Şimdi baş kısmını atlayıp diğer bayrakları inceleyebiliriz. Artık sıra bize gelince neler yapacağımızı belirtmemiz gerekir. Direktiflerden sonra script birkaç akıl sağlığı kontrolü yapar ve sonra eğitimi başlatır. `set -euo pipefail` komutunu hata yönetimi için kullandım (ilk hatada dur). Daha sonra GPU'nun gerçekten görünür olduğunu doğrulanır (`nvidia-smi -L`, artı container içinde `jax.device_count()`'in 1'e eşit olduğuna dair hızlı bir kontrol) ve çıktıların çakışmaması için `runs/` altında zaman damgalı bir `WORK_DIR` oluşturur. Sonra asıl işi yapan `apptainer exec` satırı her şeyi **container'ın içinde** çalıştırır:
+Şimdi baş kısmını atlayıp diğer bayrakları inceleyebiliriz. Artık sıra bize gelince neler yapacağımızı belirtmemiz gerekir. Direktiflerden sonra script birkaç akıl sağlığı kontrolü yapar ve sonra eğitimi başlatır. `set -euo pipefail` komutunu hata yönetimi için kullandım (ilk hatada dur). Daha sonra GPU'nun gerçekten görünür olduğunu doğrulanır (`nvidia-smi -L`, artı container içinde `jax.device_count()`'in 1'e eşit olduğuna dair hızlı bir kontrol) ve çıktıların çakışmaması için `runs/` altında zaman damgalı bir `WORK_DIR` oluşturur. Sonra asıl işi yapan `apptainer exec` satırı her şeyi container'ın içinde çalıştırır:
 
 ```bash
 apptainer exec --nv --bind /arf:/arf --pwd <project> \
@@ -145,9 +143,7 @@ GPU başına 10 çekirdek kuralının temiz bir şekilde ölçeklendiğini fark 
 global batch = per_device_batch_size * 4
 ```
 
-Yani `gpu:4` istediğinde, sadece daha fazla bellek almıyorsun — JAX, her adımın batch'ini dört yöne bölüp şeffaf bir şekilde paralel çalıştırıyor. *Benim* dokunduğum tek şey yukarıdaki üç `#SBATCH` satırı. (Bu temiz 1'e-2'ye-4 davranışı, tam olarak bir ölçeklendirme karşılaştırmasının — her GPU sayısında saniye başına adım — tez grafiği için yapılacaklar listemde olmasının nedeni.)
-
-Çıkarım: `--gres` ile GPU iste, çekirdekleri GPU başına 10'da tut, dürüst bir `--time` set et (beyin modellemesi için çoğunlukla maximum olan 3 gün olacak ve sonra checkpoint alıp devam edeceksin), hızlı iterasyon için `debug` ve gerçek çalıştırma için `akya-cuda` seç.
+`--gres` ile GPU iste, çekirdekleri GPU başına 10'da tut, bir `--time` set et (beyin modellemesi için çoğunlukla maximum olan 3 gün olacak ve sonra checkpoint alıp devam edeceksin), hızlı iterasyon için `debug` ve gerçek çalıştırma için `akya-cuda` seç.
 
 ## submit → monitor → debug döngüsü
 
@@ -155,7 +151,7 @@ Bir kez job script'im var olduğunda, TRUBA'daki hayatımın geri kalanı tek bi
 
 ### Önce Kural 3: `cd /arf/scratch`
 
-Her şeyden önce scratch'e geçerim. Job'lar `/arf/scratch`'ten gönderilmek **zorundadır** — `/arf/home`'dan gönder, scheduler seni scratch kullanmanı söyleyen bir mesajla doğrudan reddeder. (Bunu aptalca yoldan öğrendim: `/arf/home`'dan bir `srun` *"please run your jobs from /arf/scratch"* mesajıyla geri döndü.)
+Her şeyden önce scratch'e geçerim. Job'lar `/arf/scratch`'ten gönderilmek **zorundadır**. Eğer `/arf/home`'dan gönderirsen scheduler seni scratch kullanmanı söyleyen bir mesajla doğrudan reddeder.
 
 ```bash
 cd /arf/scratch/<user>/<repo>
@@ -173,7 +169,7 @@ Sonrasında gelen her şeyin tutamacı olan bir job id geri yazdırır:
 Submitted batch job 1234567
 ```
 
-Gerçek GPU partition'ı (`akya-cuda`) sık sık tıka basa doludur, bu yüzden hızlı bir duman testi için partition'ı komut satırında geçersiz kılarım — script'i düzenlemeden — ve hızlı `debug` kuyruğuna düşerim (maksimum ~4 saat, ama *başlar*):
+Gerçek GPU partition'ı (`akya-cuda`) sık sık tıka basa doludur, bu yüzden hızlı bir duman testi için partition'ı komut satırında geçersiz kılarım ve hızlı `debug` kuyruğuna düşerim:
 
 ```bash
 sbatch -p debug liconn_real/liconn_real_1gpu.sbatch
@@ -209,7 +205,7 @@ Ve partition'da hiç yer olup olmadığını görmek için:
 sinfo -p akya-cuda
 ```
 
-> **Ders** — bir job bir `--dependency` üzerinde bekliyorsa, `squeue --start` `N/A` gösterir — SLURM, bir bağımlılık karşılanmadığı sürece tahmin yapmaz. Bağımlılık temizlendiğinde tekrar çalışır; ya da sadece `sbatch --test-only` kullan, ki o ne olursa olsun tahmin eder.
+> **Ders** bir job bir `--dependency` üzerinde bekliyorsa, `squeue --start` `N/A` gösterir — SLURM, bir bağımlılık karşılanmadığı sürece tahmin yapmaz. Bağımlılık temizlendiğinde tekrar çalışır; ya da sadece `sbatch --test-only` kullan, ki o ne olursa olsun tahmin eder.
 
 ### Canlı logu takip etme
 
@@ -219,7 +215,7 @@ Script'im stdout'u `..._%j.out`'a ve stderr'i `..._%j.err`'e yazar. JAX için tu
 tail -f runs/ffn_real_1gpu_<id>.err
 ```
 
-> **Ders** — yalnızca-CPU bir adımdaki (`compute_partitions` gibi) bir `cuInit ... error 303` satırı **zararsız** bir uyarıdır — bu bir CPU job'u, init edilecek GPU yok. Görmezden gel.
+> **Ders** yalnızca CPU içeren bir adımdaki (`compute_partitions` gibi) bir `cuInit ... error 303` satırı **zararsız** bir uyarıdır — bu bir CPU job'u, init edilecek GPU yok. Görmezden gelebilirsin.
 
 ### Bittikten sonra: `sacct`
 
@@ -253,11 +249,9 @@ Daha önce container'a geri döneceğimden bahsetmiştim, çünkü onun neden or
 
 ### Kural 4: `/arf` üzerinde pip/conda yok
 
-`/arf` sadece disk-kotalı değil, **inode**-kotalıdır: yalnızca toplam boyutları değil, tutabileceğin *dosya sayısı* üzerinde katı bir tavan var. Tek bir conda/pip ortamı on binlerce küçük dosyadır (her `.py`, her `.pyc`, her geçişli bağımlılık). Bunlardan birkaçını kur ve inode kotasını aşarsın — bu noktada küme, gerçek sonuçların dahil olmak üzere *herhangi bir şey* yazmanı durdurur. `/arf`'ı "ortamlar değil, veri ve kod" olarak görmeyi öğrendim.
+Bütün yazılım yığını (yani JAX, GPU runtime, `ffn`, her bağımlılık) bir kez tek bir **Apptainer** imaj dosyasına göm `ffn-jax.sif`. Dosya sistemi açısından bu tek bir dosyadır. Elli bin değil, bir inode. `.sif`'i kümeye gönderirsin ve ortam problemi kalıcı olarak çözülür.
 
-Bunun yerine, bütün yazılım yığını (yani JAX, GPU runtime, `ffn`, her bağımlılık) bir kez tek bir **Apptainer** imaj dosyasına gömülür: `ffn-jax.sif`. Dosya sistemi açısından bu tek bir dosyadır. Elli bin değil, bir inode. `.sif`'i kümeye gönderirsin ve ortam problemi kalıcı olarak çözülür.
-
-> **Ders** — Paylaşımlı HPC'de seni ısıran şey boyut kotası değil, inode kotasıdır. Bir `.sif` bir dosyadır; bir conda ortamı on binlerce. Ortamı container'a koy.
+> **Ders** Paylaşımlı HPC'de seni ısıran şey boyut kotası değil, inode kotasıdır. Bir `.sif` bir dosyadır; bir conda ortamı on binlerce. Ortamı container'a koy.
 
 ### Bir job yazılımı aslında nasıl çalıştırır
 
