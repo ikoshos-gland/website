@@ -9,7 +9,7 @@ draft: false
 ---
 ## TRUBA Nedir?
 
-<DropCap>B</DropCap> bir moleküler biyoteknoloji öğrencisi olarak ve ne kadar daha önce biyoinformatik, python ve R dersleri alsam da 2025'e kadar hiç süperbilgisayarlar ile uğraşmamıştım. Ama petavoxel seviyesinde beyin modelleme çalışmaları için normal bilgisayarlar ne yazık ki yüzeysel kalıyor. Bu yüzden Türkiye'nin ulusal HPC kümesi TRUBA'yı kullanmaya başladım ve ilk başta anlaması biraz zor gelse de daha sonra bunun için öğrendiklerimi agentic sistemlerin kullanabileceği bir SKILL dosyası haline getirdim. Böylece Claude Code veya Codex gibi LLM'ler SSH köprüsü kurarak artık sizin yerinize TRUBA kullanabilir hale geldi. Yine de her şeyi LLM'lere yıkmak saçma (prefrontal korteksimiz LLM'ler ile konuşurken daha az çalışıyor onun için biraz da yanlış[@kosmynaYourBrainChatGPT2025, p. 96]) ve bu yazıda güzelce TRUBA'yı beyin modellemesi kullanımı çerçevesinde inceleyeceğiz. 
+<DropCap>B</DropCap> bir moleküler biyoteknoloji öğrencisi olarak daha önce biyoinformatik, python ve R dersleri alsam da 2025'e kadar hiç süperbilgisayarlar ile uğraşmamıştım. Ama petavoxel seviyesinde beyin modelleme çalışmaları için normal bilgisayarlar ne yazık ki yüzeysel kalıyor. Bu yüzden Türkiye'nin ulusal HPC kümesi TRUBA'yı kullanmaya başladım ve ilk başta anlaması biraz zor gelse de daha sonra bunun için öğrendiklerimi agentic sistemlerin kullanabileceği bir SKILL dosyası haline getirdim. Böylece Claude Code veya Codex gibi LLM'ler SSH köprüsü kurarak artık sizin yerinize TRUBA kullanabilir hale geldi. Yine de her şeyi LLM'lere yıkmak saçma (prefrontal korteksimiz LLM'ler ile konuşurken daha az çalışıyor onun için biraz da yanlış[@kosmynaYourBrainChatGPT2025, p. 96]) ve bu yazıda güzelce TRUBA'yı beyin modellemesi kullanımı çerçevesinde inceleyeceğiz. 
 
 TRUBA, “Türk Ulusal Bilim e-Altyapısı”nın kısaltmasıdır. TÜBİTAK ULAKBİM tarafından işletilen, araştırmacılara yüksek başarımlı hesaplama—HPC, veri depolama ve bilimsel hesaplama olanakları sağlayan ulusal altyapıdır. Daha basitçe söylemek gerekirse TRUBA, çok güçlü bilgisayarların araştırmacılar tarafından ortaklaşa kullanıldığı bir sistemdir. Normal bir bilgisayarda haftalar veya aylar sürebilecek hesaplamalar, işin çok sayıda işlemciye bölünmesiyle (paralelizasyon) daha kısa sürede gerçekleştirilebilir [@TRUBAOlusumuTurkish].
 ### SLURM gibi bir scheduler neden var olur ki?
@@ -40,10 +40,7 @@ ssh kullaniciadi@172.16.6.11
 - **`/arf/home/<user>`** küçük, ama kalıcı olan. Script'lerin ve sonuçların burada yaşar.
 - **`/arf/scratch/<user>`** büyük, hızlı, ama periyodik olarak silinen. Burası senin çalışma alanın.
 
-Dosyalarınla Scratch'te çalışır, öncesinde / sonrasında onları home'da saklarsın. Bir sonuç yalnızca scratch'te varsa ve scratch silinirse gider. Bu yüzden önem verdiğin her şeyi `/arf/home` (veya tamamen kümenin dışına) kısmında tut .
-
-**3. Container.** Yazılımın TRUBA'ya `pip install` ile kurulur (çok paket yüklendiği için maksimum dosya sayısı aşma gibi bir problemi var). Projede bundan dolayı her şey (JAX, `ffn` paketi, tüm bağımlılıklar) tek bir **Apptainer/Singularity** imajına, bir `.sif` dosyasına gömülü olarak ayarlanmıştır (projedeki adı `ffn-jax.sif`). Eğitimi çalıştırdığında, onu *o container'ın içinde* çalıştırırsın. Container kullanımı bunları atlatır çünkü içinde zaten her şey olan tek bir büyük dosyadır.
-
+c
 ### 5 altın kurallar
 
 Yukarıdaki her şey, özetle beş kurala damıtılabilir. Bunları SKILL.md dosyam sayesinde LLM'leri kullanarak ve buna rağmen kendimi banlatmayarak yaptım.
