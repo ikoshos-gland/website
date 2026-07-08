@@ -25,7 +25,7 @@ Asıl beygir gücü **compute node**'larda yaşar. Daha önce de yazıldığı g
 
 <SlurmFlow />
 
-### TRUBA'yı somut olarak kurmak
+### TRUBA'yı Somut Olarak Kurmak
 
 Bütün bunlar gerçek olmadan önce ihtiyacın olan üç şey.
 
@@ -41,7 +41,7 @@ ssh kullaniciadi@172.16.6.11
 - **`/arf/scratch/<user>`** büyük, hızlı, ama periyodik olarak silinen. Burası senin çalışma alanın.
 
 c
-### 5 altın kurallar
+### 5 altın kural
 
 Yukarıdaki her şey, özetle beş kurala damıtılabilir. Bunları SKILL.md dosyam sayesinde LLM'leri kullanarak ve buna rağmen kendimi banlatmayarak yaptım.
 
@@ -51,7 +51,7 @@ Yukarıdaki her şey, özetle beş kurala damıtılabilir. Bunları SKILL.md dos
 4. **`/arf` üzerine `pip`/`conda` ile kurulum yapma.** inode (dosya sayısı) kotasına çarparsın. Bunun yerine her şey container'ın içinde kur.
 5. **`/arf/scratch` periyodik olarak silinir.** Sonuçları `/arf/home`'a veya kümenin dışına kopyalamadığın takdirde silineceğini unutma.
 
-## Bir job script'inin anatomisi ve oyuncak model
+## Bir Job Script'inin Anatomisi ve Konnektomik Projesi Örneği
 
 Şimdi `liconn_real_1gpu.sbatch`'i , SLURM'e gidecek olan talimatları açıklamak için kullanacağım ne de olsa kendi script'im :D Her biri farklı soruları cevaplıyor:
 
@@ -103,7 +103,7 @@ apptainer exec --nv --bind /arf:/arf --pwd <project> \
 
 > **Ders** — `--time` bir ipucu değil, katı bir öldürmedir. `akya-cuda`'da yeterli wall-clock bütçele ve uzun formatın `D-HH:MM:SS` olduğunu unutma (örneğin `1-00:00:00` bir gündür).
 
-### Bir partition seçmek
+### Partition Seçmek
 
 Partition `#SBATCH -p <name>` ile set edilir. Gerçekten kullandığım üç tane ve ne zaman:
 
@@ -120,7 +120,7 @@ Hızlı bir test için partition'ları değiştirmek üzere script'i düzenlemen
 sbatch -p debug liconn_real/liconn_real_1gpu.sbatch   # smoke test on the fast queue
 ```
 
-### 1 GPU'yu 4'e ölçeklendirmek: aslında ne değişiyor
+### 1 GPU'yu 4'e Ölçeklendirmek: Aslında Ne Değişiyor
 
 Beni çok şaşırtan kısımlardan birine geldik 1 GPU'dan 4'e geçmek neredeyse tamamen bir SLURM değişikliği, **bir kod değişikliği değil**.
 
@@ -142,7 +142,7 @@ global batch = per_device_batch_size * 4
 
 `--gres` ile GPU iste, çekirdekleri GPU başına 10'da tut, bir `--time` set et (beyin modellemesi için çoğunlukla maximum olan 3 gün olacak ve sonra checkpoint alıp devam edeceksin), hızlı iterasyon için `debug` ve gerçek çalıştırma için `akya-cuda` seç.
 
-## submit → monitor → debug döngüsü
+## Submit → Monitor → Debug Döngüsü
 
 Bir kez job script'im var olduğunda, TRUBA'daki hayatımın geri kalanı tek bir sıkı döngü: gönder, izle, tepki ver. İşte tam olarak nasıl çalıştırdığım.
 
@@ -240,7 +240,7 @@ srun -p debug -A <user> -N1 -n1 -c8 --mem=16G -t0:30:00 bash <script>.sh
 
 Bu terminalimi bloklar ve çıktıyı canlı akıtır, ki bu uzun bir batch çalıştırmaya bağlanmadan önce küçük bir hazırlık adımı üzerinde iterasyon yapmak için mükemmeldir.
 
-## Container'lar: her job neden bir .sif içinde çalışır
+## Container'lar: Her Job Neden Bir .sif İçinde Çalışır
 
 Daha önce container'a geri döneceğimden bahsetmiştim, çünkü onun neden orada olduğunu anladığında, bütün job script'i sihir gibi görünmeyi bırakıp bariz görünmeye başlıyor.
 
