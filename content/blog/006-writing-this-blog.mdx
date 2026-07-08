@@ -92,6 +92,30 @@ Global batch scales with the GPU count, $b_\text{global} = b_\text{device} \time
 
 Which renders as, global batch scales with the GPU count, $b_\text{global} = b_\text{device} \times N$.
 
+## Citations
+
+When a post leans on someone else's work, you cite it, and the reference list at the foot of this page builds itself. It works the way Zotero does. You write a short key in the text, and a numbered entry appears below, formatted for you.
+
+You cite by putting a key in square brackets behind an `@`. The key names an entry in `content/references.bib`, the single file that holds every source.
+
+```mdx
+The flood-filling networks paper [@januszewskiHighprecisionAutomatedReconstruction2018] made this practical.
+```
+
+And here is that line, live. The flood-filling networks paper [@januszewskiHighprecisionAutomatedReconstruction2018] made this practical. The `[1]` is a quiet marker, and hovering it shows the whole reference. You can cite two at once, [@sheridanLocalShapeDescriptors2023; @chenExpansionMicroscopy2015], or pin a page, [@chenExpansionMicroscopy2015, p. 544].
+
+The list itself lands wherever you drop a lowercase `[^ref]` on its own line, under a heading in the post's language. Leave the marker out and the list simply appears at the very end.
+
+```mdx
+## References
+
+[^ref]
+```
+
+The bibliography at the bottom of this page is that marker at work, drawn in IEEE style, bracketed numbers to match the blog's plain look.
+
+> **Lesson:** the source of truth is `content/references.bib`, and you never edit it by hand. In Zotero, install the Better BibTeX plugin, export your collection with "keep updated" checked, and point it at that file. Add a paper in Zotero, the file updates, and you commit it. Turning `[@key]` into `[1]` and building the list both happen at build time.
+
 ## Components, the good part
 
 These are ready-made building blocks. You never import them. You just write the tag, and it works in every post. Here is each one, with its code and the live result side by side.
@@ -181,3 +205,7 @@ If you remember nothing else, remember these.
 > **Rule 3:** images go in `public/img/` and are called with `/img/...`. Use `.webp`.
 
 That is the whole craft. The best reference is any real post in `content/blog/`, where you can read the source and see exactly how each feature was used.
+
+## References
+
+[^ref]

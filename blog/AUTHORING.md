@@ -20,7 +20,8 @@ bölüme atla. Her şeyin kopyala-yapıştır örneği var.
 12. [Çok dillilik (TR / EN / DE)](#12-çok-dillilik)
 13. [Taslak ve yayına alma](#13-taslak-ve-yayına-alma)
 14. [Baştan sona tam örnek yazı](#14-tam-örnek-yazı)
-15. [Sık yapılan hatalar](#15-sık-yapılan-hatalar)
+15. [Atıflar ve kaynakça (Zotero)](#15-atıflar-ve-kaynakça)
+16. [Sık yapılan hatalar](#16-sık-yapılan-hatalar)
 
 ---
 
@@ -555,7 +556,86 @@ Gördüğün gibi etiketi koymak yeterli, gerisi kendiliğinden çalışıyor.
 
 ---
 
-## 15. Sık yapılan hatalar
+## 15. Atıflar ve kaynakça
+
+Akademik yazılar için "Zotero gibi" bir atıf sistemi kurulu. Metne bir **atıf
+anahtarı** yazarsın, yazının sonundaki numaralı **kaynakça kendiliğinden**
+oluşur. Motor `rehype-citation`, stil **IEEE** (köşeli parantez, `[1]`).
+
+### Yazıda atıf vermek
+
+Kaynak verisi `content/references.bib` dosyasında durur. Oradaki her girişin bir
+**anahtarı** vardır (örn. `januszewski2018`). Metinde köşeli parantez + `@` +
+anahtar yazarsın:
+
+```mdx
+Taşkın-doldurma ağları nöronları çıkarır [@januszewski2018].
+
+İki kaynağı birleştir [@januszewski2018; @sheridan2023].
+
+Sayfa sabitle [@chen2015, p. 544].
+```
+
+Sırasıyla `[1]`, `[1], [2]` ve `[3, p. 544]` olarak render olur. Atıfın üstüne
+gelince tam kaynak künyesi tooltip olarak çıkar (`<Term>` gibi).
+
+### Kaynakçayı yerleştirmek
+
+Kaynakçanın çıkmasını istediğin yere, kendi satırında **küçük harfle** `[^ref]`
+koy. Üstüne bir başlık yazarsan o dile göre çevir:
+
+```mdx
+## Kaynakça
+
+[^ref]
+```
+
+`[^ref]` koymazsan liste yazının en sonuna eklenir. Her dil dosyası (`.mdx`,
+`.tr.mdx`, `.de.mdx`) kendi başlığını taşır; atıf anahtarları üç dilde de aynıdır.
+
+### Kaynak dosyaları (iki tane, birleştiriliyor)
+
+Kaynakça iki `.bib` dosyasından beslenir, build sırasında `content/_bibliography.bib`
+olarak birleştirilir (bu üretilen dosyayı elleme, git'e de girmez):
+
+- **`content/zotero.bib`** — Zotero'nun otomatik dışa aktarımı. **Zotero'ya aittir**,
+  her değişiklikte komple yeniden yazılır, elle düzenleme.
+- **`content/references.bib`** — Zotero'da olmayan **manuel** girişler (demo ya da
+  tek seferlik kaynaklar). Kütüphaneni yeniden dışa aktarınca bunlar hayatta kalır.
+
+### Zotero ile senkron (asıl kolaylık)
+
+`zotero.bib`'i elle düzenlemezsin, Zotero doldurur:
+
+1. Zotero'da **Better BibTeX** eklentisini kur.
+2. Sol panelde **My Library**'ye (ya da bir koleksiyona) sağ tıkla → **Export Library...**
+   (Not: sağ tıktaki "Better BibTeX >" alt menüsü BUNUN İÇİN DEĞİL, o başka şeyler için.)
+3. Açılan pencerede Format **Better BibTeX**, **Keep updated** kutusunu işaretle.
+4. Hedef dosya olarak `website/content/zotero.bib` seç.
+
+Artık Zotero'ya bir kaynak eklediğinde `zotero.bib` kendiliğinden güncellenir; sen
+`git add content/zotero.bib` ile commit'lersin. Atıf anahtarı (`[@anahtar]`'daki
+anahtar) = Better BibTeX'in her kaynağa verdiği **"citation key"**. Bir kaynağın
+anahtarını görmek için Zotero'da kaynağa tıkla (sağ panelde "Citation key" görünür,
+ya da liste görünümüne "Citation Key" sütunu ekle). Anahtar biçimini sadeleştirmek
+istersen: Zotero Ayarlar → Better BibTeX → Citation keys.
+
+### Stili değiştirmek
+
+`vite.config.ts` içindeki `rehypeCitation` ayarında `csl` alanı. Yerleşik
+seçenekler: `'apa'`, `'vancouver'`, `'chicago'`, `'mla'`, `'harvard1'`. Ya da
+şu andaki gibi yerel bir `.csl` dosyası yolu (`content/ieee.csl`).
+
+> **Not:** Atıftan kaynakçaya tıkla-zıpla bağlantısı bilerek kapalı
+> (`linkCitations: false`), çünkü `[@x, p. 544]` gibi rakamlı sayfa atıflarında
+> eklentinin o kod yolu çöküyor. Tooltip zaten künyeyi gösterdiği için kayıp yok.
+
+Canlı örnek: `content/blog/999-citations.mdx` (taslak, sadece geliştirmede
+görünür). Silebilir ya da şablon olarak tutabilirsin.
+
+---
+
+## 16. Sık yapılan hatalar
 
 - **Bileşeni import etmeye çalışmak.** Gerek yok. `mdxComponents.tsx`'te kayıtlı
   olanlar (DropCap, Pull, SlurmFlow ...) her yazıda hazır. Sadece etiketi yaz.
@@ -571,6 +651,13 @@ Gördüğün gibi etiketi koymak yeterli, gerisi kendiliğinden çalışıyor.
   (kod hariç). Nokta, virgül, iki nokta, parantez kullan.
 - **`draft: true` bırakıp "neden canlıda yok" diye şaşırmak.** Canlıya çıkmadan
   önce `false` yapmayı unutma.
+- **`[^Ref]`'i büyük harfle yazmak.** Kaynakça işaretçisi küçük harf `[^ref]`
+  olmalı, yoksa liste oraya değil yazının en sonuna düşer.
+- **`references.bib` içine `@` ile başlayan yorum yazmak.** BibTeX ayrıştırıcısı
+  `@article{...}` gibi metni gerçek kayıt sanıp derlemeyi kırar. `.bib`'e sadece
+  gerçek girişleri koy, açıklamayı buraya (AUTHORING) yaz.
+- **Var olmayan bir atıf anahtarı kullanmak.** `[@yanlisAnahtar]` sessizce boş
+  render olur. Anahtarın `references.bib`'te olduğundan emin ol.
 
 ---
 

@@ -140,40 +140,52 @@ html.blg-hide-native-scrollbar::-webkit-scrollbar,body.blg-hide-native-scrollbar
 .blg-library{max-width:1180px;padding-top:10px}
 .blg-library-head{border-bottom:1px solid var(--hair);padding-bottom:30px;margin-bottom:30px}
 .blg-library .blg-index-head{max-width:720px;margin:0;border:0;padding-bottom:0}
-.blg-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:0;align-items:stretch}
-/* Deep black leather shelves. Real leather texture, dark monochrome, no colour. */
-.blg-choice-card{position:relative;display:flex;min-height:390px;flex-direction:column;text-decoration:none;color:inherit;
-  background-image:linear-gradient(155deg,rgba(8,8,9,.42),rgba(2,2,3,.6)),url(/img/leather.webp);
-  background-size:cover;background-position:center;background-repeat:no-repeat;
-  border:1px solid #1b1a18;border-radius:14px;padding:36px 34px 32px;overflow:hidden;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),inset 0 -34px 66px rgba(0,0,0,.55),0 22px 55px rgba(0,0,0,.55);
-  transition:border-color .3s,transform .3s,box-shadow .3s}
-/* soft light catching the top-left of the leather */
-.blg-choice-card::before{content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(82% 60% at 22% 6%,rgba(255,255,255,.05),transparent 60%)}
-/* tonal stitched inner border, monochrome */
-.blg-choice-card::after{content:'';position:absolute;inset:14px;border-radius:9px;pointer-events:none;
-  border:1px dashed rgba(235,235,235,.09)}
-.blg-choice-card:hover{transform:translateY(-3px);border-color:rgba(235,235,235,.2);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -34px 66px rgba(0,0,0,.5),0 30px 72px rgba(0,0,0,.62)}
-.blg-choice-kicker{position:relative;z-index:1;display:block;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8f8d88;margin-bottom:68px}
-.blg-choice-title{position:relative;z-index:1;font-family:var(--serif);font-style:italic;font-weight:400;font-size:48px;line-height:1.02;color:#eeece7;margin-bottom:18px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
-.blg-choice-body{position:relative;z-index:1;font-size:16.5px;line-height:1.68;color:#b6b3ac;margin-bottom:30px;max-width:440px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
-.blg-choice-trace{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:0;width:min(300px,100%);height:18px;margin-top:auto;margin-bottom:24px}
-.blg-choice-trace::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,rgba(235,235,235,.28),rgba(120,120,120,.12));transform:translateY(-50%);box-shadow:0 1px 0 rgba(0,0,0,.5)}
-.blg-choice-trace i{position:relative;width:7px;height:7px;border-radius:50%;background:#0a0a0b;border:1px solid rgba(235,235,235,.35);align-self:center;box-shadow:inset 0 1px 1px rgba(0,0,0,.7)}
-.blg-choice-trace i:nth-child(2){justify-self:center}.blg-choice-trace i:nth-child(3){justify-self:end}
-.blg-choice-cta{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cbc8c1}
-.blg-choice-card:hover .blg-choice-cta svg{transform:translateX(3px)}
-.blg-choice-cta svg{transition:transform .2s ease}
+.blg-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px;margin-top:0;align-items:stretch}
+/* Two lit plinths in a dark gallery — no photo texture. Each card carries its
+   own accent (lab = gold, thesis = expansion-teal) and a faint thematic motif:
+   a graph-paper dot grid for the lab, concentric "expansion" rings for the thesis. */
+.blg-choice-card{position:relative;z-index:1;display:flex;min-height:392px;flex-direction:column;text-decoration:none;color:inherit;
+  padding:34px 34px 30px;border-radius:16px;overflow:hidden;isolation:isolate;
+  border:1px solid var(--hair);
+  background:linear-gradient(168deg,rgba(255,255,255,.022),transparent 42%),linear-gradient(180deg,var(--surface),var(--surface2));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 20px 50px rgba(0,0,0,.42);
+  transition:border-color .4s,box-shadow .4s}
+.blg-choice-card.lab{--accent:var(--gold-a);--accent-line:rgba(255,215,0,.45);--accent-glow:rgba(255,215,0,.13)}
+.blg-choice-card.thesis{--accent:#6FD0C8;--accent-line:rgba(111,208,200,.45);--accent-glow:rgba(111,208,200,.12)}
+/* top hairline that ignites on hover */
+.blg-choice-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;z-index:2;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.32;transition:opacity .4s}
+/* thematic motif + corner glow, drawn behind the text */
+.blg-choice-card::after{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.85;transition:opacity .5s}
+.blg-choice-card.lab::after{
+  background:radial-gradient(150px 150px at 86% 90%,var(--accent-glow),transparent 70%),radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:auto,22px 22px}
+.blg-choice-card.thesis::after{
+  background:radial-gradient(150px 150px at 86% 90%,var(--accent-glow),transparent 70%),repeating-radial-gradient(circle at 86% 92%,transparent 0 17px,rgba(111,208,200,.055) 17px 18px)}
+.blg-choice-card:hover{border-color:var(--accent-line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 26px 62px rgba(0,0,0,.5),0 0 0 1px var(--accent-line)}
+.blg-choice-card:hover::before{opacity:.95}
+.blg-choice-card:hover::after{opacity:1}
+.blg-choice-kicker{position:relative;z-index:1;display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 auto}
+.blg-choice-kicker::before{content:'';width:18px;height:1px;background:var(--accent);opacity:.7}
+.blg-choice-title{position:relative;z-index:1;font-family:var(--serif);font-style:italic;font-weight:400;font-size:46px;line-height:1.04;color:var(--ink-bright);margin:26px 0 16px}
+.blg-choice-body{position:relative;z-index:1;font-size:16px;line-height:1.66;color:var(--muted);margin-bottom:26px;max-width:440px}
+.blg-choice-trace{position:relative;z-index:1;display:flex;align-items:center;gap:9px;width:auto;height:auto;margin:0 0 22px}
+.blg-choice-trace i{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.45;transition:background .3s,opacity .3s,box-shadow .3s}
+.blg-choice-card:hover .blg-choice-trace i{background:var(--accent);opacity:1;box-shadow:0 0 10px var(--accent-glow)}
+.blg-choice-card:hover .blg-choice-trace i:nth-child(2){transition-delay:.07s}
+.blg-choice-card:hover .blg-choice-trace i:nth-child(3){transition-delay:.14s}
+.blg-choice-cta{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);transition:color .3s}
+.blg-choice-card:hover .blg-choice-cta{color:var(--accent)}
+.blg-choice-cta svg{transition:transform .25s ease}
+.blg-choice-card:hover .blg-choice-cta svg{transform:translateX(4px)}
 @media(max-width:760px){
   .blg-library{padding-top:4px}
   .blg-library-head{padding-bottom:26px;margin-bottom:24px}
-  .blg-choice-grid{grid-template-columns:1fr}
-  .blg-choice-card{min-height:315px;padding:26px 24px}
-  .blg-choice-kicker{margin-bottom:34px}
+  .blg-choice-grid{grid-template-columns:1fr;gap:18px}
+  .blg-choice-card{min-height:300px;padding:26px 24px}
   .blg-choice-title{font-size:38px}
-  .blg-choice-body{font-size:15.5px}
+  .blg-choice-body{font-size:15px}
 }
 
 /* ── Shelf-choice page: cinematic atmosphere ──────────────────────────── */
@@ -608,6 +620,23 @@ html.blg-hide-native-scrollbar::-webkit-scrollbar,body.blg-hide-native-scrollbar
 @media(prefers-reduced-motion:reduce){
   .blg-fl-trade .bar i,.blg-term-pop{transition:none}
 }
+
+/* ── Citations & bibliography (rehype-citation) ───────────────────────── */
+/* Inline numeric marker like [1]. Kept quiet: gold, mono, slightly raised,
+   NOT underlined like body links so it reads as a reference, not a hyperlink. */
+.blg-cite,.blg-cite a{font-family:var(--mono);font-size:.82em;color:var(--gold-a);
+  text-decoration:none;border:none;white-space:nowrap;vertical-align:.12em;cursor:pointer}
+.blg-cite a{border-bottom:none}
+.blg-cite a:hover{color:var(--gold-b)}
+/* The generated bibliography block. Vancouver = numbered entries. */
+.blg-body .csl-bib-body{margin-top:14px;display:flex;flex-direction:column;gap:14px;
+  font-family:var(--body);font-weight:300;font-size:15px;line-height:1.6;color:var(--ink)}
+.blg-body .csl-entry{display:flex;gap:12px;padding-left:2px}
+/* Numeric styles emit the "1." in a left-margin box and the text in a right box. */
+.blg-body .csl-left-margin{flex:0 0 auto;min-width:1.8em;color:var(--gold-a);font-family:var(--mono);font-size:.85em;padding-top:.15em}
+.blg-body .csl-right-inline{flex:1 1 auto}
+.blg-body .csl-entry a{color:var(--ink-bright);border-bottom:1px solid rgba(255,215,0,.4)}
+.blg-body .csl-entry a:hover{border-color:var(--gold-a)}
 
 /* ── Streaming deck reveal (first open only) ──────────────────────────── */
 .blg-deck-reveal{position:relative;display:block}

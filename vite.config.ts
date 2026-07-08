@@ -1,3 +1,4 @@
+import fs from 'fs';
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -6,13 +7,45 @@ import remarkFrontmatter from 'remark-frontmatter';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rehypeCitation from 'rehype-citation';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
 
   const mdxPlugin: any = mdx({
     remarkPlugins: [remarkFrontmatter, remarkGfm, remarkMath],
-    rehypePlugins: [rehypeKatex],
+    rehypePlugins: [
+      rehypeKatex,
+      // Zotero-style citations. Author posts write `[@bibkey]` inline; the plugin
+      // reads content/_bibliography.bib and renders a numbered bibliography wherever
+      // the post puts a `[^ref]` marker (else at the very end). That file is GENERATED
+      // (gitignored) by the mergeBib plugin below, which concatenates two sources:
+      // content/zotero.bib = Zotero's Better BibTeX "keep updated" auto-export (Zotero
+      // OWNS it, overwritten on every change, do not hand-edit), and
+      // content/references.bib = manual entries not in Zotero (demo/one-off refs that
+      // must survive a library re-export). We merge into ONE file rather than passing
+      // an array to rehype-citation because its array path is buggy: it mutates the
+      // shared paths in place, so the 2nd MDX file re-resolves already-absolute paths
+      // and dies with "Cannot read non valid bibliography URL". csl points at a local
+      // IEEE style file (bracketed numeric [1]), which suits the blog's no-em-dash
+      // house style. To switch styles, set csl to a built-in ('apa', 'vancouver',
+      // 'chicago', 'mla', 'harvard1') or another local .csl path. showTooltips
+      // shows the full entry on hover, matching the site's <Term> pattern.
+      // linkCitations is intentionally OFF: its numeric-link path mis-parses page
+      // locators that contain digits (e.g. `[@chen2015, p. 544]` -> it treats 544
+      // as a second citation number and crashes). Tooltips already surface the
+      // full reference on hover, so we skip the click-to-bibliography jump.
+      [
+        rehypeCitation,
+        {
+          bibliography: 'content/_bibliography.bib',
+          csl: 'content/ieee.csl',
+          linkCitations: false,
+          showTooltips: true,
+          inlineClass: ['blg-cite'],
+        },
+      ],
+    ],
     providerImportSource: '@mdx-js/react',
   });
   const mdxBase: any = typeof mdxPlugin.transform === 'function' ? mdxPlugin.transform : mdxPlugin.transform.handler;
@@ -27,12 +60,35 @@ export default defineConfig(({ mode }) => {
     },
   };
 
+  // Concatenate the Zotero auto-export and the manual references into the single
+  // file rehype-citation reads. Runs at server start and at build start, before
+  // any MDX is compiled, so the merged file always exists. (In dev, .bib files
+  // aren't watched deps — after Zotero rewrites zotero.bib, restart the dev
+  // server to re-merge. Production rebuilds on every push, so it's a non-issue.)
+  const mergeBib: any = {
+    name: 'merge-bibliography',
+    buildStart() {
+      const root = process.cwd();
+      const sources = ['content/zotero.bib', 'content/references.bib'];
+      const merged = sources
+        .map((f) => {
+          try {
+            return fs.readFileSync(path.join(root, f), 'utf8');
+          } catch {
+            return '';
+          }
+        })
+        .join('\n\n');
+      fs.writeFileSync(path.join(root, 'content/_bibliography.bib'), merged);
+    },
+  };
+
   return {
     server: {
       port: Number(process.env.PORT) || 3000,
       host: '0.0.0.0',
     },
-    plugins: [mdxGuarded, react()],
+    plugins: [mergeBib, mdxGuarded, react()],
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),

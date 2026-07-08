@@ -92,6 +92,30 @@ Global batch, GPU sayısıyla ölçeklenir, $b_\text{global} = b_\text{device} \
 
 Şöyle görünür, global batch GPU sayısıyla ölçeklenir, $b_\text{global} = b_\text{device} \times N$.
 
+## Atıflar
+
+Bir yazı başkasının çalışmasına yaslandığında, ona atıf verirsin, ve bu sayfanın en altındaki kaynakça kendi kendine oluşur. Zotero gibi çalışır. Metne kısa bir anahtar yazarsın, altta numaralı giriş, senin için biçimlenmiş halde belirir.
+
+Atıf vermek için, bir `@` işaretinin ardından anahtarı köşeli parantez içine koyarsın. Anahtar, tüm kaynakları tutan tek dosya olan `content/references.bib` içindeki bir girişi adlandırır.
+
+```mdx
+Taşkın-doldurma ağları makalesi [@januszewskiHighprecisionAutomatedReconstruction2018] bunu pratik kıldı.
+```
+
+Ve işte o satır, canlı. Taşkın-doldurma ağları makalesi [@januszewskiHighprecisionAutomatedReconstruction2018] bunu pratik kıldı. Gördüğün `[1]` sessiz bir işaretçidir, üstüne gelince tüm kaynağı gösterir. İki kaynağı aynı anda verebilir, [@sheridanLocalShapeDescriptors2023; @chenExpansionMicroscopy2015], ya da bir sayfa sabitleyebilirsin, [@chenExpansionMicroscopy2015, s. 544].
+
+Listenin kendisi, kendi satırına küçük harf `[^ref]` koyduğun yere, yazının dilindeki bir başlığın altına düşer. İşaretçiyi koymazsan liste doğrudan en sona eklenir.
+
+```mdx
+## Kaynakça
+
+[^ref]
+```
+
+Bu sayfanın altındaki kaynakça, o işaretçinin iş başında hali, IEEE stiliyle çizilmiş, blogun sade görünüşüne uyan köşeli parantezli numaralarla.
+
+> **Ders:** doğruluğun kaynağı `content/references.bib` dosyasıdır, ve onu asla elle düzenlemezsin. Zotero'da Better BibTeX eklentisini kur, koleksiyonunu "keep updated" işaretli olarak dışa aktar, ve bu dosyaya yönlendir. Zotero'ya bir makale ekle, dosya güncellenir, sen commit'lersin. `[@anahtar]`'ı `[1]`'e çevirmek ve listeyi kurmak, ikisi de derleme anında olur.
+
 ## Bileşenler, asıl güzel kısım
 
 Bunlar hazır yapı taşları. Hiçbirini import etmezsin. Sadece etiketini yazarsın, her yazıda çalışır. İşte her biri, kodu ve canlı hali yan yana.
@@ -181,3 +205,7 @@ Başka hiçbir şey aklında kalmasın, ama bunlar kalsın.
 > **Kural 3:** resimler `public/img/`'e gider ve `/img/...` ile çağrılır. `.webp` kullan.
 
 Bütün zanaat bu. En iyi referans, `content/blog/` içindeki gerçek yazılardan herhangi biri, kaynağını okuyup her özelliğin tam olarak nasıl kullanıldığını görebilirsin.
+
+## Kaynakça
+
+[^ref]

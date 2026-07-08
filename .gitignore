@@ -47,3 +47,6 @@ coverage/
 
 # Blog drafts (not published)
 content/_blog_drafts/
+
+# Generated bibliography (merged from zotero.bib + references.bib at build time)
+content/_bibliography.bib
