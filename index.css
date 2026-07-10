@@ -38,6 +38,18 @@ html {
     }
 }
 
+/* Hero word entrance (Machina) — gentle fade + rise, ends fully visible */
+@keyframes heroWordFade {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @layer utilities {
     .text-premium-shadow {
         /* Base text properties for gradient capability */

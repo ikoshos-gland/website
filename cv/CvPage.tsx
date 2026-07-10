@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, Printer, ExternalLink, MessageSquare } from 'lucide-react';
+import { Download, Printer, ExternalLink } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { useLang } from '../i18n/LanguageContext';
 
@@ -13,24 +13,24 @@ const CV_PDF = '/cv/mert-koca-cv.pdf';
 const T = {
   en: {
     eyebrow: 'Curriculum Vitae',
-    sub: 'Molecular Biotechnology · Neuroscience · AI & Connectomics',
+    sub: 'Molecular Biotechnology · Neuroscience · AI & Connectomics',
     download: 'Download PDF', print: 'Print', open: 'Open in new tab', back: '← Back to Mertoshi',
     lundoMsg: 'Curious about something that is not on the CV? Ask Lundo, Mert’s AI assistant, anything.',
-    lundoBtn: 'Chat with Lundo',
+    lundoBtn: 'Ask Lundo',
   },
   tr: {
     eyebrow: 'Özgeçmiş',
-    sub: 'Moleküler Biyoteknoloji · Nörobilim · YZ & Konnektomik',
+    sub: 'Moleküler Biyoteknoloji · Nörobilim · YZ & Konnektomik',
     download: 'PDF İndir', print: 'Yazdır', open: 'Yeni sekmede aç', back: '← Mertoshi’ye dön',
     lundoMsg: 'Merak ettiğiniz, CV’de yer almayan konuları Lundo’ya, Mert’in yapay zekâ asistanına sorabilirsiniz.',
-    lundoBtn: 'Lundo ile sohbet et',
+    lundoBtn: 'Lundo’ya sor',
   },
   de: {
     eyebrow: 'Lebenslauf',
-    sub: 'Molekulare Biotechnologie · Neurowissenschaft · KI & Konnektomik',
+    sub: 'Molekulare Biotechnologie · Neurowissenschaft · KI & Konnektomik',
     download: 'PDF herunterladen', print: 'Drucken', open: 'In neuem Tab öffnen', back: '← Zurück zu Mertoshi',
     lundoMsg: 'Neugierig auf etwas, das nicht im Lebenslauf steht? Fragen Sie Lundo, Merts KI-Assistenten.',
-    lundoBtn: 'Mit Lundo chatten',
+    lundoBtn: 'Frag Lundo',
   },
 };
 
@@ -88,7 +88,7 @@ export default function CvPage() {
 
             <div className="mt-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 border-b border-[#23252B] pb-8">
               <div>
-                <span className="text-[10px] font-mono text-[#D6FF4F] uppercase tracking-widest">{t.eyebrow}</span>
+                <span className="text-[10px] font-mono text-[#F5F5F5] uppercase tracking-widest">{t.eyebrow}</span>
                 <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl text-[#F5F5F5] mt-3 leading-none">Mert Koca</h1>
                 <p className="text-sm text-[#A1A1A6] mt-3">{t.sub}</p>
               </div>
@@ -97,7 +97,7 @@ export default function CvPage() {
                 <a
                   href={CV_PDF}
                   download="Mert-Koca-CV.pdf"
-                  className="inline-flex items-center gap-2 bg-[#D6FF4F] text-[#0E0F11] px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-[#e4ff7a] transition-colors"
+                  className="inline-flex items-center gap-2 bg-[#F5F5F5] text-[#0E0F11] px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-white transition-colors"
                 >
                   <Download size={15} strokeWidth={2} /> {t.download}
                 </a>
@@ -115,32 +115,26 @@ export default function CvPage() {
                 >
                   <ExternalLink size={15} strokeWidth={2} /> {t.open}
                 </a>
-              </div>
-            </div>
-          </div>
 
-          {/* Lundo invitation — "not on the CV? just ask" (calm, classic, no animation) */}
-          <div className="max-w-[900px] mx-auto mt-6">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 bg-[#15171B] border border-[#23252B] rounded-xl px-5 py-4 sm:px-6 sm:py-5">
-              <img
-                src="/lundo-logo.png"
-                alt="Lundo"
-                width={40}
-                height={40}
-                loading="lazy"
-                className="w-10 h-10 rounded-full object-cover shrink-0 ring-1 ring-[#2c2f36]"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-              <p className="text-sm sm:text-[15px] text-[#C7C9CE] leading-relaxed flex-1">
-                {t.lundoMsg}
-              </p>
-              <button
-                onClick={openChat}
-                className="inline-flex items-center justify-center gap-2 bg-[#F5F5F5] text-[#0E0F11] px-5 py-2.5 rounded-full text-xs font-semibold uppercase tracking-wider shrink-0 hover:bg-white transition-colors"
-              >
-                <MessageSquare size={15} strokeWidth={2} />
-                {t.lundoBtn}
-              </button>
+                {/* small, subtle "ask Lundo about anything not on the CV" affordance */}
+                <span className="hidden sm:block w-px h-5 bg-[#2c2f36]" aria-hidden="true" />
+                <button
+                  onClick={openChat}
+                  title={t.lundoMsg}
+                  className="group inline-flex items-center gap-2 text-[#A1A1A6] px-1.5 py-2.5 text-xs font-semibold uppercase tracking-wider hover:text-[#D6FF4F] transition-colors"
+                >
+                  <img
+                    src="/lundo-logo.png"
+                    alt=""
+                    width={20}
+                    height={20}
+                    loading="lazy"
+                    className="w-5 h-5 rounded-full object-cover ring-1 ring-[#2c2f36] group-hover:ring-[#D6FF4F] transition-colors"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                  />
+                  {t.lundoBtn}
+                </button>
+              </div>
             </div>
           </div>
 

@@ -198,7 +198,7 @@ const Hero: React.FC = () => {
             <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--main-gradient-start)', '--text-gradient-end': 'var(--main-gradient-end)' } as React.CSSProperties}>
               Mens in{' '}
             </span>
-            <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--machina-gradient-start)', '--text-gradient-end': 'var(--machina-gradient-end)' } as React.CSSProperties}>
+            <span style={{ '--text-gradient-start': 'var(--machina-gradient-start)', '--text-gradient-end': 'var(--machina-gradient-end)' } as React.CSSProperties}>
               <ScrambleText text="Machina" delay={300} duration={1000} className="inline-block" />
             </span>
             <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--main-gradient-start)', '--text-gradient-end': 'var(--main-gradient-end)' } as React.CSSProperties}>,</span>
@@ -206,7 +206,7 @@ const Hero: React.FC = () => {
 
           {/* Second Line */}
           <span className="block mt-2 sm:mt-4 italic opacity-90 pb-2">
-            <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--machina-gradient-start)', '--text-gradient-end': 'var(--machina-gradient-end)' } as React.CSSProperties}>
+            <span style={{ '--text-gradient-start': 'var(--machina-gradient-start)', '--text-gradient-end': 'var(--machina-gradient-end)' } as React.CSSProperties}>
               <ScrambleText text="Machina" delay={800} duration={1000} className="inline-block" />
             </span>
             <span className="text-premium-shadow" style={{ '--text-gradient-start': 'var(--main-gradient-start)', '--text-gradient-end': 'var(--main-gradient-end)' } as React.CSSProperties}>
