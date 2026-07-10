@@ -392,8 +392,11 @@
       width:auto;max-width:none;margin:0;padding:0;
       box-shadow:none;background:#fff;
     }
-    .section{margin-top:13px;}
-    .entry{margin-bottom:10px;}
+    .section{margin-top:11px;}
+    .entry{margin-bottom:8px;}
+    ul.points li{margin-bottom:2px;}
+    .project{margin-bottom:8px;}
+    .stack-item{margin-bottom:7px;}
     a{color:var(--ink) !important;}
     .contact a{border:none;}
     *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
@@ -469,7 +472,7 @@
           <span class="tag">Flagship research</span>
           <ul class="points">
             <li>Studied various <b>Expansion Microscopy (ExM)</b> protocols (ProExM, Magnify, and single-shot 20&times; ExM) to surpass the optical diffraction limit, enabling nanometer-scale imaging of neural tissue on confocal microscopes.</li>
-            <li>Built and ran deep-learning <b>volume-segmentation pipelines</b> (Flood-Filling Networks, U-Net) for neural and vascular structures, working toward computer-based 3D brain mapping.</li>
+            <li>Built and ran deep-learning <b>volume-segmentation pipelines</b> (Flood-Filling Networks, U-Net variants) for neural and vascular structures, working toward computer-based 3D brain mapping.</li>
             <li>Learned and operated <b>high-performance computing</b> on TRUBA (Turkey's national HPC center): SLURM batch scheduling, multi-GPU (JAX) training, and Apptainer/Singularity containers.</li>
           </ul>
         </div>
@@ -485,8 +488,8 @@
           <p class="role">Embedded Machine Learning Scholar</p>
           <span class="org">TUSEB <span class="sub">· Health Institutes of Turkey</span></span>
           <ul class="points">
-            <li>Interpreted <b>EMG signals</b> using LSTM+CNN, Random Forest, and Gaussian Process models.</li>
-            <li>Developed a real-time signal-interpretation script.</li>
+            <li>Engineered a real-time <b>embedded machine learning</b> pipeline for EMG-based gesture recognition, from DSP filter design to on-device feature extraction and inference.</li>
+            <li>Trained models in Python and deployed them as <b>Int8-quantized TensorFlow Lite Micro</b> models running on an ESP32-S3 microcontroller for real-time inference.</li>
             <li>Produced data-analysis visualizations and animations in Python (Manim).</li>
           </ul>
         </div>
