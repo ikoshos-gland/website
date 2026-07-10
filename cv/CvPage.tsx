@@ -88,8 +88,7 @@ export default function CvPage() {
 
             <div className="mt-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 border-b border-[#23252B] pb-8">
               <div>
-                <span className="text-[10px] font-mono text-[#F5F5F5] uppercase tracking-widest">{t.eyebrow}</span>
-                <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl text-[#F5F5F5] mt-3 leading-none">Mert Koca</h1>
+                <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl text-[#F5F5F5] leading-none">{t.eyebrow}</h1>
                 <p className="text-sm text-[#A1A1A6] mt-3">{t.sub}</p>
               </div>
 
