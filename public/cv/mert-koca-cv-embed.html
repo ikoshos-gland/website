@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mert Koca CV</title>
+<style>
+  :root{
+    --paper:#fbfaf8;
+    --ink:#1c1e22;
+    --muted:#6a6f77;
+    --faint:#8b9099;
+    --accent:#26374a;
+    --rule:#e3e0d9;
+    --rule-strong:#cfccc3;
+    --tint:#eef1f4;
+    --serif:Georgia,"Iowan Old Style",Cambria,"Times New Roman",serif;
+    --sans:"Segoe UI",Inter,system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+
+  html{-webkit-text-size-adjust:100%;}
+
+  body{
+    margin:0;
+    background:#d8d6d0;
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:15px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ---------- screen toolbar ---------- */
+  .toolbar{
+    position:sticky;
+    top:0;
+    z-index:20;
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    padding:14px 16px;
+    background:rgba(216,214,208,.86);
+    backdrop-filter:saturate(140%) blur(6px);
+    border-bottom:1px solid #c4c1ba;
+  }
+  .toolbar button{
+    font-family:var(--sans);
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:#fff;
+    background:var(--accent);
+    border:none;
+    padding:9px 20px;
+    border-radius:2px;
+    cursor:pointer;
+    transition:background .18s ease,transform .12s ease;
+  }
+  .toolbar button:hover{background:#1a2836;}
+  .toolbar button:active{transform:translateY(1px);}
+  .toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+
+  /* ---------- page ---------- */
+  .sheet{
+    width:210mm;
+    max-width:100%;
+    margin:26px auto 40px;
+    background:var(--paper);
+    padding:20mm 20mm 18mm;
+    box-shadow:0 1px 2px rgba(0,0,0,.10),0 18px 44px rgba(0,0,0,.18);
+  }
+
+  /* ================= MASTHEAD ================= */
+  .masthead{
+    display:grid;
+    grid-template-columns:1fr auto;
+    align-items:flex-end;
+    gap:20px 40px;
+    padding-bottom:11px;
+    border-bottom:2px solid var(--ink);
+  }
+  .name{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:43px;
+    line-height:.98;
+    letter-spacing:-.015em;
+    margin:0;
+    color:var(--ink);
+    text-wrap:balance;
+  }
+  .tagline{
+    font-family:var(--serif);
+    font-style:italic;
+    font-size:16px;
+    color:var(--accent);
+    margin:11px 0 0;
+    max-width:46ch;
+    line-height:1.35;
+  }
+  .contact{
+    text-align:right;
+    font-size:12px;
+    line-height:1.7;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+  .contact a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule-strong);}
+  .contact a:hover{border-bottom-color:var(--accent);color:var(--accent);}
+  .contact .label{
+    display:block;
+    font-size:9.5px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--faint);
+    margin-bottom:1px;
+  }
+  .contact .row{margin-bottom:5px;}
+  .contact .row:last-child{margin-bottom:0;}
+
+  /* ================= SUMMARY ================= */
+  .summary{
+    margin-top:13px;
+    padding:11px 18px 11px 16px;
+    background:var(--tint);
+    border-left:3px solid var(--accent);
+    font-family:var(--serif);
+    font-size:13.6px;
+    line-height:1.48;
+    color:#33383f;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  /* ================= SECTION SCAFFOLD ================= */
+  .section{margin-top:16px;}
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:0 0 9px;
+  }
+  .eyebrow h2{
+    margin:0;
+    font-family:var(--sans);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.26em;
+    text-transform:uppercase;
+    color:var(--accent);
+    white-space:nowrap;
+  }
+  .eyebrow::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--rule);
+  }
+
+  /* ---------- entry: gutter layout ---------- */
+  .entry{
+    display:grid;
+    grid-template-columns:112px 1fr;
+    gap:0 20px;
+    margin-bottom:12px;
+    break-inside:avoid;
+  }
+  .entry:last-child{margin-bottom:0;}
+
+  .gutter{
+    text-align:right;
+    padding-top:2px;
+  }
+  .gutter .dates{
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:.03em;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+    line-height:1.4;
+  }
+  .gutter .dates.tbc{
+    font-style:italic;
+    font-weight:400;
+    color:var(--faint);
+    letter-spacing:0;
+  }
+  .gutter .place{
+    display:block;
+    margin-top:5px;
+    font-size:10.5px;
+    color:var(--muted);
+    line-height:1.4;
+  }
+
+  .body .role{
+    font-family:var(--serif);
+    font-size:15px;
+    font-weight:700;
+    line-height:1.2;
+    color:var(--ink);
+    margin:0;
+    text-wrap:balance;
+  }
+  .body .org{
+    display:block;
+    margin-top:3px;
+    font-size:12.5px;
+    color:var(--accent);
+    font-weight:600;
+  }
+  .body .org .sub{color:var(--muted);font-weight:400;}
+  .body .tag{
+    display:inline-block;
+    margin-top:6px;
+    font-size:9.5px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:#fff;
+    background:var(--accent);
+    padding:2px 8px;
+    border-radius:2px;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  ul.points{
+    list-style:none;
+    margin:6px 0 0;
+    padding:0;
+  }
+  ul.points li{
+    position:relative;
+    padding-left:23px;
+    margin-bottom:3px;
+    font-size:12.9px;
+    line-height:1.44;
+    color:#34383e;
+  }
+  ul.points li::before{
+    content:"";
+    position:absolute;
+    left:-1px;
+    top:.19em;
+    width:18px;
+    height:14px;
+    background:url("mouse-brain-bullet.svg") center / contain no-repeat;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  ul.points li:last-child{margin-bottom:0;}
+  ul.points li .foot{color:var(--muted);font-style:italic;}
+  .points em.thesis-note{color:var(--muted);}
+
+  /* ---------- projects ---------- */
+  .project{
+    margin-bottom:10px;
+    break-inside:avoid;
+    padding-left:0;
+  }
+  .project:last-child{margin-bottom:0;}
+  .project .phead{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .project .pname{
+    font-family:var(--serif);
+    font-size:16px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .project .pname .dot{color:var(--rule-strong);margin:0 2px;}
+  .project .psub{
+    font-size:12px;
+    color:var(--muted);
+    font-style:italic;
+    font-family:var(--serif);
+  }
+
+  /* ================= two-column tail ================= */
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 36px;
+  }
+
+  /* ---------- education / pub / cert lists ---------- */
+  .stack-item{margin-bottom:9px;break-inside:avoid;}
+  .stack-item:last-child{margin-bottom:0;}
+  .stack-item .si-title{
+    font-family:var(--serif);
+    font-size:15px;
+    font-weight:700;
+    line-height:1.25;
+    color:var(--ink);
+  }
+  .stack-item .si-meta{
+    font-size:12px;
+    color:var(--accent);
+    font-weight:600;
+    margin-top:2px;
+  }
+  .stack-item .si-meta .yr{color:var(--muted);font-weight:400;font-style:italic;}
+  .stack-item .si-desc{
+    font-size:12.6px;
+    color:#3a3e44;
+    margin-top:5px;
+    line-height:1.5;
+  }
+  .stack-item .si-desc .adv{color:var(--muted);}
+
+  .pub{
+    font-size:12.4px;
+    line-height:1.42;
+    color:#34383e;
+    margin-bottom:5px;
+    padding-left:23px;
+    position:relative;
+    break-inside:avoid;
+  }
+  .pub:last-child{margin-bottom:0;}
+  .pub::before{
+    content:"";
+    position:absolute;
+    left:-1px;top:.12em;
+    width:18px;height:14px;
+    background:url("mouse-brain-bullet.svg") center / contain no-repeat;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .pub .authors{font-weight:600;}
+  .pub .ptitle{font-family:var(--serif);font-style:italic;}
+  .pub .venue{color:var(--muted);}
+  .pub .doi{font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums;}
+
+  /* ---------- skills ---------- */
+  .skills{display:flex;flex-direction:column;gap:6px;}
+  .skill-row{
+    display:grid;
+    grid-template-columns:104px 1fr;
+    gap:14px;
+    align-items:baseline;
+  }
+  .skill-row .k{
+    font-size:9.5px;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    font-weight:700;
+    color:var(--muted);
+    text-align:right;
+    line-height:1.5;
+  }
+  .skill-row .v{
+    font-size:12.4px;
+    color:#33373d;
+    line-height:1.42;
+  }
+  .skill-row .v b{font-weight:600;color:var(--ink);}
+
+  /* ---------- languages / interests inline ---------- */
+  .inline-facts{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px 40px;
+    margin-top:2px;
+  }
+  .fact .k{
+    font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--faint);font-weight:700;margin-bottom:4px;
+  }
+  .fact .v{font-size:13px;color:#34383e;line-height:1.55;}
+  .fact .v .native{color:var(--accent);font-weight:600;}
+
+  /* ================= print ================= */
+  @page{size:A4;margin:14mm;}
+
+  @media print{
+    body{background:#fff;font-size:10pt;}
+    .no-print{display:none !important;}
+    .sheet{
+      width:auto;max-width:none;margin:0;padding:0;
+      box-shadow:none;background:#fff;
+    }
+    .section{margin-top:13px;}
+    .entry{margin-bottom:10px;}
+    a{color:var(--ink) !important;}
+    .contact a{border:none;}
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
+  }
+
+  /* ================= responsive (screen) ================= */
+  @media (max-width:640px){
+    .sheet{padding:26px 20px;}
+    .masthead{grid-template-columns:1fr;align-items:flex-start;}
+    .contact{text-align:left;white-space:normal;}
+    .name{font-size:34px;}
+    .entry{grid-template-columns:1fr;gap:6px;}
+    .gutter{text-align:left;}
+    .gutter .place{margin-top:2px;}
+    .grid-2,.inline-facts{grid-template-columns:1fr;}
+    .skill-row{grid-template-columns:1fr;gap:2px;}
+    .skill-row .k{text-align:left;}
+  }
+</style>
+<style id="embed-override">
+  html,body{background:transparent !important;}
+  .toolbar,.no-print{display:none !important;}
+  .sheet{margin:0 auto !important; box-shadow:0 14px 55px rgba(0,0,0,.5) !important;}
+</style>
+</head>
+<body>
+
+  <div class="toolbar no-print">
+    <button type="button" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <main class="sheet">
+
+    <!-- ============ MASTHEAD ============ -->
+    <header class="masthead">
+      <div>
+        <h1 class="name">Mert Koca</h1>
+        <p class="tagline">Mapping neural circuits at nanometer scale, from bench to supercomputer.</p>
+      </div>
+      <div class="contact">
+        <div class="row">
+          <span class="label">Location</span>
+          Beykoz, Istanbul, Turkey 34825
+        </div>
+        <div class="row">
+          <span class="label">Email</span>
+          <a href="mailto:fatih.mertkoca2@gmail.com">fatih.mertkoca2@gmail.com</a>
+        </div>
+        <div class="row">
+          <span class="label">Online</span>
+          <a href="https://mertoshi.online">mertoshi.online</a><br>
+          <a href="https://linkedin.com/in/mert-koca-503372276">linkedin.com/in/mert-koca-503372276</a><br>
+          <a href="https://github.com/ikoshos-gland">github.com/ikoshos-gland</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ SUMMARY ============ -->
+    <p class="summary">
+      Highly self-driven and intellectually curious individual with a strong foundation in machine learning and neuroscience, working at the interface of expansion-microscopy connectomics and deep-learning segmentation. Adept at synthesizing complex information across disciplines into innovative, strategic solutions, and at managing long-term projects with a holistic approach that balances creative ideation with structured execution.
+    </p>
+
+    <!-- ============ EXPERIENCE ============ -->
+    <section class="section">
+      <div class="eyebrow"><h2>Experience</h2></div>
+
+      <!-- 1 · FLAGSHIP -->
+      <article class="entry">
+        <div class="gutter">
+          <div class="dates">Jul 2025 - Present</div>
+          <span class="place">Istanbul, Turkey</span>
+        </div>
+        <div class="body">
+          <p class="role">Research Intern</p>
+          <span class="org">KUTTAM, Koç University Research Center for Translational Medicine</span>
+          <span class="tag">Flagship research</span>
+          <ul class="points">
+            <li>Studied various <b>Expansion Microscopy (ExM)</b> protocols (ProExM, Magnify, and single-shot 20&times; ExM) to surpass the optical diffraction limit, enabling nanometer-scale imaging of neural tissue on confocal microscopes.</li>
+            <li>Built and ran deep-learning <b>volume-segmentation pipelines</b> (Flood-Filling Networks, U-Net) for neural and vascular structures, working toward computer-based 3D brain mapping.</li>
+            <li>Learned and operated <b>high-performance computing</b> on TRUBA (Turkey's national HPC center): SLURM batch scheduling, multi-GPU (JAX) training, and Apptainer/Singularity containers.</li>
+            <li><span class="foot">This work forms the foundation of the bachelor thesis comparing FFN vs. LSD segmentation methods.</span></li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 2 -->
+      <article class="entry">
+        <div class="gutter">
+          <div class="dates">Oct 2024 - Feb 2026</div>
+          <span class="place">Scholarship to Jul 2025</span>
+        </div>
+        <div class="body">
+          <p class="role">Embedded Machine Learning Scholar</p>
+          <span class="org">TUSEB <span class="sub">· Health Institutes of Turkey</span></span>
+          <ul class="points">
+            <li>Interpreted <b>EMG signals</b> using LSTM+CNN, Random Forest, and Gaussian Process models.</li>
+            <li>Developed a real-time signal-interpretation script.</li>
+            <li>Produced data-analysis visualizations and animations in Python (Manim).</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 3 -->
+      <article class="entry">
+        <div class="gutter">
+          <div class="dates">Aug 2024 - Jul 2025</div>
+          <span class="place">Start-up</span>
+        </div>
+        <div class="body">
+          <p class="role">Member</p>
+          <span class="org">PsyAI</span>
+          <ul class="points">
+            <li>Built an <b>agentic parenting-assistant</b> with LangChain &amp; LangGraph, featuring long/short-term memory and RAG over curated sources.</li>
+            <li>Python backend with a UI delivering personalized, framework-based behavioral insights.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- 4 -->
+      <article class="entry">
+        <div class="gutter">
+          <div class="dates">Jan 2024 - Jul 2024</div>
+          <span class="place">National finalist</span>
+        </div>
+        <div class="body">
+          <p class="role">Team Member</p>
+          <span class="org">Tez-Türk</span>
+          <ul class="points">
+            <li><b>EMG gesture classification</b> on the Ninapro DB5 dataset; built an MLP classifier for a prosthetic hand.</li>
+          </ul>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============ PROJECTS ============ -->
+    <section class="section">
+      <div class="eyebrow"><h2>Selected Projects</h2></div>
+
+      <article class="project">
+        <div class="phead">
+          <span class="pname">mertoshi.online</span>
+          <span class="psub">Personal website &amp; agentic RAG platform, solo, end-to-end</span>
+        </div>
+        <ul class="points">
+          <li><b>Frontend:</b> React 19 + TypeScript + Vite + Tailwind + Spline 3D, deployed on Azure Static Web Apps.</li>
+          <li><b>Backend:</b> Python Azure Functions RAG using Azure OpenAI "On Your Data" + Azure AI Search (hybrid vector/semantic), secured with Managed Identity + Azure Key Vault.</li>
+          <li>Features a custom AI assistant ("Lundo") and a document-intelligence + semantic-chunking indexing pipeline.</li>
+        </ul>
+      </article>
+
+      <article class="project">
+        <div class="phead">
+          <span class="pname">liconn-ffn-truba</span>
+          <span class="psub">Open-source HPC connectomics pipeline</span>
+        </div>
+        <ul class="points">
+          <li>Trains Google's <b>Flood-Filling Network</b> (JAX) on real expansion-microscopy connectomics data, scaling 1 → 4 GPUs on TRUBA.</li>
+          <li>Public GitHub repository with an animated report.</li>
+        </ul>
+      </article>
+    </section>
+
+    <!-- ============ EDUCATION + PUBLICATIONS ============ -->
+    <div class="grid-2">
+      <section class="section" style="margin-top:16px;">
+        <div class="eyebrow"><h2>Education</h2></div>
+        <div class="stack-item">
+          <div class="si-title">B.Sc., Molecular Biotechnology</div>
+          <div class="si-meta">Turkish-German University · Beykoz, Istanbul <span class="yr">· Graduated Jun 2026 · GPA 3.14 / 4.0</span></div>
+          <div class="si-desc">
+            Bachelor thesis (in German): light-microscopic connectomics beyond the diffraction limit: deep-learning volume segmentation comparing Flood-Filling Networks (FFN) vs. Local Shape Descriptors (LSD).
+            <span class="adv">Advisor: Prof. Dr. Atay Vural.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" style="margin-top:16px;">
+        <div class="eyebrow"><h2>Certification</h2></div>
+        <div class="stack-item">
+          <div class="si-title">Foundations of Quantum Mechanics</div>
+          <div class="si-meta">University of Colorado Boulder <span class="yr">· Coursera</span></div>
+        </div>
+        <div class="eyebrow" style="margin-top:12px;"><h2>Languages</h2></div>
+        <div class="fact">
+          <div class="v">
+            <span class="native">Turkish</span>: Native &nbsp;·&nbsp; <b>German</b>: Advanced (C1, medium of instruction) &nbsp;·&nbsp; <b>English</b>: Fluent
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============ PUBLICATIONS ============ -->
+    <section class="section">
+      <div class="eyebrow"><h2>Publications</h2></div>
+      <div class="pub">
+        <span class="authors">Coskuner-Weber O., Koca M., Uversky V. N.</span>
+        <span class="ptitle">“Molecular Crowding by Computational Approaches.”</span>
+        <span class="venue">Springer Nature.</span>
+        <span class="doi">DOI: 10.1007/978-3-032-03370-3_21</span>
+      </div>
+      <div class="pub">
+        <span class="authors">Koca M.</span>
+        <span class="ptitle">“Kuantum-Klasik Bilinç Modelleri ve İnterdisipliner Perspektifler.”</span>
+        <span class="venue">Quantum Dergisi, Issue 5 (qturkey.org).</span>
+      </div>
+      <div class="pub">
+        <span class="venue" style="font-style:italic;">Third manuscript in preparation.</span>
+      </div>
+    </section>
+
+    <!-- ============ SKILLS ============ -->
+    <section class="section">
+      <div class="eyebrow"><h2>Skills</h2></div>
+      <div class="skills">
+        <div class="skill-row">
+          <div class="k">Programming</div>
+          <div class="v"><b>Python</b>, TensorFlow, JAX, NumPy, PyTorch <span style="color:var(--muted);">(learning)</span>, Bash</div>
+        </div>
+        <div class="skill-row">
+          <div class="k">Machine Learning</div>
+          <div class="v">Deep learning (CNN, LSTM, MLP, Flood-Filling Networks, U-Net), Random Forest, Gaussian Processes, LangChain / LangGraph, RAG</div>
+        </div>
+        <div class="skill-row">
+          <div class="k">HPC &amp; Cloud</div>
+          <div class="v"><b>TRUBA HPC</b>, SLURM, multi-GPU training, Apptainer / Singularity, Azure (Functions, AI Search, OpenAI), Git / GitHub</div>
+        </div>
+        <div class="skill-row">
+          <div class="k">Imaging &amp; Bio</div>
+          <div class="v">Expansion microscopy, connectomics, image segmentation, pan-protein staining, immunofluorescence staining</div>
+        </div>
+        <div class="skill-row">
+          <div class="k">Tools &amp; Viz</div>
+          <div class="v">Manim, Matplotlib</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INTERESTS ============ -->
+    <section class="section">
+      <div class="eyebrow"><h2>Interests</h2></div>
+      <div class="fact">
+        <div class="v">Photography (street &amp; portrait) &nbsp;·&nbsp; running &nbsp;·&nbsp; interdisciplinary science &nbsp;·&nbsp; behavioral neuroscience.</div>
+      </div>
+    </section>
+
+  </main>
+
+</body>
+</html>

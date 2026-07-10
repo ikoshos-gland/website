@@ -37,7 +37,7 @@ const Navbar: React.FC<{ onChatClick: () => void }> = ({ onChatClick }) => {
         <nav className="flex flex-col gap-8 text-center text-3xl font-heading font-medium tracking-tight text-[#F5F5F5]">
           <a href="#" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>{nav.projects}</a>
           <Link to="/blog" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>{nav.blog}</Link>
-          <a href="#" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>{nav.cv}</a>
+          <Link to="/cv" className="hover:text-[#D6FF4F] transition-colors" onClick={toggleMenu}>{nav.cv}</Link>
           <button
             onClick={() => { toggleMenu(); onChatClick(); }}
             className="hover:text-[#D6FF4F] transition-colors"
@@ -79,16 +79,16 @@ const Navbar: React.FC<{ onChatClick: () => void }> = ({ onChatClick }) => {
 
           {/* Logo */}
           <div className="absolute left-1/2 -translate-x-1/2">
-            <a href="#" className="flex items-center justify-center group">
+            <Link to="/" className="flex items-center justify-center group">
               <span className="font-great-vibes text-2xl sm:text-3xl md:text-4xl text-[#F5F5F5] group-hover:text-[#D6FF4F] transition-colors">
                 Mertoshi
               </span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Right Nav */}
           <div className="hidden md:flex gap-4 lg:gap-6 items-center">
-            <a href="#" className="text-xs lg:text-sm font-medium text-[#A1A1A6] hover:text-[#F5F5F5] transition-colors">{nav.cv}</a>
+            <Link to="/cv" className="text-xs lg:text-sm font-medium text-[#A1A1A6] hover:text-[#F5F5F5] transition-colors">{nav.cv}</Link>
             <LanguageSwitcher />
             <a href="https://www.instagram.com/augst.von.mackenss/" target="_blank" rel="noopener noreferrer" className="text-[#A1A1A6] hover:text-[#D6FF4F] transition-colors">
               <Instagram size={18} />

@@ -8,6 +8,7 @@ import './index.css';
 const BlogIndex = lazy(() => import('./blog/BlogIndex'));
 const BlogPost = lazy(() => import('./blog/BlogPost'));
 const ThesisHub = lazy(() => import('./blog/ThesisHub'));
+const CvPage = lazy(() => import('./cv/CvPage'));
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -25,6 +26,7 @@ root.render(
             <Route path="/blog" element={<BlogIndex />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/thesis" element={<ThesisHub />} />
+            <Route path="/cv" element={<CvPage />} />
           </Routes>
         </Suspense>
       </BrowserRouter>
