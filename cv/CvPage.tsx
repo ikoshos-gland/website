@@ -6,9 +6,9 @@ import { useLang } from '../i18n/LanguageContext';
 
 const ChatWidget = lazy(() => import('../components/ChatWidget'));
 
-const CV_EMBED = '/cv/mert-koca-cv-embed.html';
-const CV_HTML = '/cv/mert-koca-cv.html';
-const CV_PDF = '/cv/mert-koca-cv.pdf';
+const CV_EMBED = '/cv-assets/mert-koca-cv-embed.html';
+const CV_HTML = '/cv-assets/mert-koca-cv.html';
+const CV_PDF = '/cv-assets/mert-koca-cv.pdf';
 
 const T = {
   en: {
