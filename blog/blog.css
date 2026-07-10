@@ -679,13 +679,14 @@ html.blg-hide-native-scrollbar::-webkit-scrollbar,body.blg-hide-native-scrollbar
   .blg-post-cinematic .blg-deck::before{inset:-84px -74px -92px;filter:blur(34px)}
   .blg-post-cinematic .blg-deck::after{inset:-96px -64px -104px;filter:blur(42px)}
 }
-.blg-reveal{animation:blg-reveal-in .6s ease-out .3s both}
+.blg-reveal.is-primed{visibility:hidden;pointer-events:none}
+.blg-reveal.is-visible{animation:blg-reveal-in .6s ease-out .3s both}
 @keyframes blg-reveal-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){
   .blg-deck-text{transition:none}
   .blg-deck-caret{animation:none}
   .blg-post-cinematic .blg-hero::before,.blg-post-cinematic .blg-deck::before,.blg-post-cinematic .blg-deck::after{animation:none}
-  .blg-reveal{animation:none}
+  .blg-reveal.is-visible{animation:none}
   .blg-hero{transition:none !important}
 }
 

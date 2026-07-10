@@ -494,7 +494,16 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
     };
 
     const exitStartRef = { current: null as number | null };
+    const groundMouse = creatures.find((c) => c.kind === 'mouse');
     let raf = 0;
+
+    const strokeEdgePart = (ax: number, ay: number, bx: number, by: number, from: number, to: number) => {
+      if (to <= from) return;
+      ctx.beginPath();
+      ctx.moveTo(ax + (bx - ax) * from, ay + (by - ay) * from);
+      ctx.lineTo(ax + (bx - ax) * to, ay + (by - ay) * to);
+      ctx.stroke();
+    };
 
     const draw = (now: number) => {
       if (startRef.current == null) startRef.current = now;
@@ -533,7 +542,6 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
       ctx.translate(W / 2, H / 2); ctx.scale(sScale, sScale); ctx.translate(-W / 2, -H / 2);
       ctx.lineCap = 'round';
 
-      const P = nodes.map((nd) => [nd.nx * W, nd.ny * H]);
       const exitElapsed = exitP * PHASE3;
       const vesselA = sA * (isOverlay ? 1 : Math.max(0, 1 - easeInOut(clamp01((exitP - 0.08) / 0.58))));
 
@@ -542,18 +550,22 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
         if (vesselA <= 0.01) continue;
         const gp = clamp01((t - (4 - v.depth) * 140) / 520);
         if (gp <= 0) continue;
-        const vp = v.pts.map((p) => [p[0] * W, p[1] * H]);
-        const segN = vp.length - 1, upto = gp * segN;
-        ctx.beginPath(); ctx.moveTo(vp[0][0], vp[0][1]);
-        for (let s = 1; s < vp.length; s++) {
-          if (s <= upto) ctx.lineTo(vp[s][0], vp[s][1]);
-          else { const f = upto - (s - 1); if (f > 0) ctx.lineTo(vp[s - 1][0] + (vp[s][0] - vp[s - 1][0]) * f, vp[s - 1][1] + (vp[s][1] - vp[s - 1][1]) * f); break; }
+        const pts = v.pts;
+        const segN = pts.length - 1, upto = gp * segN;
+        ctx.beginPath(); ctx.moveTo(pts[0][0] * W, pts[0][1] * H);
+        for (let s = 1; s < pts.length; s++) {
+          const x1 = pts[s - 1][0] * W, y1 = pts[s - 1][1] * H;
+          const x2 = pts[s][0] * W, y2 = pts[s][1] * H;
+          if (s <= upto) ctx.lineTo(x2, y2);
+          else { const f = upto - (s - 1); if (f > 0) ctx.lineTo(x1 + (x2 - x1) * f, y1 + (y2 - y1) * f); break; }
         }
         ctx.strokeStyle = `rgba(226,92,90,${0.32 * vesselA})`; ctx.lineWidth = 0.6 + v.depth * 0.55; ctx.shadowColor = '#E24B4A'; ctx.shadowBlur = 4; ctx.stroke(); ctx.shadowBlur = 0;
         if (gp >= 1) {
           const cyc = ((t + v.phase) % 1900) / 1900, fp = cyc * segN, si = Math.floor(fp), ff = fp - si;
           if (si < segN) {
-            const bx = vp[si][0] + (vp[si + 1][0] - vp[si][0]) * ff, by = vp[si][1] + (vp[si + 1][1] - vp[si][1]) * ff;
+            const x1 = pts[si][0] * W, y1 = pts[si][1] * H;
+            const x2 = pts[si + 1][0] * W, y2 = pts[si + 1][1] * H;
+            const bx = x1 + (x2 - x1) * ff, by = y1 + (y2 - y1) * ff;
             ctx.beginPath(); ctx.arc(bx, by, 1.7, 0, 7); ctx.fillStyle = `rgba(255,150,140,${0.9 * vesselA})`; ctx.shadowColor = '#FF8A80'; ctx.shadowBlur = 6; ctx.fill(); ctx.shadowBlur = 0;
           }
         }
@@ -563,38 +575,32 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
         const gp = clamp01((t - e.start) / EDGE_GROW);
         if (gp <= 0) continue;
         const eg = easeOut(gp);
-        const [ax, ay] = P[e.a], [bx, by] = P[e.b];
+        const ax = nodes[e.a].nx * W, ay = nodes[e.a].ny * H;
+        const bx = nodes[e.b].nx * W, by = nodes[e.b].ny * H;
         const edgeExit = isOverlay ? 0 : easeInOut(clamp01((exitElapsed - e.exitDelay) / 760));
         const edgeA = sA * (1 - edgeExit * 0.28);
-        const drawEdgePart = (from: number, to: number) => {
-          if (to <= from) return;
-          ctx.beginPath();
-          ctx.moveTo(ax + (bx - ax) * from, ay + (by - ay) * from);
-          ctx.lineTo(ax + (bx - ax) * to, ay + (by - ay) * to);
-          ctx.stroke();
-        };
         ctx.strokeStyle = `rgba(176,178,190,${0.3 * edgeA})`;
         ctx.lineWidth = 1; ctx.shadowBlur = 0;
         if (edgeExit > 0) {
           const gap = 0.015 + edgeExit * 0.58;
           const leftEnd = Math.min(eg, Math.max(0, e.breakAt - gap));
           const rightStart = Math.min(eg, Math.min(1, e.breakAt + gap));
-          drawEdgePart(0, leftEnd);
-          drawEdgePart(rightStart, eg);
+          strokeEdgePart(ax, ay, bx, by, 0, leftEnd);
+          strokeEdgePart(ax, ay, bx, by, rightStart, eg);
           if (edgeExit < 0.86) {
             const crackA = (1 - edgeExit) * sA;
-            [-1, 1].forEach((side) => {
+            for (let side = -1; side <= 1; side += 2) {
               const p = e.breakAt + side * gap;
-              if (p <= 0 || p >= eg) return;
+              if (p <= 0 || p >= eg) continue;
               const sx = ax + (bx - ax) * p, sy = ay + (by - ay) * p;
               ctx.beginPath();
               ctx.arc(sx, sy, 1.2 + edgeExit * 2.4, 0, 7);
               ctx.fillStyle = `rgba(214,255,79,${0.36 * crackA})`;
               ctx.shadowColor = '#D6FF4F'; ctx.shadowBlur = 7; ctx.fill(); ctx.shadowBlur = 0;
-            });
+            }
           }
         } else {
-          drawEdgePart(0, eg);
+          strokeEdgePart(ax, ay, bx, by, 0, eg);
         }
         if (gp >= 1 && edgeExit < 0.16) {
           const cyc = ((t - e.end + e.phase) % 1500) / 650;
@@ -609,7 +615,7 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
 
       for (let i = 0; i < n; i++) {
         if (t < nodes[i].reach) continue;
-        const [x, y] = P[i];
+        const x = nodes[i].nx * W, y = nodes[i].ny * H;
         const nodeExit = isOverlay ? 0 : easeInOut(clamp01((exitElapsed - nodes[i].exitDelay) / 860));
         const drift = easeOut(nodeExit);
         const dx = Math.cos(nodes[i].exitAngle) * nodes[i].exitDistance * drift;
@@ -633,9 +639,8 @@ export default function BlogIntro({ mode = 'overlay', dissolve = false, onDone }
       if (creatures.length) {
         const es = exitStartRef.current;
         const groundA = sA * (isOverlay ? 1 : Math.max(0, 1 - easeInOut(clamp01((exitP - 0.38) / 0.48))));
-        const firstMouse = creatures.find((c) => c.kind === 'mouse');
-        if (firstMouse) {
-          const gyPx = firstMouse.ny * H, wipe = clamp01((t - (MOUSE_APPEAR - 240)) / 560);
+        if (groundMouse) {
+          const gyPx = groundMouse.ny * H, wipe = clamp01((t - (MOUSE_APPEAR - 240)) / 560);
           if (wipe > 0) {
             ctx.strokeStyle = '#B0B2BE'; ctx.shadowBlur = 0; ctx.lineWidth = 1; ctx.globalAlpha = 0.1 * groundA * wipe;
             ctx.beginPath(); ctx.moveTo(W * 0.05, gyPx); ctx.lineTo(W * 0.05 + W * 0.9 * wipe, gyPx); ctx.stroke(); ctx.globalAlpha = 1;

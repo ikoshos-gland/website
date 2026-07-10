@@ -151,21 +151,28 @@ export default function BlogPost() {
   const animateDeck = deckDecision && doneSlug !== metaSlug;
   const [introExitRequested, setIntroExitRequested] = useState(false);
   const [revealed, setRevealed] = useState(!deckDecision);
+  const [bodyPrimed, setBodyPrimed] = useState(!deckDecision);
   useEffect(() => {
     setIntroExitRequested(false);
     setRevealed(!deckDecision);
+    setBodyPrimed(!deckDecision);
   }, [deckDecision, metaSlug]);
   const handleDeckDone = () => {
     setDoneSlug(metaSlug ?? null);
     if (metaSlug) markDeckSeen(metaSlug);
     if (introBackdrop) {
       setIntroExitRequested(true);
-      if (!animateDeck) setRevealed(true);
+      if (!animateDeck) {
+        setBodyPrimed(true);
+        setRevealed(true);
+      }
     } else {
+      setBodyPrimed(true);
       setRevealed(true);
     }
   };
   const handleIntroDone = () => {
+    setBodyPrimed(true);
     setRevealed(true);
   };
 
@@ -214,6 +221,17 @@ export default function BlogPost() {
     if (loader) loader().then((m) => { if (active) setBody(() => m.default); });
     return () => { active = false; };
   }, [slug, lang]);
+
+  // Prepare the potentially long MDX tree while the calm middle of the intro is
+  // playing. React's transition lane can yield between frames; the final handoff
+  // then only unhides an existing tree instead of constructing it synchronously.
+  useEffect(() => {
+    if (!deckDecision || revealed || bodyPrimed || !Body) return;
+    const id = window.setTimeout(() => {
+      React.startTransition(() => setBodyPrimed(true));
+    }, 900);
+    return () => clearTimeout(id);
+  }, [Body, bodyPrimed, deckDecision, revealed, metaSlug]);
 
   useEffect(() => {
     const onScroll = () => {
@@ -390,8 +408,12 @@ export default function BlogPost() {
               </p>
             )}
           </div>
-          {revealed && (
-            <div className="blg-reveal">
+          {(revealed || bodyPrimed) && (
+            <div
+              className={'blg-reveal ' + (revealed ? 'is-visible' : 'is-primed')}
+              aria-hidden={!revealed}
+              inert={!revealed}
+            >
               <div className="blg-byline">
                 <span className="name">Mert Koca</span>
                 <span>{fmtDate(meta.date)}</span>
