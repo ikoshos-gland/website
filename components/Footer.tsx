@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Instagram, Linkedin } from 'lucide-react';
 import { useContent } from '../i18n/LanguageContext';
 
@@ -42,7 +43,11 @@ const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-[#A1A1A6]">
               {c.footer.sitemapLinks.map(link => (
-                <li key={link}><a href="#" className="hover:text-[#D6FF4F] transition-colors">{link}</a></li>
+                <li key={link}>
+                  {link === c.nav.cv
+                    ? <Link to="/cv" className="hover:text-[#D6FF4F] transition-colors">{link}</Link>
+                    : <a href="#" className="hover:text-[#D6FF4F] transition-colors">{link}</a>}
+                </li>
               ))}
             </ul>
           </div>
