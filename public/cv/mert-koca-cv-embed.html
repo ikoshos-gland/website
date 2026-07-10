@@ -104,8 +104,8 @@
   }
   .contact{
     text-align:right;
-    font-size:11px;
-    line-height:1.5;
+    font-size:10px;
+    line-height:1.45;
     color:var(--muted);
     white-space:nowrap;
   }
@@ -113,7 +113,7 @@
   .contact a:hover{border-bottom-color:var(--accent);color:var(--accent);}
   .contact .label{
     display:block;
-    font-size:8.5px;
+    font-size:7.5px;
     letter-spacing:.22em;
     text-transform:uppercase;
     color:var(--faint);
@@ -306,6 +306,13 @@
     margin-top:2px;
   }
   .stack-item .si-meta .yr{color:var(--muted);font-weight:400;font-style:italic;}
+  .stack-item .si-meta .yr a{
+    color:var(--accent);
+    font-style:normal;
+    text-decoration:none;
+    border-bottom:1px solid var(--rule-strong);
+  }
+  .stack-item .si-meta .yr a:hover{ border-bottom-color:var(--accent); }
   .stack-item .si-desc{
     font-size:12.6px;
     color:#3a3e44;
@@ -437,8 +444,10 @@
         </div>
         <div class="row">
           <span class="label">Website</span>
-          <a href="https://mertoshi.online">mertoshi.online</a><br>
-          <a href="https://linkedin.com/in/mert-koca-503372276">linkedin.com/in/mert-koca-503372276</a><br>
+          <a href="https://mertoshi.online">mertoshi.online</a>
+        </div>
+        <div class="row">
+          <span class="label">GitHub</span>
           <a href="https://github.com/ikoshos-gland">github.com/ikoshos-gland</a>
         </div>
       </div>
@@ -492,14 +501,13 @@
             <article class="entry">
         <div class="gutter">
           <div class="dates">2024 - 2025</div>
-          <span class="place">İTÜ Çekirdek</span>
+          <span class="place">Quarter-finalist</span>
         </div>
         <div class="body">
           <p class="role">Member</p>
-          <span class="org">Easyegitim</span>
+          <span class="org">Easyegitim <span class="sub">· İTÜ Çekirdek</span></span>
           <ul class="points">
             <li>Combined <b>agentic tools</b> with specialized capabilities for students to achieve maximum efficiency from personalized education.</li>
-            <li>Quarter-finalist in Istanbul Technical University&rsquo;s startup incubation program.</li>
           </ul>
         </div>
       </article>
@@ -538,6 +546,17 @@
 
       <article class="project">
         <div class="phead">
+          <span class="pname">ESP32-S3 Bionic Hand</span>
+          <span class="psub">Real-time EMG-controlled bionic hand</span>
+        </div>
+        <ul class="points">
+          <li>Recognizes <b>11 hand gestures</b> in real time from <b>6 EMG sensors</b> (MyoWare) to drive a bionic prosthetic hand.</li>
+          <li>On-device ML with <b>TensorFlow Lite Micro</b> on the ESP32-S3: Int8-quantized MLP, TD4 EMG features, and real-time IIR filtering in C/C++, under 300 ms end-to-end latency.</li>
+        </ul>
+      </article>
+
+      <article class="project">
+        <div class="phead">
           <span class="pname">liconn-ffn-truba</span>
           <span class="psub">Open-source HPC connectomics pipeline</span>
         </div>
@@ -566,7 +585,7 @@
         <div class="eyebrow"><h2>Certification</h2></div>
         <div class="stack-item">
           <div class="si-title">Foundations of Quantum Mechanics</div>
-          <div class="si-meta">University of Colorado Boulder <span class="yr">· Coursera</span></div>
+          <div class="si-meta">University of Colorado Boulder <span class="yr">· Coursera · <a href="https://www.coursera.org/account/accomplishments/verify/UISLH1CG75PF">Verify</a></span></div>
         </div>
         <div class="eyebrow" style="margin-top:12px;"><h2>Languages</h2></div>
         <div class="fact">
