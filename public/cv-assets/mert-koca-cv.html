@@ -386,17 +386,19 @@
   @page{size:A4;margin:14mm;}
 
   @media print{
-    body{background:#fff;font-size:10pt;}
+    body{background:#fff;font-size:9.7pt;}
     .no-print{display:none !important;}
     .sheet{
       width:auto;max-width:none;margin:0;padding:0;
       box-shadow:none;background:#fff;
     }
-    .section{margin-top:11px;}
-    .entry{margin-bottom:8px;}
-    ul.points li{margin-bottom:2px;}
-    .project{margin-bottom:8px;}
-    .stack-item{margin-bottom:7px;}
+    .section{margin-top:9px;}
+    .entry{margin-bottom:6px;}
+    ul.points li{margin-bottom:1px;line-height:1.36;}
+    .project{margin-bottom:6px;}
+    .stack-item{margin-bottom:5px;}
+    .skills{gap:4px;}
+    .summary{margin-top:9px;padding-top:8px;padding-bottom:8px;}
     a{color:var(--ink) !important;}
     .contact a{border:none;}
     *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}
@@ -471,8 +473,8 @@
           <span class="org">KUTTAM, Koç University Research Center for Translational Medicine</span>
           <span class="tag">Flagship research</span>
           <ul class="points">
-            <li>Studied various <b>Expansion Microscopy (ExM)</b> protocols (ProExM, Magnify, and single-shot 20&times; ExM) to surpass the optical diffraction limit, enabling nanometer-scale imaging of neural tissue on confocal microscopes.</li>
-            <li>Built and ran deep-learning <b>volume-segmentation pipelines</b> (Flood-Filling Networks, U-Net variants) for neural and vascular structures, working toward computer-based 3D brain mapping.</li>
+            <li>Studied various <b>Expansion Microscopy (ExM)</b> protocols in the lab (ProExM, Magnify, and single-shot 20&times; ExM) to surpass the optical diffraction limit, enabling nanometer-scale imaging of neural tissue on confocal microscopes.</li>
+            <li>Adapted and ran deep-learning <b>volume-segmentation pipelines</b> (Flood-Filling Networks, U-Net variants) for neural and vascular structures, working toward computer-based 3D brain mapping.</li>
             <li>Learned and operated <b>high-performance computing</b> on TRUBA (Turkey's national HPC center): SLURM batch scheduling, multi-GPU (JAX) training, and Apptainer/Singularity containers.</li>
           </ul>
         </div>
@@ -539,6 +541,7 @@
           <li><b>Frontend:</b> React 19 + TypeScript + Vite + Tailwind + Spline 3D, deployed on Azure Static Web Apps.</li>
           <li><b>Backend:</b> Python Azure Functions RAG using Azure OpenAI "On Your Data" + Azure AI Search (hybrid vector/semantic), secured with Managed Identity + Azure Key Vault.</li>
           <li>Features a custom AI assistant ("Lundo") and a document-intelligence + semantic-chunking indexing pipeline.</li>
+          <li>Turned my bachelor thesis into animated, illustrated blog chapters, and translated what I learn in the lab into ongoing blog posts.</li>
         </ul>
       </article>
 
