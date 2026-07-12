@@ -105,6 +105,21 @@ html.blg-hide-native-scrollbar::-webkit-scrollbar,body.blg-hide-native-scrollbar
 .blg-specimen .frame{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--surface)}
 .blg-specimen img{display:block;width:100%;height:auto;filter:saturate(.95)}
 
+.blg-connectomics-compare{margin:44px 0}
+.blg-connectomics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.blg-connectomics-card{min-width:0;overflow:hidden;background:var(--surface);border:1px solid var(--hair);border-radius:14px}
+.blg-connectomics-image{position:relative;aspect-ratio:1.72;overflow:hidden;background:#f4f4f2}
+.blg-connectomics-image img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.9) contrast(1.02);transition:transform .45s ease,filter .3s ease}
+.blg-connectomics-card:hover .blg-connectomics-image img{transform:scale(1.025);filter:saturate(1) contrast(1.03)}
+.blg-connectomics-image span{position:absolute;top:12px;left:12px;padding:4px 7px;border:1px solid rgba(255,255,255,.26);border-radius:999px;background:rgba(12,13,15,.72);backdrop-filter:blur(5px);font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--gold-a)}
+.blg-connectomics-copy{padding:18px 18px 20px}
+.blg-connectomics-kind{margin:0 0 8px!important;font-family:var(--mono)!important;font-size:10px!important;line-height:1.3!important;letter-spacing:.13em;text-transform:uppercase;color:var(--gold-a)!important}
+.blg-connectomics-copy h3{margin:0 0 10px;font-family:var(--head);font-size:18px;line-height:1.3;font-weight:500;color:var(--ink-bright)}
+.blg-connectomics-copy>p:last-child{margin:0;font-size:14px;line-height:1.65;color:var(--muted)}
+.blg-connectomics-compare>figcaption{padding:0 3px}
+@media(max-width:640px){.blg-connectomics-grid{grid-template-columns:1fr}.blg-connectomics-image{aspect-ratio:1.8}}
+@media(prefers-reduced-motion:reduce){.blg-connectomics-image img{transition:none}}
+
 .blg-pull{font-family:var(--serif);font-style:italic;font-size:27px;line-height:1.35;margin:48px 0;color:var(--ink-bright);text-align:center}
 
 .blg-foot{margin-top:70px;padding-top:26px;border-top:1px solid var(--hair);display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
