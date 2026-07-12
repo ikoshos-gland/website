@@ -239,7 +239,7 @@ export const tr: ContentShape = {
   thesisHub: {
     eyebrow: 'Tez',
     title: 'Bir Beyin, İlk İlkelerden',
-    intro: 'Lisans tezimden derlediğim dört bölüm — konnektomiğin temel kavramlarından, bağlantıları gizleyen iki duvara ve ikisini de aşan laboratuvardan-süperbilgisayara tarifine uzanıyor. En iyisi sırayla okumak.',
+    intro: 'Lisans tezimden derlediğim yazılar, konnektomiğin temel kavramlarından bağlantıları görünür kılan deneysel ve hesaplamalı yöntemlere uzanıyor. En iyisi sırayla okumak.',
     chapterLabel: 'Bölüm',
     readCta: 'Bölümü oku',
     hubLink: 'Tez',
