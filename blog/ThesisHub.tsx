@@ -15,10 +15,16 @@ const CHAPTERS = [
   'recipe-for-a-brain-glove-box-to-supercomputer',
 ];
 
+const TR_CHAPTERS = [
+  'introduction-to-exm-connectomics',
+  ...CHAPTERS,
+];
+
 export default function ThesisHub() {
   const { lang } = useLang();
   const c = useContent();
   const t = c.thesisHub;
+  const chapters = lang === 'tr' ? TR_CHAPTERS : CHAPTERS;
 
   return (
     <div className="blog-root">
@@ -38,7 +44,7 @@ export default function ThesisHub() {
         </div>
 
         <ol className="blg-thesis-path">
-          {CHAPTERS.map((slug, i) => {
+          {chapters.map((slug, i) => {
             const meta = getMeta(slug, lang);
             if (!meta) return null;
             return (

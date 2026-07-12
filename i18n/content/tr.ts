@@ -239,11 +239,12 @@ export const tr: ContentShape = {
   thesisHub: {
     eyebrow: 'Tez',
     title: 'Bir Beyin, İlk İlkelerden',
-    intro: 'Lisans tezim üç bölümde — zihnin neden bağlantılarından ibaret olduğundan, onları gizleyen iki duvara, ve ikisini de aşan laboratuvardan-süperbilgisayara tarifine. En iyisi sırayla okumak.',
+    intro: 'Lisans tezimden derlediğim dört bölüm — konnektomiğin temel kavramlarından, bağlantıları gizleyen iki duvara ve ikisini de aşan laboratuvardan-süperbilgisayara tarifine uzanıyor. En iyisi sırayla okumak.',
     chapterLabel: 'Bölüm',
     readCta: 'Bölümü oku',
     hubLink: 'Tez',
     steps: [
+      'Yapısal, işlevsel ve etkin bağlantısallıktan ExM tabanlı konnektomik haritalamaya giriş.',
       'Zihin neden kablolamasıdır — ve onu haritalama yüzyıllık yarışı.',
       'İki duvar: ışığın kırınım sınırı ve segmentasyon problemi.',
       'Tarif: eldivenli-kutu jelinden süperbilgisayardaki flood-filling ağına.',
