@@ -241,14 +241,21 @@ export const en = {
   thesisHub: {
     eyebrow: 'The thesis',
     title: 'A Brain, From First Principles',
-    intro: 'My bachelor thesis in three chapters — from why a mind is its connections, through the two walls that hide them, to the wet-lab-to-supercomputer recipe that climbs both. Best read in order.',
-    chapterLabel: 'Chapter',
+    intro: 'Six sections, six columns: from why a mind is its connections, through the two walls that hide them, to the recipe that climbs both. Hover a column to open its bay.',
     readCta: 'Read chapter',
     hubLink: 'The thesis',
-    steps: [
-      'Why a mind is its wiring — and the century-long race to map it.',
-      'The two walls: light’s diffraction limit, and the segmentation problem.',
-      'The recipe: from a glove-box gel to a flood-filling network on a supercomputer.',
+    comingSoon: 'Coming soon',
+    // Six sections, one per column. `label` is inscribed on the architrave, so
+    // it must stay short and is authored already-uppercased (text-transform
+    // would mangle Turkish’s dotted İ). Order must match SECTION_SLUGS in
+    // blog/ThesisHub.tsx.
+    sections: [
+      { label: 'INTRODUCTION', blurb: 'An introduction to ExM-based connectomic mapping: structural, functional and effective connectivity.' },
+      { label: 'THE WIRING', blurb: 'Why a mind is its wiring — and the century-long race to map it.' },
+      { label: 'THE TWO WALLS', blurb: 'The two walls: light’s diffraction limit, and the segmentation problem.' },
+      { label: 'METHODS', blurb: 'The recipe: from a glove-box gel to a flood-filling network on a supercomputer.' },
+      { label: 'RESULTS', blurb: '' },
+      { label: 'DISCUSSION', blurb: '' },
     ],
   },
 };

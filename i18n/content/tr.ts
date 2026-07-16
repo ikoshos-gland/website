@@ -239,15 +239,17 @@ export const tr: ContentShape = {
   thesisHub: {
     eyebrow: 'Tez',
     title: 'Bir Beyin, İlk İlkelerden',
-    intro: 'Lisans tezimden derlediğim yazılar, konnektomiğin temel kavramlarından bağlantıları görünür kılan deneysel ve hesaplamalı yöntemlere uzanıyor. En iyisi sırayla okumak.',
-    chapterLabel: 'Bölüm',
+    intro: 'Altı bölüm, altı sütun: zihnin neden bağlantıları olduğundan, onları gizleyen iki duvara, ikisini birden aşan tarife. Bir sütunun üstüne gelin, bölümü açılsın.',
     readCta: 'Bölümü oku',
     hubLink: 'Tez',
-    steps: [
-      'Yapısal, işlevsel ve etkin bağlantısallıktan ExM tabanlı konnektomik haritalamaya giriş.',
-      'Zihin neden kablolamasıdır — ve onu haritalama yüzyıllık yarışı.',
-      'İki duvar: ışığın kırınım sınırı ve segmentasyon problemi.',
-      'Tarif: eldivenli-kutu jelinden süperbilgisayardaki flood-filling ağına.',
+    comingSoon: 'Yakında',
+    sections: [
+      { label: 'GİRİŞ', blurb: 'Yapısal, işlevsel ve etkin bağlantısallıktan ExM tabanlı konnektomik haritalamaya giriş.' },
+      { label: 'BAĞLANTILAR', blurb: 'Zihin neden kablolamasıdır — ve onu haritalama yüzyıllık yarışı.' },
+      { label: 'İKİ DUVAR', blurb: 'İki duvar: ışığın kırınım sınırı ve segmentasyon problemi.' },
+      { label: 'YÖNTEM', blurb: 'Tarif: eldivenli-kutu jelinden süperbilgisayardaki flood-filling ağına.' },
+      { label: 'SONUÇLAR', blurb: '' },
+      { label: 'TARTIŞMA', blurb: '' },
     ],
   },
 };

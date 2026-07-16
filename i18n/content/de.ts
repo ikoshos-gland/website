@@ -239,14 +239,17 @@ export const de: ContentShape = {
   thesisHub: {
     eyebrow: 'Die Arbeit',
     title: 'Ein Gehirn, von Grund auf',
-    intro: 'Meine Bachelorarbeit in drei Kapiteln — davon, warum ein Geist seine Verbindungen ist, über die zwei Wände, die sie verbergen, bis zum Rezept von der Laborbank zum Supercomputer, das beide überwindet. Am besten der Reihe nach.',
-    chapterLabel: 'Kapitel',
+    intro: 'Sechs Abschnitte, sechs Säulen: davon, warum ein Geist seine Verbindungen ist, über die zwei Wände, die sie verbergen, bis zum Rezept, das beide überwindet. Fahren Sie über eine Säule, um ihr Joch zu öffnen.',
     readCta: 'Kapitel lesen',
     hubLink: 'Die Arbeit',
-    steps: [
-      'Warum ein Geist seine Verschaltung ist — und das Jahrhundert-Rennen, sie zu kartieren.',
-      'Die zwei Wände: das Beugungslimit des Lichts und das Segmentierungsproblem.',
-      'Das Rezept: vom Glovebox-Gel zum Flood-Filling-Netzwerk auf einem Supercomputer.',
+    comingSoon: 'Demnächst',
+    sections: [
+      { label: 'EINLEITUNG', blurb: 'Eine Einführung in die ExM-basierte konnektomische Kartierung: strukturelle, funktionelle und effektive Konnektivität.' },
+      { label: 'DIE VERSCHALTUNG', blurb: 'Warum ein Geist seine Verschaltung ist — und das Jahrhundert-Rennen, sie zu kartieren.' },
+      { label: 'DIE ZWEI WÄNDE', blurb: 'Die zwei Wände: das Beugungslimit des Lichts und das Segmentierungsproblem.' },
+      { label: 'METHODEN', blurb: 'Das Rezept: vom Glovebox-Gel zum Flood-Filling-Netzwerk auf einem Supercomputer.' },
+      { label: 'ERGEBNISSE', blurb: '' },
+      { label: 'DISKUSSION', blurb: '' },
     ],
   },
 };
