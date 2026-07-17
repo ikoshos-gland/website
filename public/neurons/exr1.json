@@ -7,9 +7,9 @@
     "720575940639278399",
     "720575940640749939"
   ],
-  "eps_nm": 350.0,
+  "eps_nm": 200.0,
   "neurons": 3,
   "vertices_raw": 57343,
-  "vertices_simplified": 23611,
-  "bytes": 472236
+  "vertices_simplified": 30792,
+  "bytes": 615856
 }

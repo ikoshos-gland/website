@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
+import { LineSegments2, LineSegmentsGeometry, LineMaterial } from 'three-stdlib';
 import * as THREE from 'three';
 
 // The actual WebGL scene for <NeuronViewer>. Lazy-imported by the wrapper so the
@@ -75,20 +76,44 @@ function bounds(arrays: Float32Array[]) {
   };
 }
 
-function NeuronLines({ geom, color }: { geom: NeuronGeom; color: string }) {
-  const g = useMemo(() => {
-    const bg = new THREE.BufferGeometry();
-    bg.setAttribute('position', new THREE.BufferAttribute(geom.positions, 3));
-    bg.setIndex(new THREE.BufferAttribute(geom.edges, 1));
-    return bg;
-  }, [geom]);
-  useEffect(() => () => g.dispose(), [g]);
-  return (
-    <lineSegments geometry={g} renderOrder={1}>
-      {/* additive on the dark backdrop makes dense arbors glow, like the FlyWire view */}
-      <lineBasicMaterial color={color} transparent opacity={0.6} depthWrite={false} blending={THREE.AdditiveBlending} />
-    </lineSegments>
-  );
+// Real thick lines (fat lines). THREE's LineBasicMaterial is stuck at 1px on
+// every platform, which reads as thin and wispy; LineSegments2 draws each edge
+// as a screen-space quad, so lineWidth is honoured in pixels and the arbors look
+// solid like the FlyWire mesh view. The indexed edges are expanded into a flat
+// [x1,y1,z1, x2,y2,z2, ...] segment list, which is what LineSegmentsGeometry wants.
+function NeuronLines({ geom, color, lineWidth }: { geom: NeuronGeom; color: string; lineWidth: number }) {
+  const size = useThree((s) => s.size);
+  const invalidate = useThree((s) => s.invalidate);
+  const obj = useMemo(() => {
+    const { positions: p, edges: e } = geom;
+    const seg = new Float32Array(e.length * 3);
+    for (let i = 0; i < e.length; i++) {
+      const v = e[i] * 3;
+      seg[i * 3] = p[v]; seg[i * 3 + 1] = p[v + 1]; seg[i * 3 + 2] = p[v + 2];
+    }
+    const g = new LineSegmentsGeometry();
+    g.setPositions(seg);
+    const m = new LineMaterial({
+      color: new THREE.Color(color).getHex(),
+      linewidth: lineWidth, // in px (worldUnits off)
+      transparent: true,
+      opacity: 0.96,
+      depthTest: true,
+    });
+    m.resolution.set(size.width, size.height);
+    const ls = new LineSegments2(g, m);
+    ls.renderOrder = 1;
+    return { g, m, ls };
+    // size intentionally excluded: the effect below keeps resolution current
+    // without rebuilding the geometry on every resize.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [geom, color, lineWidth]);
+  useEffect(() => {
+    obj.m.resolution.set(size.width, size.height);
+    invalidate();
+  }, [obj, size.width, size.height, invalidate]);
+  useEffect(() => () => { obj.g.dispose(); obj.m.dispose(); }, [obj]);
+  return <primitive object={obj.ls} />;
 }
 
 function BrainHull({ geom }: { geom: BrainGeom }) {
@@ -120,6 +145,7 @@ function BrainHull({ geom }: { geom: BrainGeom }) {
 function FitCamera({ center, radius }: { center: [number, number, number]; radius: number }) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const controls = useThree((s) => s.controls) as any;
+  const invalidate = useThree((s) => s.invalidate);
   useEffect(() => {
     const c = new THREE.Vector3(...center);
     const dist = (radius / Math.sin((camera.fov * Math.PI) / 180 / 2)) * 1.15;
@@ -128,7 +154,8 @@ function FitCamera({ center, radius }: { center: [number, number, number]; radiu
     camera.far = dist * 10;
     camera.updateProjectionMatrix();
     if (controls) { controls.target.copy(c); controls.update(); }
-  }, [center, radius, camera, controls]);
+    invalidate();
+  }, [center, radius, camera, controls, invalidate]);
   return null;
 }
 
@@ -138,9 +165,10 @@ export interface NeuronSceneProps {
   colors?: string[];
   autoRotate?: boolean;
   background?: string;
+  lineWidth?: number;
 }
 
-export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoRotate = true, background = '#0A0B0D' }: NeuronSceneProps) {
+export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoRotate = true, background = '#0A0B0D', lineWidth = 2.6 }: NeuronSceneProps) {
   const [geoms, setGeoms] = useState<NeuronGeom[] | null>(null);
   const [brainGeom, setBrainGeom] = useState<BrainGeom | null>(null);
   const [err, setErr] = useState(false);
@@ -179,7 +207,7 @@ export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoR
       <directionalLight position={[1, 1.4, 2]} intensity={0.8} />
       {brainGeom && <BrainHull geom={brainGeom} />}
       {geoms.map((geom, i) => (
-        <NeuronLines key={i} geom={geom} color={colors[i % colors.length]} />
+        <NeuronLines key={i} geom={geom} color={colors[i % colors.length]} lineWidth={lineWidth} />
       ))}
       <FitCamera center={fit.center} radius={fit.radius} />
       <OrbitControls
