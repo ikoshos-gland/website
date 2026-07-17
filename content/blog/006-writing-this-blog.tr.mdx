@@ -186,7 +186,7 @@ Bileşenlerin çoğunu kendim çizdim. Ama bir tanesi gerçek bilimsel veriyle �
 <NeuronViewer />
 ```
 
-Ve işte canlı. Fareyle sürükleyip döndür, tekerlekle yakınlaştır. Ortadaki üç parlak hücre, [FlyWire](https://flywire.ai) projesinden gerçek ExR1 nöronları. Etraflarındaki soluk kabuk ise sineğin bütün beyninin yüzeyi.
+Ve işte canlı. Fareyle sürükleyip döndür, tekerlekle yakınlaştır. Ortadaki üç hücre, [FlyWire](https://flywire.ai) projesinden gerçek ExR1 nöronları, gerçek yüzey mesh'leriyle: soma (hücre gövdesi) ve tüm uzantılar dolu, tıpkı [Codex](https://codex.flywire.ai)'te olduğu gibi. Etraflarındaki soluk kabuk ise sineğin bütün beyninin yüzeyi.
 
 <NeuronViewer caption="Üç gerçek FlyWire ExR1 nöronu, sineğin beyin kabuğunun içinde. Veri © Princeton / FlyWire." />
 
@@ -198,32 +198,20 @@ Beyin kabuğunu istemezsen kapatırsın, geriye sadece nöronlar kalır:
 
 <NeuronViewer brain={false} autoRotate={false} height={380} caption="Aynı üç nöron, beyin kabuğu ve otomatik dönüş kapalıyken." />
 
-Yukarıdakiler **iskelet** (çizgi) versiyonu, hafif olan. Bir de tam Codex'teki gibi, nöronların **gerçek yüzey mesh'ini** çizen ağır bir varyant var. Etikete `solid` eklemen yeterli:
-
-```mdx
-<NeuronViewer solid />
-```
-
-<NeuronViewer solid caption="Aynı üç nöron, bu kez gerçek yüzey mesh'iyle: soma ve tüm uzantılar dolu, tıpkı Codex'teki gibi. Daha ağır (birkaç MB), o yüzden isteğe bağlı." />
-
 ### Bu Nasıl Yapıldı
 
-Buradaki asıl marifet, ağır olmaması. [Codex](https://codex.flywire.ai) gibi profesyonel araçlar bu nöronları Neuroglancer ile çizer, ama gigabaytlarca mesh'i canlı akıtıp tarayıcıyı zorlarlar. Bir blog için buna gerek yok. İki basit fikirle hafiflettim.
+[Codex](https://codex.flywire.ai) gibi profesyonel araçlar bu nöronları Neuroglancer ile çizer, ama gigabaytlarca mesh'i canlı akıtıp tarayıcıyı zorlarlar. Bir blog için buna gerek yok. Numara şu: veriyi sayfa açılırken sunucudan akıtmıyorum. Nöronların gerçek mesh'ini bir kereliğine indirip epeyce sadeleştirip `public/neurons/` içine küçük bir ikili dosya olarak koyuyorum. Tarayıcı sadece o hazır dosyayı çiziyor.
 
-Birincisi, mesh yerine iskelet. Bir nöronun bütün yüzeyini (milyonlarca üçgen) çizmek yerine, sadece orta çizgisini ince çizgiler olarak çiziyorum. Görüntü neredeyse aynı, yük ise yüzde biri kadar. İkincisi, her şey önceden hazırlanıyor. Veriyi sayfa açılırken sunucudan akıtmıyorum; bir kereliğine indirip sadeleştirip `public/neurons/` içine küçük bir ikili dosya olarak koyuyorum.
-
-Veriyi almak sandığımdan kolaydı. Codex'te `label == ExR1` diye aratıp "Copy IDs" ile üç nöronun kimliğini alıyorsun. Gerisini bir Python betiği yapıyor, `scripts/build_neuron_bin.py`. FlyWire'ın herkese açık iskelet servisinden bu kimliklerin iskeletini düz HTTPS ile indiriyor (ne bir kütüphane ne bir şifre gerekiyor), fazla noktaları eleyip sadeleştiriyor, ve tarayıcının doğrudan okuyabileceği minik bir `.bin` dosyasına paketliyor.
+Veriyi almak sandığımdan kolaydı. Codex'te `label == ExR1` diye aratıp "Copy IDs" ile üç nöronun kimliğini alıyorsun. Gerisini bir Python betiği yapıyor, `scripts/build_neuron_solid.py`. FlyWire'ın herkese açık mesh verisinden (`cloud-volume` ile, şifresiz) bu kimliklerin gerçek yüzey mesh'ini indiriyor. Ham mesh nöron başına milyonlarca üçgen, o yüzden en kaba çözünürlüğü alıp sadeleştiriyor (QEM ile), ve tarayıcının doğrudan okuyabileceği kompakt bir `.bin` dosyasına paketliyor.
 
 ```bash
-python scripts/build_neuron_bin.py 720575940615101747 720575940639278399 \
-    720575940640749939 --out public/neurons/exr1 --eps 350 --brain
+python scripts/build_neuron_solid.py 720575940615101747 720575940639278399 \
+    720575940640749939 --out public/neurons/exr1_solid.bin --brain
 ```
 
 Sondaki `--brain` bayrağı, o şeffaf kabuğu da ekliyor. Kabuk da FlyWire'ın tüm beyin yüzeyi mesh'i, aynı yerden ve aynı nanometre koordinat sisteminden geliyor. Betik ikisini tek bir ölçeğe oturtuyor, böylece nöronlar beynin tam ortasında, gerçekte oldukları yerde duruyor.
 
-Görüntüleyen taraf `blog/NeuronViewer.tsx`, üç boyut için `three.js`'i (react-three-fiber ile) kullanan bir React bileşeni. "Kasmaması" için iki şeye dikkat ettim: three.js kütüphanesi ancak görüntüleyici ekrana girdiğinde yükleniyor, yani sayfanın ilk açılışına hiç yük bindirmiyor; ve nöronları elle döndürmediğin sürece boşta hiç işlem yapmıyor.
-
-`solid` varyantı farklı bir veri yolu kullanıyor. Orada iskeleti değil, nöronun **gerçek yüzey mesh'ini** çekiyoruz (yine FlyWire'ın herkese açık verisinden, ama bu sefer `cloud-volume` ile). Ham mesh nöron başına milyonlarca üçgen olduğu için en kaba çözünürlüğü alıp epeyce sadeleştiriyoruz (`scripts/build_neuron_solid.py`). Sonuç yine tek bir `.bin`, ama iskeletten ağır: çizgi yerine gerçek dolu yüzey çizdiğimiz için. Codex'e en çok benzeyen bu, ama "kasmasın" istediğimiz için varsayılan hâlâ hafif iskelet.
+Görüntüleyen taraf `blog/NeuronViewer.tsx`, üç boyut için `three.js`'i (react-three-fiber ile) kullanan bir React bileşeni. Nöronları katı, ışıklı yüzeyler olarak çiziyor. "Kasmaması" için iki şeye dikkat ettim: three.js kütüphanesi ancak görüntüleyici ekrana girdiğinde yükleniyor, yani sayfanın ilk açılışına hiç yük bindirmiyor; ve görüntüleyici ekrandan çıkınca tamamen boşaltılıyor.
 
 <Aside title="Künye">FlyWire verisi bedava ama atıf ister. O yüzden kaynağı hem altyazıda belirtiyorum hem de yazının kaynakçasına eklemek gerekir (Dorkenwald ve ark. 2024, Schlegel ve ark. 2024).</Aside>
 

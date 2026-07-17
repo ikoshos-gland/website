@@ -24,18 +24,14 @@ class GLBoundary extends React.Component<{ fallback: React.ReactNode; children: 
 }
 
 export interface NeuronViewerProps {
-  /** path to a .bin; defaults depend on `solid` */
+  /** path to a neuron mesh .bin built by scripts/build_neuron_solid.py */
   src?: string;
-  /** real reconstructed surface mesh (Codex-like, heavier) instead of skeleton lines */
-  solid?: boolean;
   /** translucent brain hull; pass false to hide, or a path to another mesh */
   brain?: string | false;
   /** stage height in px */
   height?: number;
   /** per-neuron colors (cycled) */
   colors?: string[];
-  /** soma (cell body) ball size multiplier; 0 hides it */
-  somaScale?: number;
   /** gentle auto-spin; forced off under prefers-reduced-motion */
   autoRotate?: boolean;
   /** optional caption shown under the stage */
@@ -44,18 +40,15 @@ export interface NeuronViewerProps {
 }
 
 export default function NeuronViewer({
-  src,
-  solid = false,
+  src = '/neurons/exr1_solid.bin',
   brain = '/neurons/brain.bin',
   height = 460,
   colors,
-  somaScale = 2.0,
   autoRotate = true,
   caption,
   children,
 }: NeuronViewerProps) {
   const t = STR[useLang().lang] || STR.en;
-  const finalSrc = src || (solid ? '/neurons/exr1_solid.bin' : '/neurons/exr1.bin');
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   const [reduced, setReduced] = useState(false);
@@ -91,7 +84,7 @@ export default function NeuronViewer({
         {inView ? (
           <GLBoundary fallback={fail}>
             <Suspense fallback={<div className="blg-neuron-spin" aria-label="loading" />}>
-              <NeuronScene src={finalSrc} solid={solid} brain={brain === false ? null : brain} colors={colors} somaScale={somaScale} autoRotate={autoRotate && !reduced} />
+              <NeuronScene src={src} brain={brain === false ? null : brain} colors={colors} autoRotate={autoRotate && !reduced} />
             </Suspense>
           </GLBoundary>
         ) : (
