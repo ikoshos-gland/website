@@ -230,6 +230,10 @@ export const tr: ContentShape = {
     tableOfContents: 'İçindekiler',
     nextPost: 'Sonraki',
     prevPost: 'Önceki',
+    comingSoon: 'Yakında',
+    comingSoonBody: 'Bu yazı henüz Türkçe yazılmadı. Başka bir dilde yayında:',
+    readIn: '{lang} oku',
+    langName: { en: 'İngilizce', tr: 'Türkçe', de: 'Almanca' },
     contentType: {
       lesson: 'Ders',
       compute: 'Hesaplama',

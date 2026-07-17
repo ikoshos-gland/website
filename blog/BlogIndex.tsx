@@ -84,6 +84,7 @@ export default function BlogIndex() {
                   <div className="meta">
                     <span>{p.date.replace(/-/g, ' · ')}</span>
                     <span className={'blg-chip ' + p.contentType}>{ct(p.contentType)}</span>
+                    {p.comingSoon && <span className="blg-chip soon">{c.blog.comingSoon}</span>}
                   </div>
                   <h2>{p.title}</h2>
                   <p>{p.excerpt}</p>

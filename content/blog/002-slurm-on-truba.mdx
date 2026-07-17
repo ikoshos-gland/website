@@ -6,7 +6,13 @@ tags: [SLURM, HPC, TRUBA, JAX, GPU]
 excerpt: I'm a molecular-biotech student who needed real GPUs and had never touched a supercomputer. Here's what a national HPC cluster actually feels like from the inside, the queue, the container, and the six mistakes that taught me the rules.
 cover: /img/truba.webp
 draft: false
+comingSoon: true
 ---
+{/* comingSoon withholds this English text and points readers at the Turkish
+    post, which is the published version. The English draft below is kept, not
+    deleted: it is still the canonical frontmatter this slug is listed under,
+    and German falls back to this file, so flagging it here covers de too.
+    Drop the flag to publish the English version. */}
 <DropCap>T</DropCap>he first thing TRUBA ever told me was *no.*
 
 I had a flood-filling network to train, an FFN that segments neurons out of expansion-microscopy volumes, and my laptop had made its position clear: it would rather melt than finish. So I got an account on TRUBA, Turkey's national HPC cluster, SSH'd in, typed `python train.py` the way I'd typed it a thousand times, and the machine just... didn't. No GPU. No crash. Nothing that looked like an error I could google. Just a shell that clearly expected me to already know how this worked.

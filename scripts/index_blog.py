@@ -94,6 +94,11 @@ def english_blog_files(include_drafts=False):
         meta, _ = parse_frontmatter(raw)
         if (meta.get("draft", "false") == "true") and not include_drafts:
             continue  # taslakları atla
+        if meta.get("comingSoon", "false") == "true":
+            # Sitede gizlenen metin: indekslenirse bot, okuyucunun sayfada
+            # göremediği İngilizce metinden cevap verir ve o URL'yi kaynak
+            # gösterir. include_drafts bunu açmaz — taslak değil, saklı.
+            continue
         out.append((path, raw, meta))
     return out
 

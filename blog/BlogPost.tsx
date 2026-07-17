@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { MDXProvider } from '@mdx-js/react';
 import 'katex/dist/katex.min.css';
 import './blog.css';
-import { getMeta, loadPostBody, getPosts } from './posts';
+import { getMeta, loadPostBody, getPosts, getReadableLangs } from './posts';
 import { mdxComponents } from './mdxComponents';
 import { useLang, useContent } from '../i18n/LanguageContext';
 import LanguageSwitcher from '../i18n/LanguageSwitcher';
@@ -107,9 +107,11 @@ function SectionScrubber({
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
-  const { lang } = useLang();
+  const { lang, setLang } = useLang();
   const c = useContent();
   const meta = slug ? getMeta(slug, lang) : undefined;
+  // Languages that actually carry this post's text, minus the one being read.
+  const readableLangs = meta ? getReadableLangs(meta.slug).filter((l) => l !== meta.lang) : [];
   const [Body, setBody] = useState<React.ComponentType | null>(null);
   const nibRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -214,13 +216,16 @@ export default function BlogPost() {
   };
   const cinematicEntry = deckDecision && !revealed;
 
+  // A withheld body is never fetched, so the announced language does not quietly
+  // ship the text it is announcing.
+  const withheld = !!meta?.comingSoon;
   useEffect(() => {
     let active = true;
     setBody(null);
-    const loader = slug ? loadPostBody(slug, lang) : undefined;
+    const loader = slug && !withheld ? loadPostBody(slug, lang) : undefined;
     if (loader) loader().then((m) => { if (active) setBody(() => m.default); });
     return () => { active = false; };
-  }, [slug, lang]);
+  }, [slug, lang, withheld]);
 
   // Prepare the potentially long MDX tree while the calm middle of the intro is
   // playing. React's transition lane can yield between frames; the final handoff
@@ -341,6 +346,57 @@ export default function BlogPost() {
     };
   }, [Body, revealed, metaSlug, lang]);
 
+  // Make citation markers clickable: [4] scrolls to bibliography entry [4].
+  // rehype-citation always tags each entry `id="bib-<key>"` and numbers them in
+  // a `.csl-left-margin` box, so we map reference-number -> entry id and wrap
+  // only those digits inside each inline citation with a jump link. Locator
+  // digits (e.g. the 544 in "[3, p. 544]") aren't reference numbers, so they
+  // stay plain — which is exactly why we don't use rehype-citation's own
+  // linkCitations (its numeric path mis-handles those and crashes the build).
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!revealed || !Body || !body) return;
+
+    const entries = Array.from(
+      body.querySelectorAll<HTMLElement>('.csl-bib-body .csl-entry')
+    );
+    if (entries.length === 0) return;
+
+    const numToId = new Map<string, string>();
+    entries.forEach((entry, i) => {
+      if (!entry.id) return;
+      const marginText = entry.querySelector('.csl-left-margin')?.textContent || '';
+      const num = (marginText.match(/\d+/) || [String(i + 1)])[0];
+      numToId.set(num, entry.id);
+    });
+
+    body.querySelectorAll<HTMLElement>('.blg-cite').forEach((cite) => {
+      if (cite.dataset.jumpLinked === '1') return;
+      cite.dataset.jumpLinked = '1';
+      const linked = cite.innerHTML.replace(/\d+/g, (d) => {
+        const id = numToId.get(d);
+        return id ? `<a class="blg-cite-jump" href="#${id}">${d}</a>` : d;
+      });
+      if (linked !== cite.innerHTML) cite.innerHTML = linked;
+    });
+
+    // Let the raw <a href="#bib-..."> do its NATIVE hash scroll (the engine's
+    // hash navigation handles this page's transformed-ancestor scroll correctly,
+    // whereas element.scrollIntoView / scrollTop do not). We only add the flash
+    // highlight on top of it, via hashchange so it also fires on back/forward.
+    const onHash = () => {
+      const id = decodeURIComponent(location.hash.slice(1));
+      if (!id.startsWith('bib-')) return;
+      const target = document.getElementById(id);
+      if (!target) return;
+      target.classList.remove('blg-ref-flash');
+      void target.offsetWidth; // reflow so the animation can restart
+      target.classList.add('blg-ref-flash');
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [Body, revealed, metaSlug, lang]);
+
   const jumpToSection = (id: string) => {
     const target = document.getElementById(id);
     if (!target) return;
@@ -368,8 +424,11 @@ export default function BlogPost() {
 
   const posts = getPosts(lang);
   const idx = posts.findIndex((p) => p.slug === meta.slug);
-  const prev = posts[idx + 1];
-  const next = posts[idx - 1];
+  // A post absent from this language's list (translation-only, so not keyed in
+  // English) yields idx -1, where posts[idx + 1] silently resolves to posts[0]
+  // and offers the newest post as the older one. No neighbours beats wrong ones.
+  const prev = idx < 0 ? undefined : posts[idx + 1];
+  const next = idx < 0 ? undefined : posts[idx - 1];
 
   return (
     <div className={'blog-root' + (cinematicEntry ? ' blg-post-cinematic' : '')}>
@@ -420,9 +479,23 @@ export default function BlogPost() {
                 <span className={'blg-chip ' + meta.contentType}>{ct(meta.contentType)}</span>
               </div>
               <div className="blg-body" ref={bodyRef}>
-                <MDXProvider components={mdxComponents}>
-                  {Body ? <Body /> : <div className="blg-loading">Loading…</div>}
-                </MDXProvider>
+                {withheld ? (
+                  <div className="blg-soon">
+                    <div className="blg-soon-tag">{c.blog.comingSoon}</div>
+                    <p className="blg-soon-body">{c.blog.comingSoonBody}</p>
+                    <div className="blg-soon-actions">
+                      {readableLangs.map((l) => (
+                        <button key={l} type="button" className="blg-soon-cta" onClick={() => setLang(l)}>
+                          {c.blog.readIn.replace('{lang}', c.blog.langName[l])} →
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <MDXProvider components={mdxComponents}>
+                    {Body ? <Body /> : <div className="blg-loading">Loading…</div>}
+                  </MDXProvider>
+                )}
               </div>
               <footer className="blg-foot">
                 {prev ? <Link to={`/blog/${prev.slug}`}>← {prev.title.slice(0, 26)}</Link> : <span />}

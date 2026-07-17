@@ -13,6 +13,12 @@ export interface PostMeta {
   excerpt: string;
   cover?: string;
   draft: boolean;
+  // Set per language: the post is listed and its frontmatter is shown, but the
+  // body is withheld and the page offers a language that does have it. Lets a
+  // post be published in one language without pulling its unfinished (or
+  // deliberately untranslated) versions along. `draft` hides a post outright;
+  // this keeps it visible and announces it.
+  comingSoon: boolean;
   lang: Lang;
 }
 
@@ -37,13 +43,15 @@ function parseFrontmatter(raw: string): Record<string, any> {
   return data;
 }
 
-// "005-recipe-....de.mdx" -> { slug: 'recipe-...', lang: 'de' }; no suffix -> 'en'
+// "005-recipe-....de.mdx" -> { slug: 'recipe-...', lang: 'de' }; no suffix -> 'en'.
+// The NNN- prefix is optional. Slugs are lower-cased so a file named with capitals
+// still resolves to the same URL the rest of the app hard-codes.
 function parsePath(path: string): { slug: string; lang: Lang } {
   let file = (path.split('/').pop() || path).replace(/\.mdx$/, '');
   let lang: Lang = 'en';
   const m = file.match(/\.(en|tr|de)$/);
   if (m) { lang = m[1] as Lang; file = file.slice(0, -3); }
-  const slug = file.replace(/^\d+[-_]/, '');
+  const slug = file.replace(/^\d+[-_]/, '').toLowerCase();
   return { slug, lang };
 }
 
@@ -66,6 +74,7 @@ for (const [path, raw] of Object.entries(rawModules)) {
     excerpt: fm.excerpt || '',
     cover: fm.cover,
     draft: !!fm.draft,
+    comingSoon: !!fm.comingSoon,
     lang,
   };
 }
@@ -86,6 +95,17 @@ export function getPosts(lang: Lang): PostMeta[] {
 
 export function getMeta(slug: string, lang: Lang): PostMeta | undefined {
   return metaByLang[lang][slug] || metaByLang.en[slug];
+}
+
+// Languages this post can actually be READ in: the file exists, it is not a
+// draft, and it is not merely announced. Drives the offer on a coming-soon
+// page, so a reader is sent to a language that has the text rather than left
+// at a dead end.
+export function getReadableLangs(slug: string): Lang[] {
+  return (Object.keys(metaByLang) as Lang[]).filter((l) => {
+    const m = metaByLang[l][slug];
+    return !!m && !m.comingSoon && isVisible(m);
+  });
 }
 
 export function loadPostBody(slug: string, lang: Lang): Loader | undefined {

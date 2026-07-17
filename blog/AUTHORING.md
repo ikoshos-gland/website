@@ -137,6 +137,7 @@ tags: [SLURM, HPC, TRUBA]               # Köşeli parantez, virgülle. İlki ki
 excerpt: Kısa özet, liste sayfasında ve giriş animasyonunda görünür.
 cover: /img/case-4.webp                 # Kapak görseli yolu (aşağıya bak)
 draft: false                            # true = sadece geliştirmede görünür
+comingSoon: false                       # true = bu dilde metin yerine "yakında" (aşağıya bak)
 ---
 ```
 
@@ -154,6 +155,19 @@ Notlar:
   iyi olur.
 - **`draft: true`** → canlıda gizli, geliştirmede görünür. Yayına almak için
   `false` yap.
+- **`comingSoon: true`** → yazı listede **görünmeye devam eder**, ama o dilde
+  gövde yerine "yakında" paneli çıkar ve okuyucuya metnin gerçekten olduğu dil
+  önerilir. `draft` yazıyı tamamen saklar; bu ise saklamaz, duyurur. Bir yazıyı
+  tek bir dilde yayımlamak için kullan: metni silmene gerek kalmaz, dosya
+  dururken sadece o dildeki sürümü beklemeye alırsın.
+  - Bayrak **dile özeldir**: hangi dosyaya koyarsan o dil beklemeye girer.
+  - Almanca'nın kendi dosyası yoksa İngilizce'ye düştüğü için, bayrağı
+    İngilizce dosyaya koymak Almanca'yı da kapsar.
+  - Gövde o dilde **hiç indirilmez**, yani saklanan metin tarayıcıya gitmez.
+    `scripts/index_blog.py` de bu yazıları atlar, böylece sohbet botu
+    okuyucunun göremediği metinden cevap vermez.
+  - Canlı örnek: `002-slurm-on-truba.mdx` (İngilizce+Almanca yakında, Türkçe
+    yayında).
 
 ---
 

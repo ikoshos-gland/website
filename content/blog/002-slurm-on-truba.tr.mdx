@@ -9,14 +9,14 @@ draft: false
 ---
 ## TRUBA Nedir?
 
-<DropCap>B</DropCap> bir moleküler biyoteknoloji öğrencisi olarak daha önce biyoinformatik, python ve R dersleri alsam da 2025'e kadar hiç süperbilgisayarlar ile uğraşmamıştım. Ama petavoxel seviyesinde beyin modelleme çalışmaları için normal bilgisayarlar ne yazık ki yüzeysel kalıyor. Bu yüzden Türkiye'nin ulusal HPC kümesi TRUBA'yı kullanmaya başladım ve ilk başta anlaması biraz zor gelse de daha sonra bunun için öğrendiklerimi agentic sistemlerin kullanabileceği bir SKILL dosyası haline getirdim. Böylece Claude Code veya Codex gibi LLM'ler SSH köprüsü kurarak artık sizin yerinize TRUBA kullanabilir hale geldi. Yine de her şeyi LLM'lere yıkmak saçma (prefrontal korteksimiz LLM'ler ile konuşurken daha az çalışıyor onun için biraz da yanlış[@kosmynaYourBrainChatGPT2025, p. 96]) ve bu yazıda güzelce TRUBA'yı beyin modellemesi kullanımı çerçevesinde inceleyeceğiz. 
+<DropCap>B</DropCap> bir moleküler biyoteknoloji öğrencisi olarak daha önce biyoinformatik, python ve R dersleri alsam da 2025'e kadar hiç süperbilgisayarlar ile uğraşmamıştım. Fakat petavoxel seviyesinde beyin modelleme çalışmaları için normal bilgisayarlar ne yazık ki oldukça sınıfta kalıyor. Bu yüzden Türkiye'nin ulusal HPC kümesi TRUBA'yı kullanmaya başladım ve ilk başta anlaması biraz zor gelse de daha sonra bunun için öğrendiklerimi agentic sistemlerin kullanabileceği bir SKILL dosyası haline getirdim. Böylece Claude Code veya Codex gibi LLM'ler öncesinde bu konuda afallarken şimdi TRUBA dokümantasyonlarını kullanarak SSH köprüsü aracılığıyla artık sizin yerinize TRUBA kullanabilir hale geldi. Yine de her şeyi LLM'lere yıkmak saçma (prefrontal korteksimiz LLM'ler ile konuşurken daha az çalışıyor onun için biraz da yanlış [@kosmynaYourBrainChatGPT2025, p. 96]). Şimdi bu yazıda güzelce TRUBA'yı beyin modellemesi kullanımı çerçevesinde inceleyeceğiz. 
 
-TRUBA, “Türk Ulusal Bilim e-Altyapısı”nın kısaltmasıdır. TÜBİTAK ULAKBİM tarafından işletilen, araştırmacılara yüksek başarımlı hesaplama—HPC, veri depolama ve bilimsel hesaplama olanakları sağlayan ulusal altyapıdır. Daha basitçe söylemek gerekirse TRUBA, çok güçlü bilgisayarların araştırmacılar tarafından ortaklaşa kullanıldığı bir sistemdir. Normal bir bilgisayarda haftalar veya aylar sürebilecek hesaplamalar, işin çok sayıda işlemciye bölünmesiyle (paralelizasyon) daha kısa sürede gerçekleştirilebilir [@TRUBAOlusumuTurkish].
+TRUBA, “Türk Ulusal Bilim e-Altyapısı”nın kısaltmasıdır. TÜBİTAK ULAKBİM tarafından işletilen, araştırmacılara yüksek başarımlı hesaplama, veri depolama ve bilimsel hesaplama olanakları sağlayan ulusal altyapıdır. Daha basitçe söylemek gerekirse TRUBA, çok güçlü bilgisayarların araştırmacılar tarafından ortaklaşa kullanıldığı bir sistemdir. Normal bir bilgisayarda haftalar veya aylar sürebilecek hesaplamalar, işin çok sayıda işlemciye bölünmesiyle (paralelizasyon) daha kısa sürede gerçekleştirilebilir [@TRUBAOlusumuTurkish].
 ### SLURM gibi bir scheduler neden var olur ki?
 
-Başta kafamı karıştıran şeylerden birisi, dizüstü bilgisayarımda `python train.py` yazdığımda script çalıştırabilirken süperbilgisayarlarda karşıma çıkan yeni **zamanlama** yapısı oldu. Süperbilgisayarlarda kümeler **paylaşımlıdır**. TRUBA'da yüzlerce araştırmacı var ama yeterli GPU mevcut değil. Eğer herkes giriş yaptığı an eğitimini başlatsaydı, makine maalesef boku yerdi. Burada TRUBA'da benim de kullandığım SLURM, paylaşımlı işlerin donanım düzeyinde organizasyonunu sağlayan oldukça önemli bir iş yükü ve kaynak yöneticisi. Kubernetes veya IBM tarafından geliştirilmiş LSF gibi alternatifler olsa da SLURM hem ücretsiz olması hem de çok fazla desteklenmesinden dolayı TRUBA'da iş zamanlayıcısı olarka tercih ediliyor (ben de dahil).
+Başta kafamı karıştıran şeylerden birisi, dizüstü bilgisayarımda `python train.py` komutu ile script çalıştırabilirken süperbilgisayarlarda karşıma çıkan yeni **schedule** yapısı oldu. Süperbilgisayarlarda kümeler **paylaşımlıdır**. TRUBA'da yüzlerce araştırmacı var ama herkes için yeterli GPU mevcut değil ve aynı anda GPU sayısından fazla iş talep edildiği anda zamanlama sistemi düzgün çalışmazsa çöker veya Çoklu GPU altyapısı yazılımsal olarak eksik kalır. Burada TRUBA'da benim de kullandığım SLURM, paylaşımlı işlerin donanım düzeyinde organizasyonunu sağlayan oldukça önemli bir iş yükü ve kaynak yöneticisi. Kubernetes veya IBM tarafından geliştirilmiş LSF gibi alternatifler olsa da SLURM hem ücretsiz olması hem de çok fazla desteklenmesinden dolayı TRUBA'da iş zamanlayıcısı olarka tercih ediliyor.
 
-Yeni kurulması gereken zamanlama mantığında kümemiz bir şeyleri çalıştırmaya izin vermekten ziyade bir şeyleri istemeyi sağlıyor. Neye ihtiyacın olduğuna göre bir dosya yazıp istek atarak bir kuyruğa girersin. İstediğin kaynaklar boşaldığında isteğin çalıştırılır ve bitince bir sonraki kişiye geçer.
+SLURM mantığında kullanıcı devasa süperbilgisayarımızda bir şeyleri çalıştırmaya uğraşmaktan ziyade kümeden nazikçe bir şeyleri istemeyi sağlıyor. Neye ihtiyacımız olduğuna göre bir dosya yazıp istek atarak bir kuyruğa giriyoruz. İstenilen kaynaklar boşaldığında bu bash script'i çalıştırılıyor ve bitince bir sonraki kişiye geçiyor.
 
 ### Login Node İle Compute Node Karşılaştırması
 
@@ -275,5 +275,36 @@ apptainer exec --nv --bind /arf:/arf --pwd "$PROJ" --env PYTHONPATH="$PROJ" \
   --env TF_NUM_INTRAOP_THREADS="${SLURM_CPUS_PER_TASK:-10}" \
   "$SIF" python ffn/jax/main.py --config "$CONFIG" --workdir "$WORK_DIR"
 ```
+
+## Günler Süren Bir Job'ı Yarı Yolda Kontrol Etmek
+
+3 günlük bir job (`--time=1-00:00:00` yerine bu kez `3-00:00:00`, gerçek LICONN verisiyle 4-GPU eğitimi) kuyruğa girdikten sonra iş bitmiyor ama insan da her saniye terminalin başında oturamıyor. İşte job hâlâ `RUNNING` durumundayken "nereye geldi" sorusunu cevaplamak için kullandığım üç komut:
+
+```bash
+# Hâlâ çalışıyor mu, ne kadar süredir?
+sacct -X --format=JobID,JobName,Partition,State,Elapsed,Start,End,ExitCode -j <id>
+
+# Kaç adıma (step) gelmiş — checkpoint klasörü isimleri adım sayısı
+ls -al runs/real_4gpu_3day/checkpoints | tail -10
+
+# loss/F1 gibi eğitim metrikleri nerede? .err dosyasında, .out'ta değil
+grep -iE 'loss|f1' runs/real_4gpu_3day_<id>.err | tail -20
+```
+
+> **Ders** `sacct`'ın `Elapsed` sütunu ile `--time` limitini karşılaştırınca job'ın ne kadar süre daha çalışacağını hesaplayabiliyorsun — job bitmeden de "sağlıklı mı, çöktü mü" sorusunun cevabı bu üç komutta.
+
+## Kod Aslında TensorFlow mu, JAX mı?
+
+Kısa cevap: ikisi de. Repoyu (`ikoshos-gland/liconn-ffn-truba`) tarayınca ortaya şu tablo çıktı:
+
+| Katman | Framework | Not |
+|---|---|---|
+| `ffn/jax/train.py` — eğitim döngüsü | JAX / Flax / Optax | gradyan, optimizer, checkpoint hep JAX |
+| `config.model_class` (`convstack.ResConvStack`) | JAX (Flax) | ama bu repoda değil, ayrı bir `connectomics` pip paketinde yaşıyor |
+| `ffn/training/models/convstack_3d.py` | saf TF1 (`tf_slim`) | 2017'den kalma, artık **kullanılmıyor** |
+| `ffn/inference/executor.py` | ikisi birden | `ThreadingBatchExecutor` (eski, TF `session.run`) + `JAXExecutor` (yeni, `jax.jit`) |
+| `requirements.txt`'teki `tensorflow` | sadece veri borusu | `tf.data` + checkpoint iterator + `gfile` I/O için, sinir ağının kendisi için değil |
+
+> **Ders** Google'ın orijinal FFN'i (2017) saf TensorFlow'du. Sonradan JAX'e taşınmış ama eski TF kodu (ve TF'e olan bağımlılık) referans/legacy olarak repoda kalmış — "TF mi JAX mi" diye tek kelimeyle cevap vermek yanıltıcı, katman katman izini sürmek gerekiyor.
 
 Devam Edecek

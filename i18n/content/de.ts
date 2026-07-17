@@ -230,6 +230,10 @@ export const de: ContentShape = {
     tableOfContents: 'Inhalt',
     nextPost: 'Weiter',
     prevPost: 'Zurück',
+    comingSoon: 'Demnächst',
+    comingSoonBody: 'Dieser Beitrag ist noch nicht auf Deutsch geschrieben. Er ist in einer anderen Sprache veröffentlicht:',
+    readIn: 'Auf {lang} lesen',
+    langName: { en: 'Englisch', tr: 'Türkisch', de: 'Deutsch' },
     contentType: {
       lesson: 'Lektion',
       compute: 'Rechnen',

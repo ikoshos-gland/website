@@ -53,6 +53,21 @@ html.blg-hide-native-scrollbar{scroll-behavior:smooth}
 .blg-chip.compute{color:var(--silver-a)}
 .blg-chip.lab{color:var(--gold-a);border-color:rgba(255,215,0,.3)}
 .blg-chip.lesson{color:var(--lime);border-color:rgba(214,255,79,.3)}
+/* a post listed in this language but whose text lives in another one */
+.blg-chip.soon{color:var(--muted);border-style:dashed}
+
+/* Stands in for a body withheld by `comingSoon`, and hands the reader off to a
+   language that has the text. */
+.blg-soon{margin:6px 0 10px;padding:34px 30px 32px;border:1px dashed var(--hair);border-radius:6px;
+  background:linear-gradient(180deg,rgba(21,23,27,.5),rgba(10,11,13,.5));text-align:center}
+.blg-soon-tag{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--gold-a)}
+.blog-root .blg-soon-body{margin:14px auto 22px;max-width:440px;font-size:15.5px;line-height:1.6;color:var(--muted)}
+.blg-soon-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.blg-soon-cta{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-bright);background:none;cursor:pointer;padding:9px 16px;border-radius:999px;
+  border:1px solid rgba(255,215,0,.4);transition:background .25s,border-color .25s}
+.blg-soon-cta:hover{background:rgba(255,215,0,.1);border-color:var(--gold-a)}
 
 .blog-root p{margin:26px 0}
 .blg-body{margin-top:34px}
@@ -109,19 +124,28 @@ html.blg-hide-native-scrollbar{scroll-behavior:smooth}
 .blg-specimen .frame{border:1px solid var(--hair);border-radius:12px;overflow:hidden;background:var(--surface)}
 .blg-specimen img{display:block;width:100%;height:auto;filter:saturate(.95)}
 
-.blg-connectomics-compare{margin:44px 0}
-.blg-connectomics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+/* three panels need more room than the 720px prose column gives them */
+.blg-connectomics-compare{position:relative;left:50%;transform:translateX(-50%);
+  width:min(960px,calc(100vw - 56px));margin:44px 0}
+.blg-connectomics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .blg-connectomics-card{min-width:0;overflow:hidden;background:var(--surface);border:1px solid var(--hair);border-radius:14px}
-.blg-connectomics-image{position:relative;aspect-ratio:1.72;overflow:hidden;background:#f4f4f2}
-.blg-connectomics-image img{display:block;width:100%;height:100%;object-fit:cover;filter:saturate(.9) contrast(1.02);transition:transform .45s ease,filter .3s ease}
+/* object-fit and background come per-panel from the component: the three source
+   figures have different aspect ratios (1.05 / 1.89 / 2.04) and backgrounds, so a
+   single cover rule would slice the two-panel functional figure down the middle */
+.blg-connectomics-image{position:relative;aspect-ratio:1.5;overflow:hidden}
+.blg-connectomics-image img{display:block;width:100%;height:100%;filter:saturate(.9) contrast(1.02);transition:transform .45s ease,filter .3s ease}
 .blg-connectomics-card:hover .blg-connectomics-image img{transform:scale(1.025);filter:saturate(1) contrast(1.03)}
 .blg-connectomics-image span{position:absolute;top:12px;left:12px;padding:4px 7px;border:1px solid rgba(255,255,255,.26);border-radius:999px;background:rgba(12,13,15,.72);backdrop-filter:blur(5px);font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--gold-a)}
 .blg-connectomics-copy{padding:18px 18px 20px}
 .blg-connectomics-kind{margin:0 0 8px!important;font-family:var(--mono)!important;font-size:10px!important;line-height:1.3!important;letter-spacing:.13em;text-transform:uppercase;color:var(--gold-a)!important}
 .blg-connectomics-copy h3{margin:0 0 10px;font-family:var(--head);font-size:18px;line-height:1.3;font-weight:500;color:var(--ink-bright)}
 .blg-connectomics-copy>p:last-child{margin:0;font-size:14px;line-height:1.65;color:var(--muted)}
-.blg-connectomics-compare>figcaption{padding:0 3px}
-@media(max-width:640px){.blg-connectomics-grid{grid-template-columns:1fr}.blg-connectomics-image{aspect-ratio:1.8}}
+.blg-connectomics-compare>figcaption{padding:0 3px;max-width:760px}
+/* source line comes from MDX children, so it arrives wrapped in a <p> */
+.blg-connectomics-src{display:block;margin-top:9px}
+.blog-root .blg-connectomics-src p{margin:0!important;font-size:11px;line-height:1.6;color:var(--muted)}
+/* three abreast get cramped well before the usual 640px break */
+@media(max-width:860px){.blg-connectomics-grid{grid-template-columns:1fr}.blg-connectomics-image{aspect-ratio:1.9}}
 @media(prefers-reduced-motion:reduce){.blg-connectomics-image img{transition:none}}
 
 .blg-pull{font-family:var(--serif);font-style:italic;font-size:27px;line-height:1.35;margin:48px 0;color:var(--ink-bright);text-align:center}
@@ -331,6 +355,78 @@ html.blg-hide-native-scrollbar{scroll-behavior:smooth}
 @media(prefers-reduced-motion:reduce){
   .blg-sf *{animation:none!important;transition:none!important}
   .blg-sf-node.comp.live .blg-sf-prog i{width:100%}
+}
+
+/* ---- volume leap: two connectomes, 1000x ---- */
+/* modest breakout — the cube needs room to read, but this is not a wide plate */
+.blg-vl{position:relative;left:50%;transform:translateX(-50%);width:min(920px,calc(100vw - 56px));margin:52px 0}
+.blg-vl-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:26px;align-items:center;
+  background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:24px 26px}
+.blg-vl-cube svg{display:block;width:100%;height:auto}
+
+.blg-vl-side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.blg-vl-eyebrow{margin:0!important;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold-a)}
+
+.blg-vl-read{display:flex;gap:26px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+.blg-vl-read .cell{display:flex;flex-direction:column;gap:3px}
+.blg-vl-read i{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);font-style:normal}
+.blg-vl-read b{font-family:var(--head);font-size:29px;font-weight:400;line-height:1;color:var(--ink-bright);
+  font-variant-numeric:tabular-nums}
+
+.blg-vl-card{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:10px;
+  border:1px solid var(--hair);background:var(--surface2);opacity:.42;
+  transition:opacity .5s ease,border-color .5s ease}
+.blg-vl-card.on{opacity:1}
+.blg-vl-card.a.on{border-color:rgba(255,215,0,.42)}
+.blg-vl-card.b.on{border-color:rgba(214,255,79,.42)}
+.blg-vl-card .yr{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--muted)}
+.blg-vl-card.a.on .yr{color:var(--gold-a)}
+.blg-vl-card.b.on .yr{color:var(--lime)}
+.blg-vl-card b{font-family:var(--head);font-size:15px;font-weight:500;color:var(--ink-bright);line-height:1.25}
+.blg-vl-card .vol{font-family:var(--mono);font-size:11px;color:var(--ink);margin-top:1px}
+.blg-vl-card .sub{font-size:11.5px;line-height:1.5;color:var(--muted)}
+.blg-vl-card .tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin-top:5px}
+.blg-vl-card.a.on .tag{color:var(--gold-a)}
+.blg-vl-card.b.on .tag{color:var(--lime)}
+
+.blg-vl-replay{align-self:flex-start;margin-top:2px;font-family:var(--mono);font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--hair);border-radius:999px;
+  padding:6px 12px;cursor:pointer;transition:color .18s,border-color .18s}
+.blg-vl-replay:hover{color:var(--ink-bright);border-color:#3E414A}
+
+/* isometric faces: top lit, left mid, right in shadow */
+.blg-vl-cell.top{fill:#3C424E;stroke:#4E5563}
+.blg-vl-cell.left{fill:#2C313A;stroke:#3B414B}
+.blg-vl-cell.right{fill:#21252C;stroke:#2F333B}
+.blg-vl-cell{stroke-width:.7;opacity:0;transform:scale(.5);transform-box:fill-box;transform-origin:center;
+  transition:opacity .4s ease var(--d),transform .52s cubic-bezier(.2,1.45,.4,1) var(--d)}
+.blg-vl-stage.build .blg-vl-cell{opacity:1;transform:scale(1)}
+
+/* the 2013 cube: its top face becomes interior once the column closes over it,
+   its two outer faces stay on the surface — that corner IS the retina */
+.blg-vl-seed{stroke-width:.8}
+.blg-vl-seed.top{fill:var(--gold-a);stroke:#FFE45C;transition:opacity .4s ease .25s}
+.blg-vl-seed.left{fill:#C9A400;stroke:#E0BC1E}
+.blg-vl-seed.right{fill:#9A7D00;stroke:#B08F0A}
+.blg-vl-stage.build .blg-vl-seed.top{opacity:0}
+.blg-vl-seed.left,.blg-vl-seed.right{filter:drop-shadow(0 0 7px rgba(255,215,0,.5))}
+
+.blg-vl-rail{stroke:var(--hair);stroke-width:2;stroke-linecap:round}
+.blg-vl-rail.lit{stroke:var(--gold-a)}
+.blg-vl-mark{fill:var(--ink-bright)}
+.blg-vl-railtxt{font-family:var(--mono);font-size:10px;fill:var(--muted)}
+
+@media(max-width:760px){
+  .blg-vl-stage{grid-template-columns:1fr;gap:18px;padding:18px}
+  .blg-vl-cube{order:-1}
+}
+@media(prefers-reduced-motion:reduce){
+  .blg-vl *{animation:none!important;transition:none!important}
+  .blg-vl-cell{opacity:1;transform:scale(1)}
+  .blg-vl-seed.top{opacity:0}
 }
 
 /* ---- thesis viz: shared scaffold ---- */

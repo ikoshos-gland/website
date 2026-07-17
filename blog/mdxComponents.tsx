@@ -17,6 +17,7 @@ import GloveBoxGelation from './GloveBoxGelation';
 import ClaheHistogram from './ClaheHistogram';
 import SofimaMontage from './SofimaMontage';
 import ConnectomicsComparison from './ConnectomicsComparison';
+import VolumeLeap from './VolumeLeap';
 
 export const DropCap: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <span className="blg-dropcap">{children}</span>
@@ -33,10 +34,15 @@ export const Console: React.FC<{ title?: string; body?: string }> = ({ title, bo
   </div>
 );
 
-export const Figure: React.FC<{ src: string; alt?: string; caption?: string }> = ({ src, alt, caption }) => (
+// Altyazi iki yolla verilebilir:
+//   caption="düz metin"                 → basit, ama [@atif] burada islenmez (prop bir string).
+//   <Figure ...>Şekil 4. ... [@key]</Figure> → cocuk icerik markdown olarak islenir,
+//                                             yani atif numaralanir ve kaynakcaya girer.
+// caption verilirse o kazanir, yoksa cocuk icerik altyaziya duser.
+export const Figure: React.FC<{ src: string; alt?: string; caption?: string; children?: React.ReactNode }> = ({ src, alt, caption, children }) => (
   <figure className="blg-specimen">
     <div className="frame"><img src={src} alt={alt || ''} loading="lazy" decoding="async" /></div>
-    {caption && <figcaption>{caption}</figcaption>}
+    {caption ? <figcaption>{caption}</figcaption> : children ? <figcaption>{children}</figcaption> : null}
   </figure>
 );
 
@@ -87,4 +93,5 @@ export const mdxComponents = {
   ClaheHistogram,
   SofimaMontage,
   ConnectomicsComparison,
+  VolumeLeap,
 };

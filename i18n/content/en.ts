@@ -232,6 +232,11 @@ export const en = {
     tableOfContents: 'Contents',
     nextPost: 'Next',
     prevPost: 'Previous',
+    // Shown in place of a post body flagged `comingSoon` in this language.
+    comingSoon: 'Coming soon',
+    comingSoonBody: 'This post has not been written in English yet. It is published in another language:',
+    readIn: 'Read it in {lang}',
+    langName: { en: 'English', tr: 'Turkish', de: 'German' },
     contentType: {
       lesson: 'Lesson',
       compute: 'Compute',
