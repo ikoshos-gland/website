@@ -26,8 +26,7 @@
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "three": "^0.185.1",
-    "three-stdlib": "^2.36.1"
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

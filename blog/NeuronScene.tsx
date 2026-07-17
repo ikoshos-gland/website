@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { LineSegments2, LineSegmentsGeometry, LineMaterial } from 'three-stdlib';
 import * as THREE from 'three';
 
 // The actual WebGL scene for <NeuronViewer>. Lazy-imported by the wrapper so the
@@ -10,7 +9,7 @@ import * as THREE from 'three';
 // mode" FlyWire/SharkViewer use); an optional translucent brain hull mesh sits
 // behind them, all co-registered in the canonical FAFB space by the build script.
 
-export interface NeuronGeom { positions: Float32Array; edges: Uint32Array; }
+export interface NeuronGeom { positions: Float32Array; edges: Uint32Array; soma: [number, number, number] | null; somaR: number; }
 export interface BrainGeom { positions: Float32Array; indices: Uint32Array; }
 
 // Neuron wire format (little-endian), written by scripts/build_neuron_bin.py:
@@ -20,7 +19,8 @@ function parseNeuronBin(buf: ArrayBuffer): NeuronGeom[] {
   const dv = new DataView(buf);
   let o = 0;
   if (dv.getUint32(o, true) !== 0x314e524e) throw new Error('bad neuron bin magic');
-  o += 8; // magic + version
+  o += 4;
+  const version = dv.getUint32(o, true); o += 4;
   const count = dv.getUint32(o, true); o += 8; // count + flags
   const out: NeuronGeom[] = [];
   for (let i = 0; i < count; i++) {
@@ -28,7 +28,13 @@ function parseNeuronBin(buf: ArrayBuffer): NeuronGeom[] {
     const e = dv.getUint32(o, true); o += 4;
     const positions = new Float32Array(buf, o, v * 3); o += v * 3 * 4;
     const edges = new Uint32Array(buf, o, e * 2); o += e * 2 * 4;
-    out.push({ positions, edges });
+    let soma: [number, number, number] | null = null;
+    let somaR = 0;
+    if (version >= 2) {
+      const s = new Float32Array(buf, o, 4); o += 16; // soma x,y,z,radius
+      soma = [s[0], s[1], s[2]]; somaR = s[3];
+    }
+    out.push({ positions, edges, soma, somaR });
   }
   return out;
 }
@@ -76,44 +82,20 @@ function bounds(arrays: Float32Array[]) {
   };
 }
 
-// Real thick lines (fat lines). THREE's LineBasicMaterial is stuck at 1px on
-// every platform, which reads as thin and wispy; LineSegments2 draws each edge
-// as a screen-space quad, so lineWidth is honoured in pixels and the arbors look
-// solid like the FlyWire mesh view. The indexed edges are expanded into a flat
-// [x1,y1,z1, x2,y2,z2, ...] segment list, which is what LineSegmentsGeometry wants.
-function NeuronLines({ geom, color, lineWidth }: { geom: NeuronGeom; color: string; lineWidth: number }) {
-  const size = useThree((s) => s.size);
-  const invalidate = useThree((s) => s.invalidate);
-  const obj = useMemo(() => {
-    const { positions: p, edges: e } = geom;
-    const seg = new Float32Array(e.length * 3);
-    for (let i = 0; i < e.length; i++) {
-      const v = e[i] * 3;
-      seg[i * 3] = p[v]; seg[i * 3 + 1] = p[v + 1]; seg[i * 3 + 2] = p[v + 2];
-    }
-    const g = new LineSegmentsGeometry();
-    g.setPositions(seg);
-    const m = new LineMaterial({
-      color: new THREE.Color(color).getHex(),
-      linewidth: lineWidth, // in px (worldUnits off)
-      transparent: true,
-      opacity: 0.96,
-      depthTest: true,
-    });
-    m.resolution.set(size.width, size.height);
-    const ls = new LineSegments2(g, m);
-    ls.renderOrder = 1;
-    return { g, m, ls };
-    // size intentionally excluded: the effect below keeps resolution current
-    // without rebuilding the geometry on every resize.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geom, color, lineWidth]);
-  useEffect(() => {
-    obj.m.resolution.set(size.width, size.height);
-    invalidate();
-  }, [obj, size.width, size.height, invalidate]);
-  useEffect(() => () => { obj.g.dispose(); obj.m.dispose(); }, [obj]);
-  return <primitive object={obj.ls} />;
+function NeuronLines({ geom, color }: { geom: NeuronGeom; color: string }) {
+  const g = useMemo(() => {
+    const bg = new THREE.BufferGeometry();
+    bg.setAttribute('position', new THREE.BufferAttribute(geom.positions, 3));
+    bg.setIndex(new THREE.BufferAttribute(geom.edges, 1));
+    return bg;
+  }, [geom]);
+  useEffect(() => () => g.dispose(), [g]);
+  return (
+    <lineSegments geometry={g} renderOrder={1}>
+      {/* additive on the dark backdrop makes dense arbors glow, like the FlyWire view */}
+      <lineBasicMaterial color={color} transparent opacity={0.6} depthWrite={false} blending={THREE.AdditiveBlending} />
+    </lineSegments>
+  );
 }
 
 function BrainHull({ geom }: { geom: BrainGeom }) {
@@ -165,10 +147,10 @@ export interface NeuronSceneProps {
   colors?: string[];
   autoRotate?: boolean;
   background?: string;
-  lineWidth?: number;
+  somaScale?: number;
 }
 
-export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoRotate = true, background = '#0A0B0D', lineWidth = 2.6 }: NeuronSceneProps) {
+export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoRotate = true, background = '#0A0B0D', somaScale = 2.0 }: NeuronSceneProps) {
   const [geoms, setGeoms] = useState<NeuronGeom[] | null>(null);
   const [brainGeom, setBrainGeom] = useState<BrainGeom | null>(null);
   const [err, setErr] = useState(false);
@@ -206,9 +188,21 @@ export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoR
       <ambientLight intensity={0.65} />
       <directionalLight position={[1, 1.4, 2]} intensity={0.8} />
       {brainGeom && <BrainHull geom={brainGeom} />}
-      {geoms.map((geom, i) => (
-        <NeuronLines key={i} geom={geom} color={colors[i % colors.length]} lineWidth={lineWidth} />
-      ))}
+      {geoms.map((geom, i) => {
+        const c = colors[i % colors.length];
+        return (
+          <group key={i}>
+            <NeuronLines geom={geom} color={c} />
+            {geom.soma && (
+              <mesh position={geom.soma} renderOrder={2}>
+                {/* soma = cell body, a solid ball at the fattest skeleton node */}
+                <sphereGeometry args={[geom.somaR * somaScale, 20, 20]} />
+                <meshStandardMaterial color={c} roughness={0.45} metalness={0} />
+              </mesh>
+            )}
+          </group>
+        );
+      })}
       <FitCamera center={fit.center} radius={fit.radius} />
       <OrbitControls
         makeDefault

@@ -36,7 +36,7 @@ SKELETON_BASE = "https://flyem.mrc-lmb.cam.ac.uk/flyconnectome/flywire_skeletons
 BRAIN_BASE = "https://storage.googleapis.com/flywire_neuropil_meshes/whole_neuropil/brain_mesh_v3"
 MAGIC = 0x314E524E       # 'NRN1' little-endian (neuron line file)
 MAGIC_BRAIN = 0x314E5242  # 'BRN1' little-endian (brain mesh file)
-VERSION = 1
+VERSION = 2  # v2 adds a per-neuron soma (x,y,z,radius) after each neuron's edges
 ATTRIBUTION = (
     "FlyWire FAFB public release 783 (c) Princeton University. "
     "Cite Dorkenwald et al. 2024 & Schlegel et al. 2024."
@@ -109,7 +109,7 @@ def build_brain(out_path: str, ncells: int):
 
 
 def fetch_skeleton(root_id: int, timeout: int = 120):
-    """Download and decode a neuroglancer skeleton -> (pos[V,3] nm, edges[E,2])."""
+    """Download and decode a neuroglancer skeleton -> (pos[V,3] nm, edges[E,2], radius[V])."""
     url = f"{SKELETON_BASE}/{root_id}"
     raw = urllib.request.urlopen(url, timeout=timeout).read()
     nv, ne = struct.unpack_from("<II", raw, 0)
@@ -117,8 +117,10 @@ def fetch_skeleton(root_id: int, timeout: int = 120):
     pos = np.frombuffer(raw, dtype="<f4", count=nv * 3, offset=off).reshape(nv, 3).astype(np.float64)
     off += nv * 3 * 4
     edges = np.frombuffer(raw, dtype="<u4", count=ne * 2, offset=off).reshape(ne, 2).astype(np.int64)
-    # remaining bytes are the per-vertex radius attribute; unused for line rendering
-    return pos, edges
+    off += ne * 2 * 4
+    # per-vertex radius; the fattest node is the soma (cell body)
+    radius = np.frombuffer(raw, dtype="<f4", count=nv, offset=off).astype(np.float64)
+    return pos, edges, radius
 
 
 def rdp(points: np.ndarray, eps: float) -> np.ndarray:
@@ -228,18 +230,22 @@ def main():
     if args.brain:
         build_brain(args.out_brain, args.brain_grid)
 
-    neurons = []  # (pos, edges) after simplify, still in nm
+    neurons = []  # (spos, sedges, soma_pos_nm[3], soma_r_nm) after simplify, still in nm
     raw_total = simp_total = 0
     for rid in args.root_ids:
         print(f"fetch  {rid} ...", flush=True)
-        pos, edges = fetch_skeleton(rid)
+        pos, edges, radius = fetch_skeleton(rid)
         raw_v = len(pos)
         spos, sedges = simplify(pos, edges, args.eps)
+        # soma = fattest node in the full-res skeleton (independent of simplify)
+        si = int(np.argmax(radius))
+        soma_pos, soma_r = pos[si], float(radius[si])
         raw_total += raw_v
         simp_total += len(spos)
         pct = 100.0 * len(spos) / raw_v
-        print(f"       {raw_v:>6d} -> {len(spos):>6d} verts ({pct:4.1f}%), {len(sedges):>6d} edges", flush=True)
-        neurons.append((spos, sedges))
+        print(f"       {raw_v:>6d} -> {len(spos):>6d} verts ({pct:4.1f}%), {len(sedges):>6d} edges, "
+              f"soma r={soma_r:.0f}nm", flush=True)
+        neurons.append((spos, sedges, soma_pos, soma_r))
 
     # Canonical FAFB transform (shared with the brain hull) so neurons sit in the
     # right place inside the brain regardless of which files are built together.
@@ -247,11 +253,14 @@ def main():
     bin_path = args.out + ".bin"
     with open(bin_path, "wb") as f:
         f.write(struct.pack("<IIII", MAGIC, VERSION, len(neurons), 0))
-        for spos, sedges in neurons:
+        for spos, sedges, soma_pos, soma_r in neurons:
             npos = normalize(spos)
             f.write(struct.pack("<II", len(npos), len(sedges)))
             f.write(npos.tobytes())
             f.write(sedges.astype("<u4").tobytes())
+            nsoma = normalize(np.array([soma_pos]))[0]  # canonical space, y-flipped
+            f.write(nsoma.astype("<f4").tobytes())
+            f.write(struct.pack("<f", soma_r * FAFB_SCALE))  # radius scaled to match
 
     size = os.path.getsize(bin_path)
     meta = {

@@ -32,8 +32,8 @@ export interface NeuronViewerProps {
   height?: number;
   /** per-neuron colors (cycled) */
   colors?: string[];
-  /** line thickness in px (real fat lines) */
-  lineWidth?: number;
+  /** soma (cell body) ball size multiplier; 0 hides it */
+  somaScale?: number;
   /** gentle auto-spin; forced off under prefers-reduced-motion */
   autoRotate?: boolean;
   /** optional caption shown under the stage */
@@ -46,7 +46,7 @@ export default function NeuronViewer({
   brain = '/neurons/brain.bin',
   height = 460,
   colors,
-  lineWidth = 2.6,
+  somaScale = 2.0,
   autoRotate = true,
   caption,
   children,
@@ -87,7 +87,7 @@ export default function NeuronViewer({
         {inView ? (
           <GLBoundary fallback={fail}>
             <Suspense fallback={<div className="blg-neuron-spin" aria-label="loading" />}>
-              <NeuronScene src={src} brain={brain === false ? null : brain} colors={colors} lineWidth={lineWidth} autoRotate={autoRotate && !reduced} />
+              <NeuronScene src={src} brain={brain === false ? null : brain} colors={colors} somaScale={somaScale} autoRotate={autoRotate && !reduced} />
             </Suspense>
           </GLBoundary>
         ) : (
