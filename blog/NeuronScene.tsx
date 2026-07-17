@@ -4,17 +4,22 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 
 // The actual WebGL scene for <NeuronViewer>. Lazy-imported by the wrapper so the
-// three.js stack (vendor-3d-three chunk) only downloads when a viewer scrolls
-// into view. Each neuron is one indexed THREE.LineSegments (the fast "skeleton
-// mode" FlyWire/SharkViewer use); an optional translucent brain hull mesh sits
-// behind them, all co-registered in the canonical FAFB space by the build script.
+// three.js stack only downloads when a viewer scrolls into view. Two modes:
+//   - 'lines' (default): each neuron a THREE.LineSegments skeleton + a soma ball.
+//     Tiny (~KB), the fast "skeleton mode" FlyWire/SharkViewer use.
+//   - 'solid': each neuron the real reconstructed surface mesh (from FlyWire,
+//     decimated). Heavier (~MB) but looks like the Codex/Neuroglancer view.
+// An optional translucent brain hull sits behind either, all co-registered in
+// canonical FAFB space by the build scripts.
 
 export interface NeuronGeom { positions: Float32Array; edges: Uint32Array; soma: [number, number, number] | null; somaR: number; }
+export interface SolidGeom { positions: Float32Array; indices: Uint16Array; }
 export interface BrainGeom { positions: Float32Array; indices: Uint32Array; }
 
-// Neuron wire format (little-endian), written by scripts/build_neuron_bin.py:
+// Skeleton wire format (little-endian), from scripts/build_neuron_bin.py:
 //   u32 magic('NRN1') · u32 version · u32 neuronCount · u32 flags
 //   per neuron: u32 vCount · u32 eCount · f32[vCount*3] pos · u32[eCount*2] edges
+//              · (v>=2) f32[4] soma (x,y,z,radius)
 function parseNeuronBin(buf: ArrayBuffer): NeuronGeom[] {
   const dv = new DataView(buf);
   let o = 0;
@@ -31,7 +36,7 @@ function parseNeuronBin(buf: ArrayBuffer): NeuronGeom[] {
     let soma: [number, number, number] | null = null;
     let somaR = 0;
     if (version >= 2) {
-      const s = new Float32Array(buf, o, 4); o += 16; // soma x,y,z,radius
+      const s = new Float32Array(buf, o, 4); o += 16;
       soma = [s[0], s[1], s[2]]; somaR = s[3];
     }
     out.push({ positions, edges, soma, somaR });
@@ -39,8 +44,28 @@ function parseNeuronBin(buf: ArrayBuffer): NeuronGeom[] {
   return out;
 }
 
-// Brain mesh format: u32 magic('BRN1') · u32 version · u32 vCount · u32 triCount
-//   · f32[vCount*3] pos · u32[triCount*3] indices
+// Solid mesh format, from scripts/build_neuron_solid.py:
+//   u32 magic('NMM1') · u32 version · u32 neuronCount · u32 flags
+//   per neuron: u32 vCount · u32 triCount · i16[vCount*3] pos(*32767) · u16[triCount*3] idx
+function parseSolidBin(buf: ArrayBuffer): SolidGeom[] {
+  const dv = new DataView(buf);
+  let o = 0;
+  if (dv.getUint32(o, true) !== 0x314d4d4e) throw new Error('bad solid bin magic');
+  o += 8; // magic + version
+  const count = dv.getUint32(o, true); o += 8; // count + flags
+  const out: SolidGeom[] = [];
+  for (let i = 0; i < count; i++) {
+    const v = dv.getUint32(o, true); o += 4;
+    const t = dv.getUint32(o, true); o += 4;
+    const qi = new Int16Array(buf, o, v * 3); o += v * 3 * 2;
+    const positions = new Float32Array(v * 3);
+    for (let k = 0; k < v * 3; k++) positions[k] = qi[k] / 32767;
+    const indices = new Uint16Array(buf, o, t * 3); o += t * 3 * 2;
+    out.push({ positions, indices });
+  }
+  return out;
+}
+
 function parseBrainBin(buf: ArrayBuffer): BrainGeom {
   const dv = new DataView(buf);
   let o = 0;
@@ -98,6 +123,23 @@ function NeuronLines({ geom, color }: { geom: NeuronGeom; color: string }) {
   );
 }
 
+function SolidNeuron({ geom, color }: { geom: SolidGeom; color: string }) {
+  const g = useMemo(() => {
+    const bg = new THREE.BufferGeometry();
+    bg.setAttribute('position', new THREE.BufferAttribute(geom.positions, 3));
+    bg.setIndex(new THREE.BufferAttribute(geom.indices, 1));
+    bg.computeVertexNormals();
+    return bg;
+  }, [geom]);
+  useEffect(() => () => g.dispose(), [g]);
+  return (
+    <mesh geometry={g} renderOrder={1}>
+      {/* DoubleSide: weld+decimation can leave mixed winding; avoids culled-face holes */}
+      <meshStandardMaterial color={color} roughness={0.55} metalness={0} side={THREE.DoubleSide} />
+    </mesh>
+  );
+}
+
 function BrainHull({ geom }: { geom: BrainGeom }) {
   const g = useMemo(() => {
     const bg = new THREE.BufferGeometry();
@@ -143,6 +185,7 @@ function FitCamera({ center, radius }: { center: [number, number, number]; radiu
 
 export interface NeuronSceneProps {
   src: string;
+  solid?: boolean;
   brain?: string | null;
   colors?: string[];
   autoRotate?: boolean;
@@ -150,32 +193,40 @@ export interface NeuronSceneProps {
   somaScale?: number;
 }
 
-export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoRotate = true, background = '#0A0B0D', somaScale = 2.0 }: NeuronSceneProps) {
+export default function NeuronScene({ src, solid = false, brain, colors = DEFAULT_COLORS, autoRotate = true, background = '#0A0B0D', somaScale = 2.0 }: NeuronSceneProps) {
   const [geoms, setGeoms] = useState<NeuronGeom[] | null>(null);
+  const [solids, setSolids] = useState<SolidGeom[] | null>(null);
   const [brainGeom, setBrainGeom] = useState<BrainGeom | null>(null);
   const [err, setErr] = useState(false);
 
   useEffect(() => {
     let alive = true;
+    const neuronsP = solid ? load(src, parseSolidBin) : load(src, parseNeuronBin);
     Promise.all([
-      load(src, parseNeuronBin),
+      neuronsP,
       brain ? load(brain, parseBrainBin) : Promise.resolve(null),
     ]).then(
-      ([n, b]) => { if (alive) { setGeoms(n as NeuronGeom[]); setBrainGeom(b as BrainGeom | null); } },
+      ([n, b]) => {
+        if (!alive) return;
+        if (solid) setSolids(n as SolidGeom[]); else setGeoms(n as NeuronGeom[]);
+        setBrainGeom(b as BrainGeom | null);
+      },
       () => alive && setErr(true),
     );
     return () => { alive = false; };
-  }, [src, brain]);
+  }, [src, brain, solid]);
 
   const fit = useMemo(() => {
-    if (!geoms) return null;
-    const arrays = geoms.map((g) => g.positions);
-    if (brainGeom) arrays.push(brainGeom.positions);
-    return bounds(arrays);
-  }, [geoms, brainGeom]);
+    const arr: Float32Array[] = [];
+    if (geoms) arr.push(...geoms.map((g) => g.positions));
+    if (solids) arr.push(...solids.map((g) => g.positions));
+    if (brainGeom) arr.push(brainGeom.positions);
+    return arr.length ? bounds(arr) : null;
+  }, [geoms, solids, brainGeom]);
 
+  const ready = solid ? solids : geoms;
   if (err) return <div className="blg-neuron-msg">3D veri yüklenemedi.</div>;
-  if (!geoms || !fit) return <div className="blg-neuron-spin" aria-label="loading" />;
+  if (!ready || !fit) return <div className="blg-neuron-spin" aria-label="loading" />;
 
   return (
     <Canvas
@@ -186,9 +237,11 @@ export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoR
     >
       <color attach="background" args={[background]} />
       <ambientLight intensity={0.65} />
-      <directionalLight position={[1, 1.4, 2]} intensity={0.8} />
+      <directionalLight position={[1, 1.4, 2]} intensity={0.9} />
+      <directionalLight position={[-1.5, -0.5, -1]} intensity={0.35} />
       {brainGeom && <BrainHull geom={brainGeom} />}
-      {geoms.map((geom, i) => {
+      {solids && solids.map((g, i) => <SolidNeuron key={i} geom={g} color={colors[i % colors.length]} />)}
+      {geoms && geoms.map((geom, i) => {
         const c = colors[i % colors.length];
         return (
           <group key={i}>
