@@ -178,6 +178,47 @@ Kullanıma hazır daha fazlası var, `<PartitionQueue />`, `<InodeContainer />`,
 
 Perde arkasında her animasyon `blog/` içinde küçük bir React bileşeni, `blog/mdxComponents.tsx` içinde bir kez kaydedilir, ve `blog/blog.css` içinde stillendirilir. Çoğu SVG değil, sade DOM ve CSS ile yapılır, bu da onları sağlam tutar.
 
+## 3B Nöron Görüntüleyici, En İddialı Bileşen
+
+Bileşenlerin çoğunu kendim çizdim. Ama bir tanesi gerçek bilimsel veriyle çalışıyor. `<NeuronViewer />`, bir meyve sineğinin beynindeki gerçek nöronları 3 boyutlu ve döndürülebilir biçimde gösteriyor. Yine tek satır, yine import yok:
+
+```mdx
+<NeuronViewer />
+```
+
+Ve işte canlı. Fareyle sürükleyip döndür, tekerlekle yakınlaştır. Ortadaki üç parlak hücre, [FlyWire](https://flywire.ai) projesinden gerçek ExR1 nöronları. Etraflarındaki soluk kabuk ise sineğin bütün beyninin yüzeyi.
+
+<NeuronViewer caption="Üç gerçek FlyWire ExR1 nöronu, sineğin beyin kabuğunun içinde. Veri © Princeton / FlyWire." />
+
+Beyin kabuğunu istemezsen kapatırsın, geriye sadece nöronlar kalır:
+
+```mdx
+<NeuronViewer brain={false} autoRotate={false} />
+```
+
+<NeuronViewer brain={false} autoRotate={false} height={380} caption="Aynı üç nöron, beyin kabuğu ve otomatik dönüş kapalıyken." />
+
+### Bu Nasıl Yapıldı
+
+Buradaki asıl marifet, ağır olmaması. [Codex](https://codex.flywire.ai) gibi profesyonel araçlar bu nöronları Neuroglancer ile çizer, ama gigabaytlarca mesh'i canlı akıtıp tarayıcıyı zorlarlar. Bir blog için buna gerek yok. İki basit fikirle hafiflettim.
+
+Birincisi, mesh yerine iskelet. Bir nöronun bütün yüzeyini (milyonlarca üçgen) çizmek yerine, sadece orta çizgisini ince çizgiler olarak çiziyorum. Görüntü neredeyse aynı, yük ise yüzde biri kadar. İkincisi, her şey önceden hazırlanıyor. Veriyi sayfa açılırken sunucudan akıtmıyorum; bir kereliğine indirip sadeleştirip `public/neurons/` içine küçük bir ikili dosya olarak koyuyorum.
+
+Veriyi almak sandığımdan kolaydı. Codex'te `label == ExR1` diye aratıp "Copy IDs" ile üç nöronun kimliğini alıyorsun. Gerisini bir Python betiği yapıyor, `scripts/build_neuron_bin.py`. FlyWire'ın herkese açık iskelet servisinden bu kimliklerin iskeletini düz HTTPS ile indiriyor (ne bir kütüphane ne bir şifre gerekiyor), fazla noktaları eleyip sadeleştiriyor, ve tarayıcının doğrudan okuyabileceği minik bir `.bin` dosyasına paketliyor.
+
+```bash
+python scripts/build_neuron_bin.py 720575940615101747 720575940639278399 \
+    720575940640749939 --out public/neurons/exr1 --eps 350 --brain
+```
+
+Sondaki `--brain` bayrağı, o şeffaf kabuğu da ekliyor. Kabuk da FlyWire'ın tüm beyin yüzeyi mesh'i, aynı yerden ve aynı nanometre koordinat sisteminden geliyor. Betik ikisini tek bir ölçeğe oturtuyor, böylece nöronlar beynin tam ortasında, gerçekte oldukları yerde duruyor.
+
+Görüntüleyen taraf `blog/NeuronViewer.tsx`, üç boyut için `three.js`'i (react-three-fiber ile) kullanan bir React bileşeni. "Kasmaması" için iki şeye dikkat ettim: three.js kütüphanesi ancak görüntüleyici ekrana girdiğinde yükleniyor, yani sayfanın ilk açılışına hiç yük bindirmiyor; ve nöronları elle döndürmediğin sürece boşta hiç işlem yapmıyor.
+
+<Aside title="Künye">FlyWire verisi bedava ama atıf ister. O yüzden kaynağı hem altyazıda belirtiyorum hem de yazının kaynakçasına eklemek gerekir (Dorkenwald ve ark. 2024, Schlegel ve ark. 2024).</Aside>
+
+Kayıt yine aynı desende, `blog/mdxComponents.tsx` içine bir satır, sonra istediğin yazıda `<NeuronViewer />`. Tek fark, bu bileşenin bir de veri hazırlık adımı olması. O Python betiğini bir kez çalıştırıp `.bin`'i commit'ledikten sonra, etiket her yerde bedava.
+
 ## Kendi animasyonunu eklemek
 
 Üç adım. `blog/MyThing.tsx` yaz (`blog/WallClock.tsx`'i şablon olarak kopyala, görünen her metni üç dilli bir `STR` nesnesinde tut). `blog/mdxComponents.tsx` içinde kaydet. Sonra herhangi bir yazıda `<MyThing />` yaz. Bütün döngü bu.

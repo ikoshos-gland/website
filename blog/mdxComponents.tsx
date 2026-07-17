@@ -18,6 +18,7 @@ import ClaheHistogram from './ClaheHistogram';
 import SofimaMontage from './SofimaMontage';
 import ConnectomicsComparison from './ConnectomicsComparison';
 import VolumeLeap from './VolumeLeap';
+import NeuronViewer from './NeuronViewer';
 
 export const DropCap: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <span className="blg-dropcap">{children}</span>
@@ -94,4 +95,5 @@ export const mdxComponents = {
   SofimaMontage,
   ConnectomicsComparison,
   VolumeLeap,
+  NeuronViewer,
 };

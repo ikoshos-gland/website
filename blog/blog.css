@@ -438,6 +438,16 @@ html.blg-hide-native-scrollbar{scroll-behavior:smooth}
 .blg-viz-controls input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:linear-gradient(135deg,var(--gold-a),var(--gold-b));cursor:pointer}
 .blg-viz-controls input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--gold-a);cursor:pointer}
 
+/* 3D neuron skeleton viewer (<NeuronViewer>) */
+.blg-neuron-stage{position:relative;background:radial-gradient(120% 120% at 50% 0%,#101318 0%,var(--surface2) 72%);border:1px solid var(--hair);border-radius:14px;overflow:hidden;touch-action:none}
+.blg-neuron-stage canvas{display:block;width:100%;height:100%;cursor:grab}
+.blg-neuron-stage canvas:active{cursor:grabbing}
+.blg-neuron-hint{position:absolute;right:11px;bottom:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);pointer-events:none;opacity:.72}
+.blg-neuron-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.blg-neuron-spin{position:absolute;top:50%;left:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:2px solid var(--hair);border-top-color:var(--gold-a);animation:blg-neuron-rot .8s linear infinite}
+@keyframes blg-neuron-rot{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.blg-neuron-spin{animation:none}}
+
 /* expansion microscopy — "swell through a fixed lens" */
 .blg-exm-mesh .ln line{stroke:#9FE870;stroke-width:.6;opacity:.26}
 .blg-exm-mesh .dt circle{fill:none;stroke:#9FE870;stroke-width:.6;opacity:.4}

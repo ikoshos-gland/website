@@ -11,6 +11,8 @@
   "dependencies": {
     "@mdx-js/react": "^3.1.1",
     "@mdx-js/rollup": "^3.1.1",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "@splinetool/react-spline": "^4.1.0",
     "chart.js": "^4.5.1",
     "katex": "^0.17.0",
@@ -23,10 +25,12 @@
     "rehype-katex": "^7.0.1",
     "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.1",
-    "remark-math": "^6.0.0"
+    "remark-math": "^6.0.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@types/three": "^0.185.1",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.4.23",
     "postcss": "^8.5.6",

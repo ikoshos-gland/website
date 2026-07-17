@@ -144,6 +144,17 @@ export default defineConfig(({ mode }) => {
             if (norm.includes('@splinetool')) {
               return 'vendor-3d';
             }
+            // three.js + react-three stack for the blog's <NeuronViewer>. Its own
+            // chunk (separate from Spline's vendor-3d) so a neuron viewer never
+            // drags in Spline and vice versa. The 'vendor-3d' substring keeps it
+            // out of the eager modulePreload list above — it loads only when a
+            // NeuronViewer scrolls into view.
+            if (
+              norm.includes('/node_modules/three/') ||
+              norm.includes('/node_modules/@react-three/')
+            ) {
+              return 'vendor-3d-three';
+            }
           }
         }
       }
