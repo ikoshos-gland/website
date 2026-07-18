@@ -49,11 +49,26 @@ FAFB_CENTER = (FAFB_MIN + FAFB_MAX) / 2.0
 FAFB_SCALE = 1.0 / ((FAFB_MAX - FAFB_MIN).max() / 2.0)
 
 
-def normalize(p: np.ndarray) -> np.ndarray:
-    """Canonical FAFB nm -> viewer space (~[-1,1] on the widest axis, y-up)."""
-    q = (p - FAFB_CENTER) * FAFB_SCALE
+def normalize_with(p: np.ndarray, center: np.ndarray, scale: float) -> np.ndarray:
+    """nm -> viewer space (~[-1,1] on the widest axis), y flipped (EM y grows down)."""
+    q = (p - center) * scale
     q[:, 1] = -q[:, 1]
     return q
+
+
+def normalize(p: np.ndarray) -> np.ndarray:
+    """Canonical FAFB transform (FlyWire neurons + brain hull share this)."""
+    return normalize_with(p, FAFB_CENTER, FAFB_SCALE)
+
+
+def auto_transform(all_verts):
+    """Center/scale fitted to the data itself, for datasets other than FAFB
+    (e.g. LICONN), which have their own volume and no shared brain hull."""
+    lo = np.min([v.min(0) for v in all_verts], axis=0)
+    hi = np.max([v.max(0) for v in all_verts], axis=0)
+    center = (lo + hi) / 2.0
+    half = (hi - lo).max() / 2.0
+    return center, (1.0 / half if half > 0 else 1.0)
 
 
 # --------------------------------------------------------------------------- #
@@ -86,15 +101,24 @@ def fetch_solid(cv, rid: int, lod: int, weld_nm: float, target_faces: int):
     return vv.astype(np.float64), ff.astype(np.int64), raw_f
 
 
-def build_solid(out_path: str, root_ids, lod: int, weld_nm: float, target_faces: int):
+def build_solid(out_path: str, root_ids, lod: int, weld_nm: float, target_faces: int,
+                source: str = MESH_SRC, space: str = "fafb"):
     from cloudvolume import CloudVolume
-    cv = CloudVolume(MESH_SRC, use_https=True, progress=False)
+    cv = CloudVolume(source, use_https=True, progress=False)
     neurons = []
     for rid in root_ids:
         print(f"neuron {rid} (lod {lod}) ...", flush=True)
         vv, ff, raw_f = fetch_solid(cv, rid, lod, weld_nm, target_faces)
-        print(f"       {raw_f:>7d} -> {len(ff):>6d} faces, {len(vv):>6d} verts", flush=True)
+        ext = (vv.max(0) - vv.min(0)) / 1000.0
+        print(f"       {raw_f:>7d} -> {len(ff):>6d} faces, {len(vv):>6d} verts, "
+              f"extent {ext.round(1)} um", flush=True)
         neurons.append((vv, ff))
+
+    if space == "fafb":
+        center, scale = FAFB_CENTER, FAFB_SCALE
+    else:
+        center, scale = auto_transform([v for v, _ in neurons])
+        print(f"auto transform: center {center.round(0)} nm, scale {scale:.3e}", flush=True)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with open(out_path, "wb") as fh:
@@ -102,7 +126,7 @@ def build_solid(out_path: str, root_ids, lod: int, weld_nm: float, target_faces:
         for vv, ff in neurons:
             if len(vv) >= 65536:
                 raise SystemExit(f"neuron has {len(vv)} verts >= 65536; lower --target-faces for uint16 indices")
-            q = np.clip(np.round(normalize(vv) * 32767.0), -32767, 32767).astype("<i2")
+            q = np.clip(np.round(normalize_with(vv, center, scale) * 32767.0), -32767, 32767).astype("<i2")
             fh.write(struct.pack("<II", len(vv), len(ff)))
             fh.write(q.tobytes())
             fh.write(ff.astype("<u2").tobytes())
@@ -110,10 +134,12 @@ def build_solid(out_path: str, root_ids, lod: int, weld_nm: float, target_faces:
     size = os.path.getsize(out_path)
     tf = sum(len(f) for _, f in neurons)
     meta = {
-        "source": "flywire_fafb_783_public_mesh",
-        "url": MESH_SRC,
-        "attribution": "FlyWire FAFB public release 783 (c) Princeton University. "
-                       "Cite Dorkenwald et al. 2024 & Schlegel et al. 2024.",
+        "url": source,
+        "space": space,
+        "attribution": ("FlyWire FAFB public release 783 (c) Princeton University. "
+                        "Cite Dorkenwald et al. 2024 & Schlegel et al. 2024."
+                        if space == "fafb" else
+                        "Check and record the dataset's own license/citation."),
         "root_ids": [str(r) for r in root_ids],
         "lod": lod, "target_faces": target_faces,
         "neurons": len(neurons), "faces": tf, "bytes": size,
@@ -173,6 +199,12 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("root_ids", nargs="+", type=int, help="FlyWire root ids (Codex Copy IDs)")
     ap.add_argument("--out", default="public/neurons/neurons_solid.bin", help="neuron mesh output (.bin)")
+    ap.add_argument("--source", default=MESH_SRC,
+                    help="CloudVolume mesh source; default FlyWire FAFB 783. For LICONN: "
+                         "precomputed://gs://liconn-public/ExPID82_1/segmentation/231030_agg_240123")
+    ap.add_argument("--space", choices=["fafb", "auto"], default="fafb",
+                    help="'fafb' = canonical transform shared with the brain hull; "
+                         "'auto' = fit center/scale to the data (use for LICONN etc.)")
     ap.add_argument("--lod", type=int, default=3, help="coarsest LOD is usually 3")
     ap.add_argument("--weld-nm", type=float, default=30.0)
     ap.add_argument("--target-faces", type=int, default=40000, help="per-neuron decimation target")
@@ -183,7 +215,8 @@ def main():
 
     if args.brain:
         build_brain(args.out_brain, args.brain_grid)
-    build_solid(args.out, args.root_ids, args.lod, args.weld_nm, args.target_faces)
+    build_solid(args.out, args.root_ids, args.lod, args.weld_nm, args.target_faces,
+                source=args.source, space=args.space)
 
 
 if __name__ == "__main__":

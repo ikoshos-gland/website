@@ -217,6 +217,22 @@ Görüntüleyen taraf `blog/NeuronViewer.tsx`, üç boyut için `three.js`'i (re
 
 Kayıt yine aynı desende, `blog/mdxComponents.tsx` içine bir satır, sonra istediğin yazıda `<NeuronViewer />`. Tek fark, bu bileşenin bir de veri hazırlık adımı olması. O Python betiğini bir kez çalıştırıp `.bin`'i commit'ledikten sonra, etiket her yerde bedava.
 
+### Başka Bir Veri Seti: LICONN
+
+Bileşen FlyWire'a bağlı değil. Mesh'ini neuroglancer formatında yayınlayan herhangi bir segmentasyonla çalışıyor. Aşağıdakiler kendi tez verimden: **LICONN** (genişletme mikroskobu) ile görüntülenmiş fare korteksi hacminden üç uzun dendrit.
+
+<NeuronViewer src="/neurons/liconn_solid.bin" brain={false} height={440} caption="LICONN (ExM) fare korteksinden üç dendrit, 40-78 µm uzunluğunda. Sinek beyni kabuğu burada kapalı: başka bir tür, başka bir hacim." />
+
+Betiği çağırırken tek fark, kaynağı ve koordinat modunu vermek:
+
+```bash
+python scripts/build_neuron_solid.py 27885 121602 165260 \
+    --source precomputed://gs://liconn-public/ExPID82_1/segmentation/231030_agg_240123 \
+    --space auto --lod 0 --out public/neurons/liconn_solid.bin
+```
+
+> **Ders:** buna bilerek "dendrit" diyorum, "nöron" değil. Bu segmentasyon FFN ile nöritler (akson ve dendritler) için eğitilmiş, hücre gövdeleri için değil. Ölçtüm: bu nesnelerin en kalın yeri bile ~3 µm, oysa bir soma 10-20 µm olurdu. Uzaktan soma gibi duran yuvarlak kütleler aslında sıkışık dendrit yumakları. Veri neyi içeriyorsa onu söylemek gerekiyor.
+
 ## Kendi animasyonunu eklemek
 
 Üç adım. `blog/MyThing.tsx` yaz (`blog/WallClock.tsx`'i şablon olarak kopyala, görünen her metni üç dilli bir `STR` nesnesinde tut). `blog/mdxComponents.tsx` içinde kaydet. Sonra herhangi bir yazıda `<MyThing />` yaz. Bütün döngü bu.

@@ -1,0 +1,15 @@
+{
+  "url": "precomputed://gs://liconn-public/ExPID82_1/segmentation/231030_agg_240123",
+  "space": "auto",
+  "attribution": "Check and record the dataset's own license/citation.",
+  "root_ids": [
+    "27885",
+    "121602",
+    "165260"
+  ],
+  "lod": 0,
+  "target_faces": 40000,
+  "neurons": 3,
+  "faces": 120000,
+  "bytes": 1076278
+}
