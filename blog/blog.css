@@ -976,6 +976,143 @@ html.blg-hide-native-scrollbar{scroll-behavior:smooth}
   .blg-bay:hover .card,.blg-bay:focus-visible .card{transform:none}
 }
 
+/* ── BLOG GATE: two statues, two doors ────────────────────────────────
+   The entry screen at /blog. Same grammar as the colonnade: one engraved
+   plate, percentage-anchored hit boxes measured off the artwork, and light
+   as the only hover affordance. Two bays instead of six, and the
+   inscriptions sit UNDER the figures in the plate's black foreground band
+   rather than up in an architrave, because that is where this plate's
+   empty space is.
+
+   Anchors measured off statues.webp: the figures stand at 23% and 77.5% of
+   the plate width, and everything below 85% of its height is flat black (the
+   plate's foreground was extended into shadow for exactly that purpose). The
+   stage is locked to the plate's aspect ratio and never cropped, so these
+   hold at every viewport width without any JS.
+
+   Unlike the colonnade this plate is gilt rather than grey, so --night is
+   warmed to sit under it and the plate is NOT desaturated. */
+.blg-gate-page{
+  --stone:#F2E7CE; --stone-2:#9C8E73; --brass:#D9AE55; --night:#0A0806;
+  --roman:'Cinzel',Georgia,serif;
+  background:var(--night)}
+.blg-gate-page .blg-topbar{font-family:var(--roman);letter-spacing:.22em;border-bottom:0}
+.blg-gate-wrap{max-width:1500px;margin:0 auto;padding:0 28px 30px}
+
+.blg-gate-masthead{display:flex;align-items:flex-end;justify-content:space-between;gap:48px;
+  padding:2px 0 16px;border-bottom:1px solid rgba(201,164,76,.16)}
+.blg-gate-mast-title .eyebrow{font-family:var(--roman);font-weight:500;font-size:10.5px;
+  letter-spacing:.42em;text-transform:uppercase;color:var(--brass)}
+.blg-gate-mast-title h1{font-family:var(--roman);font-weight:400;font-size:clamp(21px,2.3vw,34px);
+  line-height:1.1;letter-spacing:.06em;color:var(--stone);margin:9px 0 0}
+.blog-root .blg-gate-intro{max-width:560px;font-size:13px;line-height:1.66;font-weight:300;
+  color:var(--stone-2);margin:0;text-align:right}
+
+.blg-gate{position:relative;isolation:isolate;
+  width:min(100%,calc((100vh - 215px) * 1800 / 1175));
+  aspect-ratio:1800 / 1175;margin:18px auto 0;
+  border:1px solid rgba(217,174,85,.15);overflow:hidden;background:var(--night)}
+/* No grayscale here, unlike the colonnade: the gilding IS the plate. Held a
+   little under full brightness so the lit marble has somewhere to go when a
+   bay's shaft opens up. */
+.blg-gate-plate{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+  filter:brightness(.72) contrast(1.06) saturate(1.04)}
+/* Lifts the plate's cut edges into the page. The foreground needs no extra
+   help now that the plate carries its own black band, so the bottom wash is
+   light and only feathers the seam. */
+.blg-gate-veil{position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to bottom,rgba(10,8,6,.7) 0%,rgba(10,8,6,.18) 12%,rgba(10,8,6,0) 22%),
+    linear-gradient(to top,rgba(10,8,6,.42) 0%,rgba(10,8,6,0) 14%),
+    radial-gradient(138% 108% at 50% 42%,rgba(10,8,6,0) 46%,rgba(10,8,6,.7) 100%)}
+
+.blg-gate-bay{position:absolute;top:0;bottom:0;left:var(--x);width:30%;transform:translateX(-50%);
+  display:block;text-decoration:none;color:inherit}
+.blg-gate-bay:focus{outline:none}
+.blg-gate-bay:hover,.blg-gate-bay:focus-visible{z-index:3}
+/* Same trick as the colonnade: backdrop-filter re-lights the pixels the plate
+   already painted, so there is no second copy of the image and the effect
+   tracks the stage's scale for free. The mask feathers on both axes so the
+   bay's own box edges never read as a lit rectangle. */
+.blg-gate-bay .shaft{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s ease;
+  backdrop-filter:brightness(1.62) contrast(1.04) saturate(1.12);
+  -webkit-backdrop-filter:brightness(1.62) contrast(1.04) saturate(1.12);
+  background:linear-gradient(to bottom,rgba(217,174,85,.12),rgba(217,174,85,.03) 60%,transparent 86%);
+  -webkit-mask-image:radial-gradient(44% 54% at 50% 38%,rgba(0,0,0,1) 0%,rgba(0,0,0,.86) 44%,rgba(0,0,0,0) 100%);
+  mask-image:radial-gradient(44% 54% at 50% 38%,rgba(0,0,0,1) 0%,rgba(0,0,0,.86) 44%,rgba(0,0,0,0) 100%)}
+.blg-gate-bay:hover .shaft,.blg-gate-bay:focus-visible .shaft{opacity:1}
+
+/* The inscription, cut into the plate's black foreground band. Everything
+   below 85% of the plate is flat black, so the whole plaque (numeral, name
+   and count) lives down here where it has unambiguous ground. The count in
+   particular cannot sit any higher: over the lit pedestal a 9px grey mono
+   line is unreadable. */
+.blg-gate-bay .plaque{position:absolute;top:86.5%;left:0;right:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  text-align:center;padding:0 6px}
+.blg-gate-bay .glyph{font-family:var(--roman);font-weight:600;font-size:clamp(8.5px,.72vw,11.5px);
+  line-height:1;letter-spacing:.24em;color:var(--brass);opacity:.78;transition:opacity .4s}
+.blg-gate-bay .label{font-family:var(--roman);font-weight:500;font-size:clamp(11px,1.15vw,17px);
+  line-height:1.25;letter-spacing:.15em;color:var(--stone);
+  text-shadow:0 1px 4px rgba(0,0,0,.95);transition:color .4s}
+.blg-gate-bay:hover .glyph,.blg-gate-bay:focus-visible .glyph{opacity:1}
+.blg-gate-bay:hover .label,.blg-gate-bay:focus-visible .label{color:#FFF}
+
+/* Third line of the plaque. It never collides with the open card (which lands
+   far above it), so unlike the colonnade's chip it has nothing to cross-fade
+   with and simply stays put. */
+.blg-gate-bay .tally{white-space:nowrap;margin-top:1px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--stone-2);opacity:.9;transition:opacity .3s}
+.blg-gate-bay:hover .tally,.blg-gate-bay:focus-visible .tally{opacity:1}
+
+/* Opens upward into the plate's own shadow, carrying its own dark ground so
+   the copy stays legible over whatever the engraving put behind it. */
+.blg-gate-bay .card{position:absolute;top:52%;left:-12%;right:-12%;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;
+  padding:17px 14px 19px;opacity:0;transform:translateY(9px);
+  transition:opacity .4s ease,transform .4s cubic-bezier(.2,.7,.3,1);
+  background:radial-gradient(70% 70% at 50% 50%,rgba(10,8,6,.97) 0%,rgba(10,8,6,.88) 48%,rgba(10,8,6,0) 100%)}
+.blg-gate-bay:hover .card,.blg-gate-bay:focus-visible .card{opacity:1;transform:none}
+.blg-gate-bay .cb{font-size:clamp(11px,.88vw,13px);line-height:1.6;font-weight:300;color:var(--stone-2);
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.blg-gate-bay .cc{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--brass)}
+
+/* Two 30% bays still work on a phone, but the plate does not: drop the stage,
+   keep the engraving as a dim backdrop, and stack the bays as plain cards.
+   Same escape hatch the colonnade uses, and for the same reasons. */
+@media(max-width:860px){
+  .blg-gate-wrap{padding:0 18px 40px}
+  .blg-gate-page .blg-topbar{letter-spacing:.1em;font-size:10.5px}
+  .blg-gate-masthead{flex-direction:column;align-items:flex-start;gap:14px}
+  .blog-root .blg-gate-intro{text-align:left;max-width:none;font-size:14px}
+  .blg-gate{position:static;isolation:auto;aspect-ratio:auto;width:100%;overflow:visible;
+    border:none;background:none;margin:24px 0 0;
+    display:flex;flex-direction:column;gap:10px}
+  .blg-gate-plate{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;
+    filter:brightness(.36) contrast(1.08) saturate(.9)}
+  .blg-gate-veil{position:fixed;inset:0;z-index:0;
+    background:linear-gradient(to bottom,rgba(10,8,6,.84),rgba(10,8,6,.95))}
+  .blg-gate-page .blg-topbar,.blg-gate-masthead{position:relative;z-index:1}
+  .blg-gate-bay{position:relative;z-index:1;inset:auto;width:100%;transform:none;padding:15px 16px 17px;
+    border:1px solid rgba(217,174,85,.17);background:rgba(12,10,8,.74)}
+  .blg-gate-bay .shaft,.blg-gate-bay .tally{display:none}
+  .blg-gate-bay .plaque{position:static;flex-direction:row;justify-content:flex-start;
+    align-items:baseline;gap:11px;padding:0;text-align:left}
+  .blg-gate-bay .glyph{font-size:14px}
+  .blg-gate-bay .label{font-size:16px;text-shadow:none}
+  .blg-gate-bay .card{position:static;opacity:1;transform:none;pointer-events:auto;
+    align-items:flex-start;text-align:left;padding:9px 0 0;background:none;gap:6px}
+  .blg-gate-bay .cb{font-size:13px;-webkit-line-clamp:5}
+  .blg-gate-bay .cc{font-size:9.5px}
+}
+@media(prefers-reduced-motion:reduce){
+  .blg-gate-bay .shaft,.blg-gate-bay .card,.blg-gate-bay .tally,
+  .blg-gate-bay .glyph,.blg-gate-bay .label{transition:none}
+  .blg-gate-bay:hover .card,.blg-gate-bay:focus-visible .card{transform:none}
+}
+
 /* ── TRUBA: partition queue board ─────────────────────────────────────── */
 .blg-pq{margin:42px 0}
 .blg-pq-board{background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:16px 16px 10px}

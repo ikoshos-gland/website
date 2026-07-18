@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import './blog.css';
 import { getPosts } from './posts';
 import { useLang, useContent } from '../i18n/LanguageContext';
@@ -32,34 +31,63 @@ export default function BlogIndex() {
   );
 
   if (section !== 'lab') {
+    // Two bays, anchored to the figures measured off statues.webp. Kept here
+    // rather than derived, for the same reason the colonnade hard-codes
+    // COLUMN_X: the numbers come off the engraving, not off the data.
+    const gates = [
+      {
+        x: 23,
+        glyph: 'I',
+        label: c.blog.labChoiceTitle,
+        blurb: c.blog.labChoiceBody,
+        tally: `${labPosts.length} ${c.blog.postsLabel}`,
+        href: '/blog?section=lab',
+      },
+      {
+        x: 77.5,
+        glyph: 'II',
+        label: c.blog.thesisChoiceTitle,
+        blurb: c.blog.thesisChoiceBody,
+        tally: `3 ${c.blog.chaptersLabel}`,
+        href: '/thesis',
+      },
+    ];
+
     return (
-      <div className="blog-root blg-shelf">
+      <div className="blog-root blg-gate-page">
         {topbar}
-        <div className="blg-index blg-library">
-          <div className="blg-library-head">
-            <div className="blg-index-head">
+        <div className="blg-gate-wrap">
+          <header className="blg-gate-masthead">
+            <div className="blg-gate-mast-title">
               <div className="eyebrow">{c.blog.entryEyebrow}</div>
               <h1>{c.blog.chooseTitle}</h1>
-              <p className="blg-index-intro">{c.blog.chooseIntro}</p>
             </div>
-          </div>
+            <p className="blg-gate-intro">{c.blog.chooseIntro}</p>
+          </header>
 
-          <div className="blg-choice-grid" aria-label={c.blog.chooseTitle}>
-            <Link className="blg-choice-card lab" to="/blog?section=lab">
-              <span className="blg-choice-kicker">{labPosts.length} {c.blog.postsLabel}</span>
-              <span className="blg-choice-title">{c.blog.labChoiceTitle}</span>
-              <span className="blg-choice-body">{c.blog.labChoiceBody}</span>
-              <span className="blg-choice-trace" aria-hidden="true"><i /><i /><i /></span>
-              <span className="blg-choice-cta">{c.blog.openSection}<ArrowRight size={15} strokeWidth={1.8} /></span>
-            </Link>
+          <div className="blg-gate" aria-label={c.blog.chooseTitle}>
+            <img className="blg-gate-plate" src="/img/statues.webp" alt="" />
+            <div className="blg-gate-veil" aria-hidden="true" />
 
-            <Link className="blg-choice-card thesis" to="/thesis">
-              <span className="blg-choice-kicker">3 {c.blog.chaptersLabel}</span>
-              <span className="blg-choice-title">{c.blog.thesisChoiceTitle}</span>
-              <span className="blg-choice-body">{c.blog.thesisChoiceBody}</span>
-              <span className="blg-choice-trace" aria-hidden="true"><i /><i /><i /></span>
-              <span className="blg-choice-cta">{c.blog.openSection}<ArrowRight size={15} strokeWidth={1.8} /></span>
-            </Link>
+            {gates.map((g) => (
+              <Link
+                key={g.href}
+                className="blg-gate-bay"
+                style={{ '--x': `${g.x}%` } as React.CSSProperties}
+                to={g.href}
+              >
+                <span className="shaft" aria-hidden="true" />
+                <span className="plaque">
+                  <span className="glyph" aria-hidden="true">{g.glyph}</span>
+                  <span className="label">{g.label}</span>
+                  <span className="tally">{g.tally}</span>
+                </span>
+                <span className="card">
+                  <span className="cb">{g.blurb}</span>
+                  <span className="cc">{c.blog.openSection} →</span>
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </div>

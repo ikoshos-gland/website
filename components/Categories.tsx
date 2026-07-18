@@ -77,7 +77,7 @@ const Categories: React.FC = () => {
     {
       subtitle: "TUSEB PROJECT",
       title: "1.5 Year Tuseb Embedded Machine Learning Scholar",
-      image: "/img/category-1.webp",
+      image: "/img/tuseb-potentiostat.webp",
       description: [
         "Created graphs, charts and other visualizations (Manim package) to convey results of data analysis using python.",
         "Worked with LSTM + CNN, Random Forest and Gaussian process machine learning models to interpret our EMG data.",
@@ -87,7 +87,7 @@ const Categories: React.FC = () => {
     {
       subtitle: "Internship Project",
       title: "1 Year Long-Internship in KUTTAM",
-      image: "/img/category-2.webp",
+      image: "/img/kuttam-long-internship.webp",
       description: [
         "KUTTAM: Koç University Research Center for Translational Medicine.",
         "Studies Expansion Microscopy Techniques to surpass light diffraction limit.",

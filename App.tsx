@@ -48,7 +48,7 @@ function App() {
 
       {/* Main content - mounted immediately but hidden until loading done */}
       <div
-        className="max-w-[1600px] mx-auto min-h-screen bg-[#0E0F11] relative overflow-hidden text-[#A1A1A6]"
+        className="w-full min-h-screen bg-[#0E0F11] relative overflow-hidden text-[#A1A1A6]"
         style={{
           opacity: isLoading ? 0 : 1,
           visibility: isLoading ? 'hidden' : 'visible',

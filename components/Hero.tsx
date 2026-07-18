@@ -5,6 +5,49 @@ const Spline = lazy(() => import('@splinetool/react-spline'));
 import ScrambleText from './ScrambleText';
 import { useContent } from '../i18n/LanguageContext';
 
+type HeroStar = {
+  x: number;
+  y: number;
+  size: number;
+  opacity: number;
+  delay: number;
+  duration: number;
+};
+
+// A deterministic sky field so every visit gets the same composition.
+// The empty ellipse keeps the stars visually behind the Spline sun.
+const HERO_STARS: HeroStar[] = (() => {
+  let seed = 0x4d455254;
+  const random = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 0x100000000;
+  };
+  const stars: HeroStar[] = [];
+
+  while (stars.length < 64) {
+    const x = 2 + random() * 96;
+    const y = 2 + random() * 46;
+    const sunX = (x - 49) / 28;
+    const sunY = (y - 35) / 31;
+
+    if (sunX * sunX + sunY * sunY < 1) continue;
+
+    const sizeRoll = random();
+    stars.push({
+      x,
+      y,
+      size: sizeRoll > 0.82
+        ? 2.5 + ((sizeRoll - 0.82) / 0.18) * 1.2
+        : 0.9 + (sizeRoll / 0.82) * 1.5,
+      opacity: 0.2 + random() * 0.58,
+      delay: -random() * 6,
+      duration: 3.4 + random() * 4.8,
+    });
+  }
+
+  return stars;
+})();
+
 // Mobile detection hook for performance optimization
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -171,6 +214,29 @@ const Hero: React.FC = () => {
               />
             </Suspense>
           )
+        )}
+
+        {/* Code-side stars, masked around the sun so they remain in the distant sky. */}
+        {!isMobile && (
+          <div className="hero-starfield absolute inset-0 z-[1] pointer-events-none" aria-hidden="true">
+            {HERO_STARS.map((star, index) => (
+              <span
+                key={index}
+                className={`hero-star${star.size > 2.5 ? ' hero-star--large' : ''}`}
+                style={{
+                  left: `${star.x}%`,
+                  top: `${star.y}%`,
+                  width: `${star.size}px`,
+                  height: `${star.size}px`,
+                  opacity: star.opacity,
+                  animationDelay: `${star.delay}s`,
+                  animationDuration: `${star.duration}s`,
+                }}
+              />
+            ))}
+            <span className="hero-shooting-star" />
+            <span className="hero-shooting-star hero-shooting-star--second" />
+          </div>
         )}
 
         {/* Dark Gradients for Depth & Text Readability */}
