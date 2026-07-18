@@ -34,6 +34,11 @@ export interface NeuronViewerProps {
   colors?: string[];
   /** gentle auto-spin; forced off under prefers-reduced-motion */
   autoRotate?: boolean;
+  /** small badge in the stage corner, e.g. the dataset name */
+  label?: React.ReactNode;
+  /** render only the stage (no <figure>/caption), so it can be composed,
+      e.g. side by side inside <NeuronCompare> */
+  bare?: boolean;
   /** optional caption shown under the stage */
   caption?: React.ReactNode;
   children?: React.ReactNode;
@@ -45,6 +50,8 @@ export default function NeuronViewer({
   height = 460,
   colors,
   autoRotate = true,
+  label,
+  bare = false,
   caption,
   children,
 }: NeuronViewerProps) {
@@ -78,20 +85,27 @@ export default function NeuronViewer({
 
   const fail = <div className="blg-neuron-msg">{t.fail}</div>;
 
+  const stage = (
+    <div ref={ref} className="blg-neuron-stage" style={{ height }}>
+      {inView ? (
+        <GLBoundary fallback={fail}>
+          <Suspense fallback={<div className="blg-neuron-spin" aria-label="loading" />}>
+            <NeuronScene src={src} brain={brain === false ? null : brain} colors={colors} autoRotate={autoRotate && !reduced} />
+          </Suspense>
+        </GLBoundary>
+      ) : (
+        <div className="blg-neuron-spin" aria-label="loading" />
+      )}
+      {label && <span className="blg-neuron-label">{label}</span>}
+      <span className="blg-neuron-hint" aria-hidden="true">{t.hint}</span>
+    </div>
+  );
+
+  if (bare) return stage;
+
   return (
     <figure className="blg-viz">
-      <div ref={ref} className="blg-neuron-stage" style={{ height }}>
-        {inView ? (
-          <GLBoundary fallback={fail}>
-            <Suspense fallback={<div className="blg-neuron-spin" aria-label="loading" />}>
-              <NeuronScene src={src} brain={brain === false ? null : brain} colors={colors} autoRotate={autoRotate && !reduced} />
-            </Suspense>
-          </GLBoundary>
-        ) : (
-          <div className="blg-neuron-spin" aria-label="loading" />
-        )}
-        <span className="blg-neuron-hint" aria-hidden="true">{t.hint}</span>
-      </div>
+      {stage}
       {(caption || children) && <figcaption>{caption || children}</figcaption>}
     </figure>
   );

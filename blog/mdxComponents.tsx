@@ -19,6 +19,7 @@ import SofimaMontage from './SofimaMontage';
 import ConnectomicsComparison from './ConnectomicsComparison';
 import VolumeLeap from './VolumeLeap';
 import NeuronViewer from './NeuronViewer';
+import NeuronCompare from './NeuronCompare';
 
 export const DropCap: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <span className="blg-dropcap">{children}</span>
@@ -96,4 +97,5 @@ export const mdxComponents = {
   ConnectomicsComparison,
   VolumeLeap,
   NeuronViewer,
+  NeuronCompare,
 };

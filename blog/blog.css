@@ -447,6 +447,11 @@ html.blg-hide-native-scrollbar{scroll-behavior:smooth}
 .blg-neuron-spin{position:absolute;top:50%;left:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:2px solid var(--hair);border-top-color:var(--gold-a);animation:blg-neuron-rot .8s linear infinite}
 @keyframes blg-neuron-rot{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.blg-neuron-spin{animation:none}}
+/* side-by-side comparison (<NeuronCompare>) */
+.blg-neuron-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.blg-neuron-compare .blg-neuron-hint{display:none}
+@media (max-width:720px){.blg-neuron-compare{grid-template-columns:1fr}}
+.blg-neuron-label{position:absolute;left:10px;top:9px;z-index:2;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-bright);background:rgba(10,11,13,.62);border:1px solid var(--hair);border-radius:999px;padding:3px 9px;pointer-events:none}
 
 /* expansion microscopy — "swell through a fixed lens" */
 .blg-exm-mesh .ln line{stroke:#9FE870;stroke-width:.6;opacity:.26}
