@@ -61,10 +61,10 @@ function App() {
           <Suspense fallback={<div className="min-h-[200px]" />}>
             <Categories />
             <MyStory />
-            <FilterBar />
-            <CaseStudies />
             <Publications />
             <Process />
+            <FilterBar />
+            <CaseStudies />
             <Testimonials />
             <HomeBlog />
             <Footer />

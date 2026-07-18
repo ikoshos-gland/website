@@ -109,18 +109,11 @@ export const tr: ContentShape = {
         metricLabel: 'Bağlantı',
         metricValue: 'qturkey.org',
       },
-      {
-        journal: 'COMING SOON',
-        title: 'Coming Soon',
-        authors: 'Mert Koca',
-        metricLabel: 'Durum',
-        metricValue: 'In Prep',
-      },
     ],
   },
   process: {
-    sectionLabel: '05 — METODOLOJİ',
-    heading: 'Keşifte Hassasiyet',
+    sectionLabel: '05 — THESIS',
+    heading: 'ExM Based Connectomics',
     steps: [
       {
         title: 'Strateji',

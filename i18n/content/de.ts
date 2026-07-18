@@ -109,18 +109,11 @@ export const de: ContentShape = {
         metricLabel: 'Link',
         metricValue: 'qturkey.org',
       },
-      {
-        journal: 'DEMNÄCHST',
-        title: 'Demnächst',
-        authors: 'Mert Koca',
-        metricLabel: 'Status',
-        metricValue: 'In Vorbereitung',
-      },
     ],
   },
   process: {
-    sectionLabel: '05 — METHODIK',
-    heading: 'Präzision in der Entdeckung',
+    sectionLabel: '05 — THESIS',
+    heading: 'ExM Based Connectomics',
     steps: [
       {
         title: 'Strategie',

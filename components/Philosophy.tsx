@@ -105,15 +105,6 @@ const Publications: React.FC = () => {
       metricLabel: "Link",
       metricValue: "qturkey.org",
       link: "https://quantium.qturkey.org/5-sayi/"
-    },
-    {
-      year: "2025",
-      journal: "COMING SOON",
-      journalColor: "text-gray-400",
-      title: "Coming Soon",
-      authors: "Mert Koca",
-      metricLabel: "Status",
-      metricValue: "In Prep"
     }
   ];
 

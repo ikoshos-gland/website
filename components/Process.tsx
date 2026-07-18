@@ -1,11 +1,16 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Telescope, PenTool, Code2 } from 'lucide-react';
 import { useContent } from '../i18n/LanguageContext';
 
 const Process: React.FC = () => {
   const { process } = useContent();
   return (
-    <div className="border-t border-[#23252B] bg-[#0E0F11] py-12 sm:py-16 md:py-24 px-4 sm:px-6">
+    <Link
+      to="/thesis"
+      aria-label={process.heading}
+      className="group/thesis block border-t border-[#23252B] bg-[#0E0F11] py-12 sm:py-16 md:py-24 px-4 sm:px-6 cursor-pointer transition-colors duration-300 hover:bg-[#111316]"
+    >
       <div className="max-w-5xl mx-auto text-center">
         <span className="block text-[10px] text-[#D6FF4F] font-mono w-fit border-b border-[#23252B] mx-auto mb-6 sm:mb-8 pb-1 tracking-widest">
           {process.sectionLabel}
@@ -52,7 +57,7 @@ const Process: React.FC = () => {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

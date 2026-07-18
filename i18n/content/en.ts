@@ -111,18 +111,11 @@ export const en = {
         metricLabel: 'Link',
         metricValue: 'qturkey.org',
       },
-      {
-        journal: 'COMING SOON',
-        title: 'Coming Soon',
-        authors: 'Mert Koca',
-        metricLabel: 'Status',
-        metricValue: 'In Prep',
-      },
     ],
   },
   process: {
-    sectionLabel: '05 — METHODOLOGY',
-    heading: 'Precision in Discovery',
+    sectionLabel: '05 — THESIS',
+    heading: 'ExM Based Connectomics',
     steps: [
       {
         title: 'Strategy',
