@@ -44,16 +44,15 @@ export const de: ContentShape = {
         ],
       },
       {
-        subtitle: 'Start-up',
-        title: 'PsyAI',
+        subtitle: 'NATIONALFINALIST',
+        title: 'Tez-Türk',
         description: [
-          'Fortgeschrittene LangChain- & LangGraph-Workflows mit UI UX zur Unterstützung von Eltern.',
-          'Angetrieben von LangChain und LangGraph, bietet mein Start-up-Projekt einen elternorientierten, agentischen Workflow.',
-          'Es nutzt zudem integrierten Speicher und RAG, um personalisierte Erkenntnisse aus kuratierten Büchern und Datenquellen zu liefern.',
+          'Klassifizierung von EMG-Handgesten mit dem NinaPro-DB5-Datensatz.',
+          'Entwicklung eines MLP-Klassifikators zur Steuerung einer Handprothese.',
         ],
       },
       {
-        subtitle: 'Mitglied',
+        subtitle: 'ITU-INKUBATOR-VIERTELFINALIST',
         title: 'easyegitim',
         description: [
           'Entwicklung personalisierter LLM-Werkzeuge, um Studierende zu unterstützen und aktives Lernen zu fördern.',

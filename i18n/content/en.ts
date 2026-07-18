@@ -46,16 +46,15 @@ export const en = {
         ],
       },
       {
-        subtitle: 'Start-up',
-        title: 'PsyAI',
+        subtitle: 'NATIONAL FINALIST',
+        title: 'Tez-Türk',
         description: [
-          'Advanced Langchain & Langgraph workflows with UI UX to support parents.',
-          'Powered by LangChain and LangGraph, my start-up project features a parent-focused agentic workflow.',
-          'It also leverages integrated memory and RAG to provide personalized insights from curated books and data sources.',
+          'Performed EMG gesture classification on the NinaPro DB5 dataset.',
+          'Built an MLP classifier to control a prosthetic hand.',
         ],
       },
       {
-        subtitle: 'Member',
+        subtitle: 'ITU INCUBATION QUARTERFINALIST',
         title: 'easyegitim',
         description: [
           'Creating personalized LLM tools to assist students and improve active learning.',

@@ -44,16 +44,15 @@ export const tr: ContentShape = {
         ],
       },
       {
-        subtitle: 'Girişim',
-        title: 'PsyAI',
+        subtitle: 'ULUSAL FİNALİST',
+        title: 'Tez-Türk',
         description: [
-          'Ebeveynleri desteklemek için UI UX ile gelişmiş Langchain & Langgraph iş akışları.',
-          'LangChain ve LangGraph ile çalışan girişim projem, ebeveyn odaklı bir agentic iş akışı sunuyor.',
-          'Ayrıca entegre bellek ve RAG\'den yararlanarak özenle seçilmiş kitaplardan ve veri kaynaklarından kişiselleştirilmiş içgörüler sağlıyor.',
+          'NinaPro DB5 veri seti üzerinde EMG hareket sınıflandırması gerçekleştirdim.',
+          'Protez el kontrolü için bir MLP sınıflandırıcısı geliştirdim.',
         ],
       },
       {
-        subtitle: 'Üye',
+        subtitle: 'İTÜ KULUÇKA ÇEYREK FİNALİSTİ',
         title: 'easyegitim',
         description: [
           'Öğrencilere yardımcı olmak ve aktif öğrenmeyi geliştirmek için kişiselleştirilmiş LLM araçları oluşturuyorum.',

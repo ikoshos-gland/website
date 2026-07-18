@@ -96,17 +96,16 @@ const Categories: React.FC = () => {
       ]
     },
     {
-      subtitle: "Start-up",
-      title: "PsyAI",
-      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop",
+      subtitle: "NATIONAL FINALIST",
+      title: "Tez-Türk",
+      image: "/img/tez-turk-yaz.png",
       description: [
-        "Advanced Langchain & Langgraph workflows with UI UX to support parents.",
-        "Powered by LangChain and LangGraph, my start-up project features a parent-focused agentic workflow.",
-        "It also leverages integrated memory and RAG to provide personalized insights from curated books and data sources."
+        "Performed EMG gesture classification on the NinaPro DB5 dataset.",
+        "Built an MLP classifier to control a prosthetic hand."
       ]
     },
     {
-      subtitle: "Member",
+      subtitle: "ITU INCUBATION QUARTERFINALIST",
       title: "easyegitim",
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200&auto=format&fit=crop",
       description: [
