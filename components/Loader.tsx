@@ -1,6 +1,8 @@
 import React from 'react';
 import { useContent } from '../i18n/LanguageContext';
-const brainLoader = '/brain-loader.png';
+// 640px webp (35KB) instead of the original 1024px source (527KB). The art is
+// only ever painted at 320 CSS px (w-80 h-80), so 640 still covers 2x displays.
+const brainLoader = '/brain-loader.webp';
 
 const Loader: React.FC = () => {
   const { loader } = useContent();

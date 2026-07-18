@@ -48,6 +48,15 @@ const HERO_STARS: HeroStar[] = (() => {
   return stars;
 })();
 
+// The hero scene carries a point light wired to Spline's "follow" event, so it
+// tracks the cursor across the ridge. It ships from the editor at intensity 10,
+// which reads dim against the dark terrain. Overriding it here rather than
+// re-exporting the scene keeps it tunable from code and survives a re-export.
+// Measured mean frame luminance: 10 -> 6.8, 20 -> 7.9, 40 -> 8.6 (the falloff
+// and tone mapping make it sublinear, so large jumps buy less than they look).
+const HERO_LIGHT_NAME = 'Point Light 2';
+const HERO_LIGHT_INTENSITY = 20;
+
 // Mobile detection hook for performance optimization
 const useIsMobile = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -75,8 +84,35 @@ const Hero: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [shouldLoadSpline, setShouldLoadSpline] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
+  const splineApp = useRef<any>(null);
+  // onLoad fires once and would otherwise capture whatever isVisible was when
+  // the element was first created, so read the live value through a ref.
+  const isVisibleRef = useRef(true);
   const isMobile = useIsMobile();
   const { hero } = useContent();
+
+  // Pause the Spline render loop while the hero is scrolled out of view.
+  // Hiding the layer with visibility:hidden stopped it being *seen*, but the
+  // engine kept drawing its scene every frame behind the rest of the page,
+  // which is the GPU cost you feel while scrolling. stop()/play() is preferred
+  // over unmounting: the canvas keeps its context and its last frame, so
+  // coming back to the top is instant and pixel-identical instead of paying a
+  // full WASM + scene re-init.
+  const setSplineRunning = (run: boolean) => {
+    const app = splineApp.current;
+    if (!app) return;
+    try {
+      if (run) app.play();
+      else app.stop();
+    } catch {
+      /* older runtimes without stop()/play(); rendering just continues */
+    }
+  };
+
+  useEffect(() => {
+    isVisibleRef.current = isVisible;
+    setSplineRunning(isVisible);
+  }, [isVisible]);
 
   useEffect(() => {
     // Desktop only — and defer the ~4MB Spline engine to idle AFTER first paint
@@ -211,6 +247,17 @@ const Hero: React.FC = () => {
               <Spline
                 scene="https://prod.spline.design/rZPCbrvNCWCkozOI/scene.splinecode"
                 style={{ width: '100%', height: '100%', filter: 'brightness(1.3)' }}
+                onLoad={(app) => {
+                  splineApp.current = app;
+                  // Brighten the cursor-following light. Guarded: if the scene
+                  // is ever re-exported with a different object name this just
+                  // no-ops back to the editor's own intensity.
+                  const light = app.findObjectByName(HERO_LIGHT_NAME);
+                  if (light) light.intensity = HERO_LIGHT_INTENSITY;
+                  // The scene can finish loading while the hero is already
+                  // scrolled past, so apply the current state on arrival too.
+                  setSplineRunning(isVisibleRef.current);
+                }}
               />
             </Suspense>
           )

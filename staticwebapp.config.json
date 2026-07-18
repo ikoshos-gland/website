@@ -2,5 +2,37 @@
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/img/*", "/assets/*", "/cv-assets/*", "/*.{webp,png,jpg,jpeg,svg,ico,mp4,webm,css,js,txt,xml,json,pdf,html}"]
-  }
+  },
+  "routes": [
+    {
+      "route": "/assets/*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/neurons/*",
+      "headers": {
+        "cache-control": "public, max-age=2592000"
+      }
+    },
+    {
+      "route": "/img/*",
+      "headers": {
+        "cache-control": "public, max-age=2592000"
+      }
+    },
+    {
+      "route": "/cv-assets/*",
+      "headers": {
+        "cache-control": "public, max-age=2592000"
+      }
+    },
+    {
+      "route": "/*.{png,jpg,jpeg,webp,svg,ico,mp4,webm,pdf}",
+      "headers": {
+        "cache-control": "public, max-age=2592000"
+      }
+    }
+  ]
 }

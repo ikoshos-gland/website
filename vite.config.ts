@@ -142,6 +142,17 @@ export default defineConfig(({ mode }) => {
               return 'vendor-react';
             }
             if (norm.includes('@splinetool')) {
+              // The Spline runtime already dynamic-imports its optional
+              // sub-engines (physics is 2MB on its own, plus navmesh, CSG
+              // booleans, opentype, howler audio, gaussian splats) and only
+              // pulls the ones a scene actually uses. Naming them all
+              // 'vendor-3d' merged them back into a single 4.6MB download,
+              // defeating that. Return undefined for them so Rollup keeps each
+              // as its own on-demand chunk; the hero scene (a sun behind a
+              // ridge) touches none of them.
+              if (/\/runtime\/build\/(physics|navmesh|boolean|opentype|howler|gaussian-splat-compression|ui)\./.test(norm)) {
+                return;
+              }
               return 'vendor-3d';
             }
             // three.js + react-three stack for the blog's <NeuronViewer>. Its own
