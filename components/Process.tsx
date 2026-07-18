@@ -9,10 +9,10 @@ const Process: React.FC = () => {
     <Link
       to="/thesis"
       aria-label={process.heading}
-      className="group/thesis block border-t border-[#23252B] bg-[#0E0F11] py-12 sm:py-16 md:py-24 px-4 sm:px-6 cursor-pointer transition-colors duration-300 hover:bg-[#111316]"
+      className="group/thesis block border-t border-[#23252B] bg-black/75 py-12 sm:py-16 md:py-24 px-4 sm:px-6 cursor-pointer transition-colors duration-300 hover:bg-[#111316]/90 backdrop-blur-[1px]"
     >
       <div className="max-w-5xl mx-auto text-center">
-        <span className="block text-[10px] text-[#D6FF4F] font-mono w-fit border-b border-[#23252B] mx-auto mb-6 sm:mb-8 pb-1 tracking-widest">
+        <span lang="en" className="normal-case block text-[10px] text-[#D6FF4F] font-mono w-fit border-b border-[#23252B] mx-auto mb-6 sm:mb-8 pb-1 tracking-widest">
           {process.sectionLabel}
         </span>
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium font-heading text-[#F5F5F5] tracking-tight mb-10 sm:mb-16">

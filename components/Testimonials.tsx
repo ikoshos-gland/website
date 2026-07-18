@@ -33,7 +33,7 @@ const Testimonials: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#15171B] border-t border-[#23252B] py-12 sm:py-16 md:py-20 px-4 md:px-8">
+    <div className="bg-[#0A0B0D]/82 border-t border-[#23252B] py-12 sm:py-16 md:py-20 px-4 md:px-8 backdrop-blur-[1px]">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col text-center pb-8 sm:pb-12 items-center justify-center">
           <span className="block text-[10px] text-[#D6FF4F] font-mono w-fit border-b border-[#23252B] mb-4 pb-1 tracking-widest">

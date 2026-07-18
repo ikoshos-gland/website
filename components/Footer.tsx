@@ -6,7 +6,7 @@ import { useContent } from '../i18n/LanguageContext';
 const Footer: React.FC = () => {
   const c = useContent();
   return (
-    <footer className="bg-[#0E0F11] text-[#F5F5F5] pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-10 border-t border-[#23252B] mt-16 sm:mt-20 md:mt-24">
+    <footer className="bg-black/88 text-[#F5F5F5] pt-12 sm:pt-16 md:pt-20 pb-8 sm:pb-10 border-t border-[#23252B] mt-16 sm:mt-20 md:mt-24 backdrop-blur-[1px]">
       <div className="w-full text-center text-[8px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] text-[#A1A1A6]/50 mb-6 sm:mb-10 font-sans select-none px-4">
         Per aspera ad astra
       </div>

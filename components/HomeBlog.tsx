@@ -1,44 +1,75 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { getPosts } from '../blog/posts';
-import { useLang, useContent } from '../i18n/LanguageContext';
+import { ArrowUpRight, BookOpen, FileText, MessageCircle } from 'lucide-react';
+import { useContent } from '../i18n/LanguageContext';
 
-const HomeBlog: React.FC = () => {
-  const { lang } = useLang();
+type HomeBlogProps = {
+  onChatClick: () => void;
+};
+
+const HomeBlog: React.FC<HomeBlogProps> = ({ onChatClick }) => {
   const c = useContent();
-  const latest = getPosts(lang).slice(0, 3);
-  if (latest.length === 0) return null;
+
+  const destinations = [
+    {
+      label: c.homeBlog.blogLink,
+      to: '/blog',
+      icon: BookOpen,
+    },
+    {
+      label: c.homeBlog.thesisLink,
+      to: '/thesis',
+      icon: FileText,
+    },
+  ];
 
   return (
-    <section className="w-full px-4 sm:px-6 md:px-12 py-16 md:py-24 max-w-[1600px] mx-auto">
-      <div className="flex items-end justify-between mb-10 md:mb-14">
-        <div>
-          <p className="font-mono text-xs tracking-[0.3em] text-[#A1A1A6] uppercase mb-3">{c.homeBlog.sectionLabel}</p>
-          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl text-[#F5F5F5] font-medium">{c.homeBlog.heading}</h2>
+    <section className="w-full px-4 sm:px-6 md:px-12 py-20 md:py-28 max-w-[1600px] mx-auto">
+      <div className="relative overflow-hidden rounded-3xl border border-[#23252B] bg-[#0A0B0D]/82 px-6 py-10 sm:px-10 md:px-14 md:py-14 backdrop-blur-sm">
+        <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#D6FF4F]/[0.035] blur-3xl pointer-events-none" />
+
+        <div className="relative grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+          <div className="max-w-3xl">
+            <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.3em] text-[#D6FF4F]">
+              {c.homeBlog.sectionLabel}
+            </p>
+            <h2 className="font-heading text-3xl font-medium leading-tight text-[#F5F5F5] sm:text-4xl md:text-5xl">
+              {c.homeBlog.heading}
+            </h2>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-[#A1A1A6] sm:text-lg">
+              {c.homeBlog.description}
+            </p>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            {destinations.map(({ label, to, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                className="group flex min-h-24 flex-col justify-between rounded-2xl border border-[#23252B] bg-black/55 p-4 transition-all duration-300 hover:border-[#D6FF4F]/60 hover:bg-[#111316]"
+              >
+                <Icon size={18} className="text-[#A1A1A6] transition-colors group-hover:text-[#D6FF4F]" />
+                <span className="mt-5 flex items-end justify-between gap-3 text-sm font-medium text-[#F5F5F5]">
+                  {label}
+                  <ArrowUpRight size={16} className="shrink-0 text-[#52525B] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#D6FF4F]" />
+                </span>
+              </Link>
+            ))}
+
+            <button
+              type="button"
+              onClick={onChatClick}
+              className="group flex min-h-24 flex-col justify-between rounded-2xl border border-[#23252B] bg-black/55 p-4 text-left transition-all duration-300 hover:border-[#D6FF4F]/60 hover:bg-[#111316]"
+            >
+              <MessageCircle size={18} className="text-[#A1A1A6] transition-colors group-hover:text-[#D6FF4F]" />
+              <span className="mt-5 flex w-full items-end justify-between gap-3 text-sm font-medium text-[#F5F5F5]">
+                {c.homeBlog.chatLink}
+                <ArrowUpRight size={16} className="shrink-0 text-[#52525B] transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#D6FF4F]" />
+              </span>
+            </button>
+          </div>
         </div>
-        <Link to="/blog" className="hidden sm:inline-block font-mono text-xs tracking-widest uppercase text-[#A1A1A6] hover:text-[#D6FF4F] border-b border-[#23252B] pb-1 transition-colors">
-          {c.homeBlog.readAll}
-        </Link>
       </div>
-      <div className="grid md:grid-cols-3 gap-4">
-        {latest.map((p) => (
-          <Link
-            key={p.slug}
-            to={`/blog/${p.slug}`}
-            className="group flex flex-col bg-[#15171B] border border-[#23252B] rounded-2xl p-5 hover:bg-[#1a1b1e] transition-colors duration-300"
-          >
-            <div className="flex items-center gap-3 font-mono text-[10px] tracking-widest uppercase text-[#A1A1A6] mb-4">
-              <span>{p.date.replace(/-/g, ' · ')}</span>
-              <span className="px-2 py-0.5 border border-[#23252B] rounded-full">{(c.blog.contentType as Record<string, string>)[p.contentType] ?? p.contentType}</span>
-            </div>
-            <h3 className="font-heading text-lg text-[#F5F5F5] font-medium mb-2 group-hover:text-[#D6FF4F] transition-colors">{p.title}</h3>
-            <p className="text-sm text-[#A1A1A6] leading-relaxed line-clamp-3">{p.excerpt}</p>
-          </Link>
-        ))}
-      </div>
-      <Link to="/blog" className="sm:hidden mt-8 inline-block font-mono text-xs tracking-widest uppercase text-[#A1A1A6] hover:text-[#D6FF4F] border-b border-[#23252B] pb-1">
-        {c.homeBlog.readAll}
-      </Link>
     </section>
   );
 };

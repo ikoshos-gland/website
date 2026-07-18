@@ -148,9 +148,12 @@ export const tr: ContentShape = {
     ],
   },
   homeBlog: {
-    sectionLabel: '04 — Blog',
-    heading: 'Seyir Defterinden',
-    readAll: 'Tümünü oku →',
+    sectionLabel: 'KEŞFET',
+    heading: 'Düşüncelerimin izini sürün.',
+    description: 'Blog yazılarıma göz atabilir, tezimi inceleyebilir veya fikirlerim ve yazılarım hakkında kişisel chatbot’umla sohbet edebilirsiniz.',
+    blogLink: 'Blogu keşfet',
+    thesisLink: 'Tezi incele',
+    chatLink: 'Sohbete başla',
   },
   footer: {
     tagline: 'Mert Koca\'nın Kişisel Web Sitesi',
@@ -209,7 +212,7 @@ export const tr: ContentShape = {
     labChoiceTitle: 'Lab Günlükleri',
     labChoiceBody: 'Deney notları, hesaplama günlükleri, araç hataları ve çalışma masasından kısa saha raporları.',
     thesisChoiceTitle: 'Tezim',
-    thesisChoiceBody: 'Konnektomik ve genişletme mikroskopisi tezini üç bölümlük düzenli bir okuma yolu olarak açar.',
+    thesisChoiceBody: 'Konnektomik ve genişletme mikroskopisi tezini altı bölümlük düzenli bir okuma yolu olarak açar.',
     openSection: 'Aç',
     postsLabel: 'yazı',
     chaptersLabel: 'bölüm',
@@ -230,6 +233,7 @@ export const tr: ContentShape = {
       lesson: 'Ders',
       compute: 'Hesaplama',
       lab: 'Laboratuvar',
+      thesis: 'THESIS',
     },
   },
   thesisHub: {

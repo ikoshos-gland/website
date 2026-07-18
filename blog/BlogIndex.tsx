@@ -38,18 +38,18 @@ export default function BlogIndex() {
       {
         x: 23,
         glyph: 'I',
-        label: c.blog.labChoiceTitle,
-        blurb: c.blog.labChoiceBody,
-        tally: `${labPosts.length} ${c.blog.postsLabel}`,
-        href: '/blog?section=lab',
+        label: c.blog.thesisChoiceTitle,
+        blurb: c.blog.thesisChoiceBody,
+        tally: `6 ${c.blog.chaptersLabel}`,
+        href: '/thesis',
       },
       {
         x: 77.5,
         glyph: 'II',
-        label: c.blog.thesisChoiceTitle,
-        blurb: c.blog.thesisChoiceBody,
-        tally: `3 ${c.blog.chaptersLabel}`,
-        href: '/thesis',
+        label: c.blog.labChoiceTitle,
+        blurb: c.blog.labChoiceBody,
+        tally: `${labPosts.length} ${c.blog.postsLabel}`,
+        href: '/blog?section=lab',
       },
     ];
 

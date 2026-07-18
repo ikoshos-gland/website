@@ -58,7 +58,7 @@ const CaseStudies: React.FC = () => {
   const photos = fallbackPhotos;
 
   return (
-    <div className="border-t border-[#23252B] bg-[#0E0F11]">
+    <div className="border-t border-[#23252B] bg-black/78 backdrop-blur-[1px]">
       <div className="max-w-[1550px] mx-auto grid grid-cols-1 md:grid-cols-12">
 
         {/* Sidebar Info */}

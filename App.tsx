@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Loader from './components/Loader';
+import CosmicNeuralBackground from './components/CosmicNeuralBackground';
 
 // Lazy load below-the-fold components for better initial load
 const Categories = lazy(() => import('./components/Categories'));
@@ -48,7 +49,7 @@ function App() {
 
       {/* Main content - mounted immediately but hidden until loading done */}
       <div
-        className="w-full min-h-screen bg-[#0E0F11] relative overflow-hidden text-[#A1A1A6]"
+        className="w-full min-h-screen bg-black relative overflow-hidden text-[#A1A1A6]"
         style={{
           opacity: isLoading ? 0 : 1,
           visibility: isLoading ? 'hidden' : 'visible',
@@ -58,17 +59,22 @@ function App() {
         <Navbar onChatClick={() => { setChatMounted(true); setIsChatOpen(true); }} />
         <main className="w-full mt-20">
           <Hero />
-          <Suspense fallback={<div className="min-h-[200px]" />}>
-            <Categories />
-            <MyStory />
-            <Publications />
-            <Process />
-            <FilterBar />
-            <CaseStudies />
-            <Testimonials />
-            <HomeBlog />
-            <Footer />
-          </Suspense>
+          <div className="relative isolate bg-black">
+            <CosmicNeuralBackground />
+            <div className="relative z-10">
+              <Suspense fallback={<div className="min-h-[200px]" />}>
+                <Categories />
+                <MyStory />
+                <Publications />
+                <Process />
+                <FilterBar />
+                <CaseStudies />
+                <Testimonials />
+                <HomeBlog onChatClick={() => { setChatMounted(true); setIsChatOpen(true); }} />
+                <Footer />
+              </Suspense>
+            </div>
+          </div>
         </main>
       </div>
       {chatMounted && (

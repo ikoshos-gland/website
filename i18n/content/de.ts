@@ -148,9 +148,12 @@ export const de: ContentShape = {
     ],
   },
   homeBlog: {
-    sectionLabel: '04 — Blog',
-    heading: 'Aus dem Logbuch',
-    readAll: 'Alle lesen →',
+    sectionLabel: 'ENTDECKEN',
+    heading: 'Folgen Sie den Spuren meiner Gedanken.',
+    description: 'Lesen Sie meine Beiträge, entdecken Sie meine Abschlussarbeit oder sprechen Sie mit meinem persönlichen Chatbot über meine Ideen und Texte.',
+    blogLink: 'Blog entdecken',
+    thesisLink: 'Arbeit lesen',
+    chatLink: 'Gespräch beginnen',
   },
   footer: {
     tagline: 'Persönliche Website von Mert Koca',
@@ -209,7 +212,7 @@ export const de: ContentShape = {
     labChoiceTitle: 'Labor-Logs',
     labChoiceBody: 'Labor- und Rechennotizen, Werkzeugfehler und kurze Feldberichte vom Arbeitstisch.',
     thesisChoiceTitle: 'Die Arbeit',
-    thesisChoiceBody: 'Ein kuratierter Leseweg mit drei Kapiteln zur Konnektomik und Expansionsmikroskopie.',
+    thesisChoiceBody: 'Ein kuratierter Leseweg mit sechs Kapiteln zur Konnektomik und Expansionsmikroskopie.',
     openSection: 'Öffnen',
     postsLabel: 'Beiträge',
     chaptersLabel: 'Kapitel',
@@ -230,6 +233,7 @@ export const de: ContentShape = {
       lesson: 'Lektion',
       compute: 'Rechnen',
       lab: 'Labor',
+      thesis: 'THESIS',
     },
   },
   thesisHub: {

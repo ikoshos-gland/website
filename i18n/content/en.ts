@@ -150,9 +150,12 @@ export const en = {
     ],
   },
   homeBlog: {
-    sectionLabel: '04 — Blog',
-    heading: 'From the Logbook',
-    readAll: 'Read all →',
+    sectionLabel: 'EXPLORE',
+    heading: 'Follow the trail of my thoughts.',
+    description: 'Browse my writing, explore my thesis, or talk with my personal chatbot about my ideas and work.',
+    blogLink: 'Explore the blog',
+    thesisLink: 'Read the thesis',
+    chatLink: 'Start a conversation',
   },
   footer: {
     tagline: 'Personal Website of Mert Koca',
@@ -211,7 +214,7 @@ export const en = {
     labChoiceTitle: 'Lab Logs',
     labChoiceBody: 'Bench notes, computation notes, tool failures, and field reports from the workbench.',
     thesisChoiceTitle: 'The Thesis',
-    thesisChoiceBody: 'A curated three-chapter reading path for the connectomics and expansion microscopy thesis.',
+    thesisChoiceBody: 'A curated six-chapter reading path for the connectomics and expansion microscopy thesis.',
     openSection: 'Open',
     postsLabel: 'posts',
     chaptersLabel: 'chapters',
@@ -233,6 +236,7 @@ export const en = {
       lesson: 'Lesson',
       compute: 'Compute',
       lab: 'Lab',
+      thesis: 'THESIS',
     },
   },
   thesisHub: {
