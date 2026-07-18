@@ -86,7 +86,13 @@ def weld(v: np.ndarray, f: np.ndarray, nm: float):
     return rep, f[good]
 
 
-def fetch_solid(cv, rid: int, lod: int, weld_nm: float, target_faces: int):
+def surface_area_um2(v: np.ndarray, f: np.ndarray) -> float:
+    a, b, c = v[f[:, 0]], v[f[:, 1]], v[f[:, 2]]
+    return float(0.5 * np.linalg.norm(np.cross(b - a, c - a), axis=1).sum()) / 1e6
+
+
+def fetch_solid(cv, rid: int, lod: int, weld_nm: float, target_faces: int,
+                target_density: float | None = None):
     import pyfqmr
     m = cv.mesh.get(rid, lod=lod)
     mesh = m[rid] if isinstance(m, dict) else m
@@ -94,24 +100,30 @@ def fetch_solid(cv, rid: int, lod: int, weld_nm: float, target_faces: int):
     f = mesh.faces.astype(np.int64)
     raw_f = len(f)
     v, f = weld(v, f, weld_nm)
+    area = surface_area_um2(v, f)
+    # Matching triangle DENSITY (faces per um^2) rather than a flat face count is
+    # what makes two datasets comparable: a big arbor and a short dendrite then
+    # carry the same surface detail, i.e. the same effective mesh resolution.
+    if target_density:
+        target_faces = max(500, int(round(area * target_density)))
     s = pyfqmr.Simplify()
     s.setMesh(v, f)
     s.simplify_mesh(target_count=target_faces, aggressiveness=7, preserve_border=False, verbose=0)
     vv, ff, _ = s.getMesh()
-    return vv.astype(np.float64), ff.astype(np.int64), raw_f
+    return vv.astype(np.float64), ff.astype(np.int64), raw_f, area
 
 
 def build_solid(out_path: str, root_ids, lod: int, weld_nm: float, target_faces: int,
-                source: str = MESH_SRC, space: str = "fafb"):
+                source: str = MESH_SRC, space: str = "fafb", target_density: float | None = None):
     from cloudvolume import CloudVolume
     cv = CloudVolume(source, use_https=True, progress=False)
     neurons = []
     for rid in root_ids:
         print(f"neuron {rid} (lod {lod}) ...", flush=True)
-        vv, ff, raw_f = fetch_solid(cv, rid, lod, weld_nm, target_faces)
+        vv, ff, raw_f, area = fetch_solid(cv, rid, lod, weld_nm, target_faces, target_density)
         ext = (vv.max(0) - vv.min(0)) / 1000.0
         print(f"       {raw_f:>7d} -> {len(ff):>6d} faces, {len(vv):>6d} verts, "
-              f"extent {ext.round(1)} um", flush=True)
+              f"area {area:7.0f} um2 -> {len(ff)/area:5.1f} faces/um2, extent {ext.round(1)} um", flush=True)
         neurons.append((vv, ff))
 
     if space == "fafb":
@@ -124,12 +136,12 @@ def build_solid(out_path: str, root_ids, lod: int, weld_nm: float, target_faces:
     with open(out_path, "wb") as fh:
         fh.write(struct.pack("<IIII", MAGIC_SOLID, SOLID_VERSION, len(neurons), 0))
         for vv, ff in neurons:
-            if len(vv) >= 65536:
-                raise SystemExit(f"neuron has {len(vv)} verts >= 65536; lower --target-faces for uint16 indices")
             q = np.clip(np.round(normalize_with(vv, center, scale) * 32767.0), -32767, 32767).astype("<i2")
             fh.write(struct.pack("<II", len(vv), len(ff)))
             fh.write(q.tobytes())
-            fh.write(ff.astype("<u2").tobytes())
+            # Index width follows vCount, so the reader needs no extra flag: uint16
+            # while the neuron fits in 16 bits, uint32 for high-detail meshes.
+            fh.write(ff.astype("<u4" if len(vv) >= 65536 else "<u2").tobytes())
 
     size = os.path.getsize(out_path)
     tf = sum(len(f) for _, f in neurons)
@@ -207,7 +219,10 @@ def main():
                          "'auto' = fit center/scale to the data (use for LICONN etc.)")
     ap.add_argument("--lod", type=int, default=3, help="coarsest LOD is usually 3")
     ap.add_argument("--weld-nm", type=float, default=30.0)
-    ap.add_argument("--target-faces", type=int, default=40000, help="per-neuron decimation target")
+    ap.add_argument("--target-faces", type=int, default=40000, help="per-neuron decimation target (face count)")
+    ap.add_argument("--target-density", type=float, default=None,
+                    help="faces per um^2; overrides --target-faces so two datasets can be "
+                         "matched to the SAME mesh resolution (FlyWire lod3 sits near 12.4)")
     ap.add_argument("--brain", action="store_true", help="also build the whole-brain hull")
     ap.add_argument("--out-brain", default="public/neurons/brain.bin")
     ap.add_argument("--brain-grid", type=int, default=55, help="brain decimation cells along longest axis")
@@ -216,7 +231,7 @@ def main():
     if args.brain:
         build_brain(args.out_brain, args.brain_grid)
     build_solid(args.out, args.root_ids, args.lod, args.weld_nm, args.target_faces,
-                source=args.source, space=args.space)
+                source=args.source, space=args.space, target_density=args.target_density)
 
 
 if __name__ == "__main__":

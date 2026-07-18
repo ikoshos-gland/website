@@ -34,6 +34,8 @@ export interface NeuronViewerProps {
   colors?: string[];
   /** gentle auto-spin; forced off under prefers-reduced-motion */
   autoRotate?: boolean;
+  /** framing multiplier: >1 starts closer, <1 pulls back */
+  zoom?: number;
   /** small badge in the stage corner, e.g. the dataset name */
   label?: React.ReactNode;
   /** render only the stage (no <figure>/caption), so it can be composed,
@@ -50,6 +52,7 @@ export default function NeuronViewer({
   height = 460,
   colors,
   autoRotate = true,
+  zoom = 1,
   label,
   bare = false,
   caption,
@@ -90,7 +93,7 @@ export default function NeuronViewer({
       {inView ? (
         <GLBoundary fallback={fail}>
           <Suspense fallback={<div className="blg-neuron-spin" aria-label="loading" />}>
-            <NeuronScene src={src} brain={brain === false ? null : brain} colors={colors} autoRotate={autoRotate && !reduced} />
+            <NeuronScene src={src} brain={brain === false ? null : brain} colors={colors} zoom={zoom} autoRotate={autoRotate && !reduced} />
           </Suspense>
         </GLBoundary>
       ) : (

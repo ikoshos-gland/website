@@ -9,12 +9,13 @@ import * as THREE from 'three';
 // by scripts/build_neuron_solid.py), like the Codex/Neuroglancer view, plus an
 // optional translucent brain hull. All co-registered in canonical FAFB space.
 
-export interface SolidGeom { positions: Float32Array; indices: Uint16Array; }
+export interface SolidGeom { positions: Float32Array; indices: Uint16Array | Uint32Array; }
 export interface BrainGeom { positions: Float32Array; indices: Uint32Array; }
 
 // Neuron mesh format, from scripts/build_neuron_solid.py:
 //   u32 magic('NMM1') · u32 version · u32 neuronCount · u32 flags
-//   per neuron: u32 vCount · u32 triCount · i16[vCount*3] pos(*32767) · u16[triCount*3] idx
+//   per neuron: u32 vCount · u32 triCount · i16[vCount*3] pos(*32767)
+//               · idx[triCount*3], uint16 while vCount < 65536, else uint32
 function parseSolidBin(buf: ArrayBuffer): SolidGeom[] {
   const dv = new DataView(buf);
   let o = 0;
@@ -28,7 +29,15 @@ function parseSolidBin(buf: ArrayBuffer): SolidGeom[] {
     const qi = new Int16Array(buf, o, v * 3); o += v * 3 * 2;
     const positions = new Float32Array(v * 3);
     for (let k = 0; k < v * 3; k++) positions[k] = qi[k] / 32767;
-    const indices = new Uint16Array(buf, o, t * 3); o += t * 3 * 2;
+    // uint16 indices are always 2-byte aligned here, so they can be a zero-copy
+    // view; uint32 needs 4-byte alignment that the layout does not guarantee, so
+    // slice (copy) instead of viewing.
+    let indices: Uint16Array | Uint32Array;
+    if (v >= 65536) {
+      indices = new Uint32Array(buf.slice(o, o + t * 3 * 4)); o += t * 3 * 4;
+    } else {
+      indices = new Uint16Array(buf, o, t * 3); o += t * 3 * 2;
+    }
     out.push({ positions, indices });
   }
   return out;
@@ -74,7 +83,7 @@ function bounds(arrays: Float32Array[]) {
   }
   return {
     center: [(mnx + mxx) / 2, (mny + mxy) / 2, (mnz + mxz) / 2] as [number, number, number],
-    radius: 0.5 * Math.hypot(mxx - mnx, mxy - mny, mxz - mnz),
+    half: [(mxx - mnx) / 2, (mxy - mny) / 2, (mxz - mnz) / 2] as [number, number, number],
   };
 }
 
@@ -121,20 +130,30 @@ function BrainHull({ geom }: { geom: BrainGeom }) {
   );
 }
 
-function FitCamera({ center, radius }: { center: [number, number, number]; radius: number }) {
+// Frames the content tightly. Fitting the bounding SPHERE (box diagonal) pushes
+// the camera much further out than needed for a flat, wide object, which is why
+// this used to start zoomed way out; fit the actual box against the viewport
+// aspect instead, and add the depth half-extent so nothing clips at the front.
+function FitCamera({ center, half, zoom }: {
+  center: [number, number, number]; half: [number, number, number]; zoom: number;
+}) {
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera;
   const controls = useThree((s) => s.controls) as any;
+  const size = useThree((s) => s.size);
   const invalidate = useThree((s) => s.invalidate);
   useEffect(() => {
+    const [hx, hy, hz] = half;
+    const aspect = Math.max(0.1, size.width / size.height);
+    const tan = Math.tan((camera.fov * Math.PI) / 180 / 2);
+    const dist = (Math.max(hy / tan, hx / (tan * aspect)) + hz) * 1.08 / Math.max(0.1, zoom);
     const c = new THREE.Vector3(...center);
-    const dist = (radius / Math.sin((camera.fov * Math.PI) / 180 / 2)) * 1.15;
     camera.position.set(c.x, c.y, c.z + dist);
-    camera.near = dist / 100;
-    camera.far = dist * 10;
+    camera.near = Math.max(dist / 1000, 0.001);
+    camera.far = dist * 20;
     camera.updateProjectionMatrix();
     if (controls) { controls.target.copy(c); controls.update(); }
     invalidate();
-  }, [center, radius, camera, controls, invalidate]);
+  }, [center, half, zoom, camera, controls, size.width, size.height, invalidate]);
   return null;
 }
 
@@ -144,9 +163,11 @@ export interface NeuronSceneProps {
   colors?: string[];
   autoRotate?: boolean;
   background?: string;
+  /** framing multiplier: >1 starts closer, <1 pulls back */
+  zoom?: number;
 }
 
-export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoRotate = true, background = '#0A0B0D' }: NeuronSceneProps) {
+export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoRotate = true, background = '#0A0B0D', zoom = 1 }: NeuronSceneProps) {
   const [neurons, setNeurons] = useState<SolidGeom[] | null>(null);
   const [brainGeom, setBrainGeom] = useState<BrainGeom | null>(null);
   const [err, setErr] = useState(false);
@@ -163,12 +184,9 @@ export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoR
     return () => { alive = false; };
   }, [src, brain]);
 
-  const fit = useMemo(() => {
-    if (!neurons) return null;
-    const arr = neurons.map((g) => g.positions);
-    if (brainGeom) arr.push(brainGeom.positions);
-    return bounds(arr);
-  }, [neurons, brainGeom]);
+  // Frame the NEURONS, not the hull: the neurons are the subject and the brain is
+  // an order of magnitude wider, so including it leaves them as a speck.
+  const fit = useMemo(() => (neurons ? bounds(neurons.map((g) => g.positions)) : null), [neurons]);
 
   if (err) return <div className="blg-neuron-msg">3D veri yüklenemedi.</div>;
   if (!neurons || !fit) return <div className="blg-neuron-spin" aria-label="loading" />;
@@ -188,7 +206,7 @@ export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoR
       {neurons.map((g, i) => (
         <SolidNeuron key={i} geom={g} color={colors[i % colors.length]} />
       ))}
-      <FitCamera center={fit.center} radius={fit.radius} />
+      <FitCamera center={fit.center} half={fit.half} zoom={zoom} />
       <OrbitControls
         makeDefault
         enablePan={false}
@@ -196,8 +214,8 @@ export default function NeuronScene({ src, brain, colors = DEFAULT_COLORS, autoR
         dampingFactor={0.08}
         rotateSpeed={0.6}
         zoomSpeed={0.7}
-        minDistance={fit.radius * 0.4}
-        maxDistance={fit.radius * 8}
+        minDistance={Math.hypot(...fit.half) * 0.15}
+        maxDistance={Math.hypot(...fit.half) * 12}
         autoRotate={autoRotate}
         autoRotateSpeed={0.6}
       />

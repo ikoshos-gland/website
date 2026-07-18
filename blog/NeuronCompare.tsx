@@ -14,10 +14,12 @@ export interface NeuronCompareProps {
   leftLabel?: React.ReactNode;
   leftBrain?: string | false;
   leftColors?: string[];
+  leftZoom?: number;
   rightSrc?: string;
   rightLabel?: React.ReactNode;
   rightBrain?: string | false;
   rightColors?: string[];
+  rightZoom?: number;
   height?: number;
   autoRotate?: boolean;
   caption?: React.ReactNode;
@@ -29,10 +31,12 @@ export default function NeuronCompare({
   leftLabel = 'EM · FlyWire',
   leftBrain = '/neurons/brain.bin',
   leftColors,
+  leftZoom = 1,
   rightSrc = '/neurons/liconn_solid.bin',
   rightLabel = 'ExM · LICONN',
   rightBrain = false,
   rightColors = ['#E8C66A', '#F0916B', '#5BC8C0'],
+  rightZoom = 1,
   height = 380,
   autoRotate = true,
   caption,
@@ -46,6 +50,7 @@ export default function NeuronCompare({
           src={leftSrc}
           brain={leftBrain}
           colors={leftColors}
+          zoom={leftZoom}
           label={leftLabel}
           height={height}
           autoRotate={autoRotate}
@@ -55,6 +60,7 @@ export default function NeuronCompare({
           src={rightSrc}
           brain={rightBrain}
           colors={rightColors}
+          zoom={rightZoom}
           label={rightLabel}
           height={height}
           autoRotate={autoRotate}
