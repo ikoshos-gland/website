@@ -396,6 +396,8 @@ Tek yapman gereken etiketi yazmak. Örnek: `<SlurmFlow />`
 | `<FFNFlood />` | FFN taşkın-doldurma segmentasyonu |
 | `<DiffractionLimit />` | Işık kırınımı sınırı |
 | `<ExpansionChemistry />` | Genişletme jeli kimyası |
+| `<ExpansionSlice>kaynak [@key]</ExpansionSlice>` | Solda gerçek genişleme kaydı (`public/video/exm-expansion.mp4`), sağda sabit objektif penceresi; video ilerledikçe E 1×→4,5× artar, bulanıklık sabit kalır, 150 nm'lik pre/post sinaptik çift ayrışır. Çocuk içerik altyazıya kaynak satırı olur; `[@key]` orada numaralanıp kaynakçaya düşer |
+| `<MouseBrainExpansion />` | Şematik koronal kesit + jel ağı, tek skaler dönüşümle 1×→4,5× genişler |
 | `<SplitMerge />` | Bölme/birleştirme düzeltmesi (proofreading) |
 | `<FFNvsLSD />` | FFN ile LSD yönteminin karşılaştırması |
 | `<LabPipeline />` | Laboratuvar iş akışı adımları |

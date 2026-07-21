@@ -10,6 +10,8 @@ import ScaleEscalation from './ScaleEscalation';
 import FFNFlood from './FFNFlood';
 import DiffractionLimit from './DiffractionLimit';
 import ExpansionChemistry from './ExpansionChemistry';
+import ExpansionSlice from './ExpansionSlice';
+import MouseBrainExpansion from './MouseBrainExpansion';
 import SplitMerge from './SplitMerge';
 import FFNvsLSD from './FFNvsLSD';
 import LabPipeline from './LabPipeline';
@@ -88,6 +90,8 @@ export const mdxComponents = {
   FFNFlood,
   DiffractionLimit,
   ExpansionChemistry,
+  ExpansionSlice,
+  MouseBrainExpansion,
   SplitMerge,
   FFNvsLSD,
   LabPipeline,
